@@ -20,9 +20,16 @@ import { MailModule } from './modules/mail/mail.module';
       isGlobal: true,
       load: [appConfig, dbConfig],
     }),
-    TypeOrmModule.forRootAsync({
-      useFactory: (configService: ConfigService) => configService.get('database'),
-      inject: [ConfigService],
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT ?? 5432),
+      username: process.env.DB_USER,
+      password: process.env.DB_PASS,
+      database: process.env.DB_NAME,
+      autoLoadEntities: true,   // dev tiện, prod nên tắt
+      synchronize: false,       // dev có thể bật true; prod bắt buộc false + migration
+      logging: ['error', 'schema'],
     }),
     AuthModule,
     UsersModule,

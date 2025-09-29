@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { TransformResponseInterceptor } from './common/interceptors/transform.interceptor';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,7 +19,7 @@ async function bootstrap() {
 
   // Global filters and interceptors
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalInterceptors(new TransformResponseInterceptor());
+  app.useGlobalInterceptors(new TransformInterceptor());
 
   // CORS
   app.enableCors({

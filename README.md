@@ -13,7 +13,7 @@ src/
 │   ├── guards/
 │   ├── interceptors/
 │   ├── filters/
-│   └── dtos/
+│   └── dto/
 ├── database/            # Cấu hình database và migrations
 │   ├── typeorm.config.ts
 │   └── migrations/

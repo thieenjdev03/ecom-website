@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../modules/users/user.entity';
-import { Role } from '../modules/users/role.enum';
+import { Role } from './role.enum';
 
 const ACCESS_TTL = '15m';
 const REFRESH_TTL = '7d';
@@ -19,7 +19,12 @@ export class AuthService {
 
   async register(email: string, password: string) {
     const passwordHash = await bcrypt.hash(password, 12);
-    const user = this.usersRepo.create({ email, passwordHash, role: Role.USER });
+    const user = this.usersRepo.create({ 
+      email, 
+      password: password, // Keep original password for compatibility
+      passwordHash, 
+      role: Role.USER 
+    });
     await this.usersRepo.save(user);
     const tokens = await this.issueTokens(user);
     return { user: { id: user.id, email: user.email, role: user.role }, ...tokens };
@@ -53,7 +58,7 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async refresh(userId: string, refreshToken: string) {
+  async refresh(userId: number, refreshToken: string) {
     const user = await this.usersRepo
       .createQueryBuilder('u')
       .addSelect('u.refreshTokenHash')
@@ -65,7 +70,7 @@ export class AuthService {
     return this.issueTokens(user);
   }
 
-  async logout(userId: string) {
+  async logout(userId: number) {
     await this.usersRepo.update(userId, { refreshTokenHash: null });
     return { ok: true };
   }

@@ -1,92 +1,20 @@
-version: "3.9"
-
-name: ecom-backend
-
 services:
   postgres:
-    image: postgres:15-alpine
-    container_name: ecom-postgres
+    image: postgres:16
+    container_name: pg
     environment:
-      POSTGRES_USER: ecom_user
-      POSTGRES_PASSWORD: StrongPassword!
-      POSTGRES_DB: ecom_db
+      POSTGRES_DB: appdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: secret
+    ports:
+      - "5432:5432"         # expose cho DBeaver/Nest local
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d  # (tuỳ chọn) SQL init/migrations
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    ports:
-      - "5432:5432"
-    networks: [ecom-net]
-
-  redis:
-    image: redis:7-alpine
-    container_name: ecom-redis
-    command: ["redis-server", "--appendonly", "yes"]
-    volumes:
-      - redisdata:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
       interval: 5s
       timeout: 3s
-      retries: 20
-    ports:
-      - "6379:6379"
-    networks: [ecom-net]
-
-  # optional administration UI
-  pgadmin:
-    image: dpage/pgadmin4:8
-    container_name: ecom-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@local.dev
-      PGADMIN_DEFAULT_PASSWORD: Admin@12345
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    networks: [ecom-net]
-
-  api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: ecom-api
-    env_file: [.env]
-    environment:
-      NODE_ENV: development
-      PORT: 3001
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_USER: ecom_user
-      DB_PASS: StrongPassword!
-      DB_NAME: ecom_db
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      JWT_ACCESS_SECRET: fd21f1492b44961d3c3d0d6b00721773
-      JWT_REFRESH_SECRET: fd21f1492b44961d3c3d0d6b00721773
-      TYPEORM_SYNC: "false"
-      TYPEORM_LOGGING: "true"
-    ports:
-      - "3001:3001"
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
-      interval: 10s
-      timeout: 5s
       retries: 10
-    networks: [ecom-net]
-
-networks:
-  ecom-net:
-    driver: bridge
-
 volumes:
   pgdata:
-  redisdata:

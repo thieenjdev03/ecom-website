@@ -1,62 +1,67 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Role } from '../../auth/role.enum';
+import { Role } from '../../../auth/role.enum';
 
-@Entity()
-export class User {
+export class UserResponseDto {
   @ApiProperty({
     description: 'User ID',
     example: 1,
   })
-  @PrimaryGeneratedColumn()
   id: number;
 
   @ApiProperty({
     description: 'User email address',
     example: 'user@example.com',
   })
-  @Column({ unique: true })
   email: string;
-
-  @Column()
-  password: string;
-
-  @Column()
-  passwordHash: string;
 
   @ApiProperty({
     description: 'User role',
     enum: Role,
     example: Role.USER,
   })
-  @Column({
-    type: 'enum',
-    enum: Role,
-    default: Role.USER,
-  })
   role: Role;
-
-  @Column({ nullable: true })
-  refreshTokenHash: string;
 
   @ApiPropertyOptional({
     description: 'User profile information',
     example: 'John Doe',
   })
-  @Column({ default: '' })
-  profile: string;
+  profile?: string;
 
   @ApiProperty({
     description: 'User creation date',
     example: '2023-01-01T00:00:00.000Z',
   })
-  @CreateDateColumn()
   createdAt: Date;
 
   @ApiProperty({
     description: 'User last update date',
     example: '2023-01-01T00:00:00.000Z',
   })
-  @UpdateDateColumn()
   updatedAt: Date;
+}
+
+export class UserListResponseDto {
+  @ApiProperty({
+    description: 'List of users',
+    type: [UserResponseDto],
+  })
+  data: UserResponseDto[];
+
+  @ApiProperty({
+    description: 'Total number of users',
+    example: 100,
+  })
+  total: number;
+
+  @ApiProperty({
+    description: 'Current page number',
+    example: 1,
+  })
+  page: number;
+
+  @ApiProperty({
+    description: 'Number of items per page',
+    example: 10,
+  })
+  limit: number;
 }

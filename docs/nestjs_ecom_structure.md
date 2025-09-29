@@ -13,7 +13,7 @@
           guards/
           interceptors/
           filters/
-          dtos/
+          dto/
         database/
           typeorm.config.ts  # DataSource (kết nối DB)
           migrations/
