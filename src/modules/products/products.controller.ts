@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
+import { Product } from './product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -13,8 +14,21 @@ export class ProductsController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Query('keyword') keyword?: string) {
+    // TODO: extend to include pagination and filters
     return this.productsService.findAll();
+  }
+
+  // Public: by slug
+  @Get('slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.productsService.findBySlug(slug);
+  }
+
+  // Public: variant detail
+  @Get('variants/:id')
+  getVariant(@Param('id') id: string) {
+    return this.productsService.getVariantDetail(id);
   }
 
   @Get(':id')

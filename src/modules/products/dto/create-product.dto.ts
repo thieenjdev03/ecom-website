@@ -1,9 +1,9 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsEnum, IsUUID } from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  title: string;
 
   @IsString()
   @IsNotEmpty()
@@ -13,22 +13,11 @@ export class CreateProductDto {
   @IsString()
   description?: string;
 
-  @IsNumber()
-  price: number;
+  @IsOptional()
+  @IsEnum(['draft', 'published', 'archived'])
+  status?: 'draft' | 'published' | 'archived' = 'published';
 
   @IsOptional()
-  @IsString()
-  currency?: string = 'VND';
-
-  @IsOptional()
-  @IsEnum(['ACTIVE', 'INACTIVE', 'DRAFT'])
-  status?: string = 'ACTIVE';
-
-  @IsOptional()
-  @IsNumber()
-  stock?: number = 0;
-
-  @IsOptional()
-  @IsArray()
-  images?: string[];
+  @IsUUID()
+  defaultVariantId?: string;
 }

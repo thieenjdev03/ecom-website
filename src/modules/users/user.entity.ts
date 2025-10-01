@@ -1,15 +1,17 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Role } from '../../auth/role.enum';
-
+import { Role } from '../../auth/enums/role.enum';
+import { Address } from '../addresses/address.entity';
+import { Order } from '../orders/order.entity';
+import { UserWishlist } from './entities/user-wishlist.entity';
 @Entity()
 export class User {
   @ApiProperty({
     description: 'User ID',
     example: 1,
   })
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ApiProperty({
     description: 'User email address',
@@ -18,8 +20,8 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
-  password: string;
+  @Column({ unique: false, nullable: true })
+  phoneNumber: string;
 
   @Column()
   passwordHash: string;
@@ -45,6 +47,15 @@ export class User {
   })
   @Column({ default: '' })
   profile: string;
+
+  @OneToMany(() => Address, (a) => a.user, { cascade: false })
+  addresses: Address[]; // address foreign to address table
+
+  @OneToMany(() => Order, (o) => o.userId, { cascade: false })
+  orders: Order[]; // address foreign to address table
+
+  @OneToMany(() => UserWishlist, (w) => w.userId, { cascade: false })
+  wishlists: UserWishlist[]; // address foreign to address table
 
   @ApiProperty({
     description: 'User creation date',

@@ -1,20 +1,45 @@
 // src/auth/roles.guard.ts
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
-import { Role } from './role.enum';
+import { Role } from './enums/role.enum';
+
+type JwtUser = { userId: string; role: Role; ver: number; twofa?: boolean };
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) {}
+
   canActivate(ctx: ExecutionContext): boolean {
-    const roles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+    const req = ctx.switchToHttp().getRequest<{ user?: JwtUser; method?: string; originalUrl?: string; path?: string }>();
+
+    // Bypass ở local cho GET /users
+    const isProduction = (process.env.NODE_ENV || 'development') === 'production';
+    if (!isProduction) {
+      const urlPath = (req.originalUrl || req.path || '').split('?')[0];
+      const isGetAllUsers = req.method === 'GET' && urlPath === '/users';
+      if (isGetAllUsers) return true;
+    }
+
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
       ctx.getHandler(),
       ctx.getClass(),
     ]);
-    if (!roles || roles.length === 0) return true;
-    const req = ctx.switchToHttp().getRequest();
-    const user = req.body; // do JwtStrategy gắn vào
-    return roles.includes(user.role);
+
+    // Không yêu cầu role -> cho qua
+    if (!requiredRoles || requiredRoles.length === 0) return true;
+
+    // LẤY USER ĐÚNG CHỖ
+    const user = req.user; // <-- JwtAuthGuard/Passport gắn ở đây
+
+    if (!user) {
+      // Thường là thiếu JwtAuthGuard chạy trước RolesGuard
+      throw new ForbiddenException('UNAUTHORIZED_OR_MISSING_JWT');
+    }
+
+    if (!requiredRoles.includes(user.role)) {
+      throw new ForbiddenException('FORBIDDEN_ROLE');
+    }
+    return true;
   }
 }

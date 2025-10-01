@@ -24,7 +24,6 @@ export class UsersService {
     const passwordHash = await bcrypt.hash(password, 12);
     const user = this.usersRepository.create({ 
       email, 
-      password: password, // Keep original for compatibility
       passwordHash, 
       role,
       profile: profile || ''
@@ -44,7 +43,6 @@ export class UsersService {
     if (role) {
       where.role = role;
     }
-
     const options: FindManyOptions<User> = {
       where,
       order: { [sortBy]: sortOrder },
@@ -52,8 +50,10 @@ export class UsersService {
       take: limit,
     };
 
-    const [users, total] = await this.usersRepository.findAndCount(options);
-    
+    const [users, total] = await this.usersRepository.findAndCount({
+      ...options,
+      relations: ['addresses'],
+    });
     return {
       data: users.map(user => this.toResponseDto(user)),
       total,
@@ -62,8 +62,8 @@ export class UsersService {
     };
   }
 
-  async findOne(id: number): Promise<UserResponseDto> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+  async findOne(id: string): Promise<UserResponseDto> {
+    const user = await this.usersRepository.findOne({ where: { id }, relations: ['addresses'] });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -74,7 +74,7 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -96,7 +96,6 @@ export class UsersService {
     if (profile !== undefined) updateData.profile = profile;
     
     if (password) {
-      updateData.password = password;
       updateData.passwordHash = await bcrypt.hash(password, 12);
     }
 
@@ -105,7 +104,7 @@ export class UsersService {
     return this.toResponseDto(updatedUser);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -117,10 +116,16 @@ export class UsersService {
     return {
       id: user.id,
       email: user.email,
+      phoneNumber: user.phoneNumber,
       role: user.role,
       profile: user.profile,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
+      addresses: (user as any).addresses,
+      orders: (user as any).orders,
+      wishlists: (user as any).wishlists,
+      cart: (user as any).cart,
+      payments: (user as any).payments,
     };
   }
 }

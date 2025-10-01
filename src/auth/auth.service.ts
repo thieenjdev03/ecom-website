@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../modules/users/user.entity';
-import { Role } from './role.enum';
+import { Role } from './enums/role.enum';
 
 const ACCESS_TTL = '15m';
 const REFRESH_TTL = '7d';
@@ -21,7 +21,6 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(password, 12);
     const user = this.usersRepo.create({ 
       email, 
-      password: password, // Keep original password for compatibility
       passwordHash, 
       role: Role.USER 
     });

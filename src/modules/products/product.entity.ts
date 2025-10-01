@@ -1,12 +1,13 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 @Entity('products')
+@Index(['status', 'updatedAt'])
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
-  name: string;
+  title: string;
 
   @Column({ unique: true })
   slug: string;
@@ -14,20 +15,20 @@ export class Product {
   @Column({ type: 'text', nullable: true })
   description?: string;
 
-  @Column({ type: 'numeric', precision: 10, scale: 2 })
+  @Column({ default: 'published' })
+  status: 'draft' | 'published' | 'archived';
+
+  @Column({ type: 'uuid', nullable: true })
+  defaultVariantId: string | null;
+
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
   price: string;
 
-  @Column({ default: 'VND' })
-  currency: string;
+  @Column({ type: 'decimal', precision: 12, scale: 2, default: 0 })
+  priceOriginal: string;
 
-  @Column({ default: 'ACTIVE' })
-  status: string;
-
-  @Column({ default: 0 })
-  stock: number;
-
-  @Column({ type: 'json', nullable: true })
-  images?: string[];
+  @Column({ default: '' })
+  attribute: string;
 
   @CreateDateColumn()
   createdAt: Date;

@@ -1,18 +1,24 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Role } from '../../../auth/role.enum';
+import { Role } from '../../../auth/enums/role.enum';
 
 export class UserResponseDto {
   @ApiProperty({
     description: 'User ID',
     example: 1,
   })
-  id: number;
+  id: string;
 
   @ApiProperty({
     description: 'User email address',
     example: 'user@example.com',
   })
   email: string;
+
+  @ApiPropertyOptional({
+    description: 'User phone number',
+    example: '+84 901234567',
+  })
+  phoneNumber?: string;
 
   @ApiProperty({
     description: 'User role',
@@ -38,6 +44,36 @@ export class UserResponseDto {
     example: '2023-01-01T00:00:00.000Z',
   })
   updatedAt: Date;
+
+  @ApiPropertyOptional({
+    description: 'User addresses',
+    type: 'array',
+  })
+  addresses?: any[];
+
+  @ApiPropertyOptional({
+    description: 'User orders',
+    type: 'array',
+  })
+  orders?: any[];
+
+  @ApiPropertyOptional({
+    description: 'User wishlists',
+    type: 'array',
+  })
+  wishlists?: any[];
+
+  @ApiPropertyOptional({
+    description: 'User cart',
+    type: 'array',
+  })
+  cart?: any[];
+
+  @ApiPropertyOptional({
+    description: 'User payments',
+    type: 'array',
+  })
+  payments?: any[];
 }
 
 export class UserListResponseDto {

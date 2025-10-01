@@ -402,3 +402,62 @@ curl -X DELETE http://localhost:3000/api/users/1 \
 - Only admin users can perform CRUD operations on users
 - The API uses JWT tokens for authentication
 - All responses are wrapped in a standard format with `data`, `message`, and `success` fields
+
+## Auth
+
+### Login
+**POST** `/auth/login`
+
+Authenticate a user with email and password and receive access/refresh tokens.
+
+#### Base URL
+```
+http://localhost:3000/api
+```
+
+#### Request Body
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+Validation:
+- `email`: must be a valid email
+- `password`: minimum length 8 characters
+
+#### Response
+```json
+{
+  "data": {
+    "user": {
+      "id": 1,
+      "email": "user@example.com",
+      "role": "user"
+    },
+    "accessToken": "<JWT_ACCESS_TOKEN>",
+    "refreshToken": "<JWT_REFRESH_TOKEN>"
+  },
+  "message": "Success",
+  "success": true
+}
+```
+
+Notes:
+- `accessToken` has a short TTL (e.g., 15m) and is used in the `Authorization: Bearer <token>` header.
+- `refreshToken` has a longer TTL (e.g., 7d) and is used to obtain new tokens via the refresh endpoint.
+
+#### Error Responses
+- `400 Bad Request`: Validation failed (invalid email format, password too short)
+- `401 Unauthorized`: Invalid credentials (wrong email or password)
+
+#### cURL Example
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "password123"
+  }'
+```

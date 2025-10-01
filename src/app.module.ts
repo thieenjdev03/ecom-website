@@ -13,6 +13,8 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { FilesModule } from './modules/files/files.module';
 import { MailModule } from './modules/mail/mail.module';
+import { AddressesModule } from './modules/addresses/addresses.module';
+import { CartModule } from './modules/cart/cart.module';
 
 @Module({
   imports: [
@@ -20,16 +22,19 @@ import { MailModule } from './modules/mail/mail.module';
       isGlobal: true,
       load: [appConfig, dbConfig],
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT ?? 5432),
-      username: process.env.DB_USER,
-      password: process.env.DB_PASS,
-      database: process.env.DB_NAME,
-      autoLoadEntities: true,   // dev tiện, prod nên tắt
-      synchronize: false,       // dev có thể bật true; prod bắt buộc false + migration
-      logging: ['error', 'schema'],
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const databaseConfig = configService.get('database') as any;
+        return {
+          ...databaseConfig,
+          autoLoadEntities: true,
+          ssl: process.env.DATABASE_URL?.includes('sslmode=require')
+            ? { rejectUnauthorized: false }
+            : false,
+        };
+      },
     }),
     AuthModule,
     UsersModule,
@@ -39,6 +44,8 @@ import { MailModule } from './modules/mail/mail.module';
     PaymentsModule,
     FilesModule,
     MailModule,
+    AddressesModule,
+    CartModule,
   ],
 })
 export class AppModule {}
