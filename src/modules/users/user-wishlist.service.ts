@@ -14,7 +14,6 @@ export class UserWishlistService {
   async findAllByUser(userId: string): Promise<UserWishlist[]> {
     return this.wishlistRepo.find({
       where: { userId },
-      relations: ['product', 'productVariant'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -24,8 +23,6 @@ export class UserWishlistService {
     const existing = await this.wishlistRepo.findOne({
       where: {
         userId,
-        productId: dto.productId,
-        productVariantId: dto.productVariantId || null,
       },
     });
 
@@ -35,8 +32,6 @@ export class UserWishlistService {
 
     const wishlistItem = this.wishlistRepo.create({
       userId,
-      productId: dto.productId,
-      productVariantId: dto.productVariantId || null,
       note: dto.note,
     });
 
@@ -72,12 +67,10 @@ export class UserWishlistService {
     await this.wishlistRepo.delete({ userId });
   }
 
-  async isInWishlist(userId: string, productId: string, productVariantId?: string): Promise<boolean> {
+  async isInWishlist(userId: string): Promise<boolean> {
     const count = await this.wishlistRepo.count({
       where: {
         userId,
-        productId,
-        productVariantId: productVariantId || null,
       },
     });
 

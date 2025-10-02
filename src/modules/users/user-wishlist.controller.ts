@@ -43,11 +43,10 @@ export class UserWishlistController {
   @Get('check')
   async checkInWishlist(
     @Request() req,
-    @Query('productId') productId: string,
     @Query('variantId') variantId?: string,
   ) {
     const userId = req.user?.sub;
-    const inWishlist = await this.wishlistService.isInWishlist(userId, productId, variantId);
+    const inWishlist = await this.wishlistService.isInWishlist(userId);
     return { inWishlist };
   }
 }

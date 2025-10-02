@@ -7,14 +7,10 @@ import dbConfig from './config/db.config';
 // Modules
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
-import { ProductsModule } from './modules/products/products.module';
-import { CategoriesModule } from './modules/categories/categories.module';
-import { OrdersModule } from './modules/orders/orders.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { FilesModule } from './modules/files/files.module';
 import { MailModule } from './modules/mail/mail.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
-import { CartModule } from './modules/cart/cart.module';
 
 @Module({
   imports: [
@@ -38,14 +34,10 @@ import { CartModule } from './modules/cart/cart.module';
     }),
     AuthModule,
     UsersModule,
-    ProductsModule,
-    CategoriesModule,
-    OrdersModule,
     PaymentsModule,
     FilesModule,
     MailModule,
     AddressesModule,
-    CartModule,
   ],
 })
 export class AppModule {}

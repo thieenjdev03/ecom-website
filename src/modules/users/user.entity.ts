@@ -2,7 +2,6 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Role } from '../../auth/enums/role.enum';
 import { Address } from '../addresses/address.entity';
-import { Order } from '../orders/order.entity';
 import { UserWishlist } from './entities/user-wishlist.entity';
 @Entity()
 export class User {
@@ -50,9 +49,6 @@ export class User {
 
   @OneToMany(() => Address, (a) => a.user, { cascade: false })
   addresses: Address[]; // address foreign to address table
-
-  @OneToMany(() => Order, (o) => o.userId, { cascade: false })
-  orders: Order[]; // address foreign to address table
 
   @OneToMany(() => UserWishlist, (w) => w.userId, { cascade: false })
   wishlists: UserWishlist[]; // address foreign to address table

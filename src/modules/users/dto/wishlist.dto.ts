@@ -1,12 +1,6 @@
 import { IsString, IsOptional, IsUUID } from 'class-validator';
 
 export class AddToWishlistDto {
-  @IsUUID()
-  productId: string;
-
-  @IsOptional()
-  @IsUUID()
-  productVariantId?: string;
 
   @IsOptional()
   @IsString()
