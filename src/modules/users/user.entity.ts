@@ -20,6 +20,15 @@ export class User {
   email: string;
 
   @Column({ unique: false, nullable: true })
+  firstName: string;
+
+  @Column({ unique: false, nullable: true })
+  lastName: string;
+
+  @Column({ unique: false, nullable: true })
+  country: string;
+
+  @Column({ unique: false, nullable: true })
   phoneNumber: string;
 
   @Column()

@@ -37,7 +37,8 @@
     "seed:categories": "ts-node -r tsconfig-paths/register ./scripts/seed-categories.ts",
     "seed:users": "ts-node -r tsconfig-paths/register ./scripts/seed-users.ts",
     "seed:carts-wishlists": "ts-node -r tsconfig-paths/register ./scripts/seed-carts-wishlists.ts",
-    "seed:carts": "ts-node -r tsconfig-paths/register ./scripts/seed-carts.ts"
+    "seed:carts": "ts-node -r tsconfig-paths/register ./scripts/seed-carts.ts",
+    "seed:catalog": "ts-node -r tsconfig-paths/register ./scripts/seed-catalog.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",

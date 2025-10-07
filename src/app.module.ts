@@ -11,7 +11,11 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { FilesModule } from './modules/files/files.module';
 import { MailModule } from './modules/mail/mail.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
-
+import { CategoriesModule } from './modules/categories/categories.module';
+import { ColorsModule } from './modules/colors/colors.module';
+import { SizesModule } from './modules/sizes/sizes.module';
+import { ProductsModule } from './modules/products/products.module';
+import { OtpModule } from './modules/otp_service/otp.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -38,6 +42,11 @@ import { AddressesModule } from './modules/addresses/addresses.module';
     FilesModule,
     MailModule,
     AddressesModule,
+    CategoriesModule,
+    OtpModule,
+    ProductsModule,
+    ColorsModule,
+    SizesModule,
   ],
 })
 export class AppModule {}

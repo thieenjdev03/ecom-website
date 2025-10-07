@@ -47,6 +47,13 @@ export class AuthService {
     return { user: { id: user.id, email: user.email, role: user.role }, ...tokens };
   }
 
+  async loginWithOtp(email: string) {
+    const user = await this.usersRepo.findOne({ where: { email } });
+    if (!user) throw new UnauthorizedException('Invalid credentials');
+    const tokens = await this.issueTokens(user);
+    return { user: { id: user.id, email: user.email, role: user.role }, ...tokens };
+  }
+
   async issueTokens(user: User) {
     const payload = { sub: user.id, role: user.role, email: user.email };
     const accessToken = await this.jwt.signAsync(payload, { expiresIn: ACCESS_TTL });

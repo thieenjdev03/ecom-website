@@ -14,7 +14,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(email: string, password: string) {
+  async register(email: string, password: string, firstName: string, lastName: string, phoneNumber: string, country: string) {
     const exists = await this.usersRepository.findOne({ where: { email } });
     if (exists) {
       throw new ConflictException('User with this email already exists');
@@ -25,6 +25,10 @@ export class AuthService {
       email,
       passwordHash,
       role: Role.USER,
+      firstName,
+      lastName,
+      phoneNumber,
+      country,
     });
     const saved = await this.usersRepository.save(user);
     return { id: saved.id, email: saved.email, role: saved.role };

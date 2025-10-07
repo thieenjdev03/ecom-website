@@ -15,7 +15,7 @@ export class AuthController {
   @ApiCreatedResponse({ description: 'User registered successfully' })
   @ApiBadRequestResponse({ description: 'Invalid input' })
   async register(@Body() dto: RegisterDto) {
-    return this.authService.register(dto.email, dto.password);
+    return this.authService.register(dto.email, dto.password, dto.firstName, dto.lastName, dto.phoneNumber, dto.country);
   }
 
   @Post('login')

@@ -6,6 +6,8 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository, LessThan } from 'typeorm'
 import { EmailOtp } from './entities/email-otp.entity'
 import { User } from '../users/user.entity'
+import * as bcrypt from 'bcrypt'
+import { Role } from '../../auth/enums/role.enum'
 
 @Injectable()
 export class OtpService {
@@ -95,18 +97,32 @@ export class OtpService {
     try {
       await this.sendEmail(
         email,
-        'Mã xác thực OTP - TalkToDoc',
+        'Mã xác thực OTP - Ecom Server',
         `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd;">
-            <h2 style="color: #2E86C1;">Xác thực đăng ký tài khoản</h2>
-            <p>Xin chào,</p>
-            <p>Chúng tôi đã nhận được yêu cầu xác minh địa chỉ email của bạn trên <strong>TalkToDoc</strong>.</p>
-            <p style="font-size: 18px;">Mã OTP của bạn là:</p>
-            <div style="font-size: 28px; font-weight: bold; letter-spacing: 4px; margin: 16px 0;">${otp}</div>
-            <p>Mã này sẽ hết hạn sau <strong>5 phút</strong>. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
-            <p>Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email.</p>
-            <hr />
-            <p style="font-size: 12px; color: #888;">© ${new Date().getFullYear()} TalkToDoc. All rights reserved.</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; text-align: center; background-color: #ffffff;">
+            <!-- Logo -->
+            <div style="margin-bottom: 30px;">
+              <h1 style="font-family: 'Brush Script MT', cursive; font-size: 36px; color: #000; margin: 0; letter-spacing: 2px;">
+                LUMÉ
+                <span style="font-size: 20px; color: #666;">✦</span>
+              </h1>
+            </div>
+            
+            <!-- OTP Code -->
+            <div style="margin: 30px 0;">
+              <p style="font-size: 16px; color: #333; margin-bottom: 10px;">Your verification code:</p>
+              <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #000; margin: 20px 0;">${otp}</div>
+              <p style="font-size: 14px; color: #666;">This code can only be used once. It expires in 15 minutes.</p>
+            </div>
+            
+            <!-- Footer -->
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+              <p style="font-size: 12px; color: #999; margin: 0;">© LUMÉ</p>
+              <div style="margin-top: 10px;">
+                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Privacy policy</a>
+                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Terms of service</a>
+              </div>
+            </div>
           </div>
         `,
       )
@@ -146,18 +162,32 @@ export class OtpService {
     try {
       await this.sendEmail(
         email,
-        'Mã xác thực đặt lại mật khẩu - TalkToDoc',
+        'Mã xác thực đặt lại mật khẩu - Ecom Server',
         `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd;">
-            <h2 style="color: #2E86C1;">Đặt lại mật khẩu</h2>
-            <p>Xin chào,</p>
-            <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn trên <strong>TalkToDoc</strong>.</p>
-            <p style="font-size: 18px;">Mã OTP của bạn là:</p>
-            <div style="font-size: 28px; font-weight: bold; letter-spacing: 4px; margin: 16px 0;">${otp}</div>
-            <p>Mã này sẽ hết hạn sau <strong>5 phút</strong>. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
-            <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này và bảo vệ tài khoản của bạn.</p>
-            <hr />
-            <p style="font-size: 12px; color: #888;">© ${new Date().getFullYear()} TalkToDoc. All rights reserved.</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; text-align: center; background-color: #ffffff;">
+            <!-- Logo -->
+            <div style="margin-bottom: 30px;">
+              <h1 style="font-family: 'Brush Script MT', cursive; font-size: 36px; color: #000; margin: 0; letter-spacing: 2px;">
+                LUMÉ
+                <span style="font-size: 20px; color: #666;">✦</span>
+              </h1>
+            </div>
+            
+            <!-- OTP Code -->
+            <div style="margin: 30px 0;">
+              <p style="font-size: 16px; color: #333; margin-bottom: 10px;">Your verification code:</p>
+              <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #000; margin: 20px 0;">${otp}</div>
+              <p style="font-size: 14px; color: #666;">This code can only be used once. It expires in 15 minutes.</p>
+            </div>
+            
+            <!-- Footer -->
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+              <p style="font-size: 12px; color: #999; margin: 0;">© LUMÉ</p>
+              <div style="margin-top: 10px;">
+                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Privacy policy</a>
+                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Terms of service</a>
+              </div>
+            </div>
           </div>
         `,
       )
@@ -169,6 +199,70 @@ export class OtpService {
     return { message: 'Mã OTP đặt lại mật khẩu đã được gửi đến email của bạn' }
   }
 
+  async sendLoginOtp(email: string): Promise<any> {
+    if (!(await this.isEmailTaken(email))) {
+      throw new BadRequestException('Email không tồn tại trong hệ thống')
+    }
+
+    const existingOtp = await this.otpRepo.findOne({ where: { email } })
+
+    if (existingOtp && existingOtp.expiresAt > new Date()) {
+      await this.otpRepo.delete({ email })
+    }
+
+    const otp = randomInt(100000, 999999).toString()
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000)
+
+    const login = await this.otpRepo.findOne({ where: { email } })
+    if (login) {
+      login.otp = otp
+      login.expiresAt = expiresAt
+      login.isVerified = false
+      await this.otpRepo.save(login)
+    } else {
+      await this.otpRepo.save(this.otpRepo.create({ email, otp, expiresAt, isVerified: false }))
+    }
+
+    try {
+      await this.sendEmail(
+        email,
+        'Verification code - LUMÉ',
+        `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; text-align: center; background-color: #ffffff;">
+            <!-- Logo -->
+            <div style="margin-bottom: 30px;">
+              <h1 style="font-family: 'Brush Script MT', cursive; font-size: 36px; color: #000; margin: 0; letter-spacing: 2px;">
+                LUMÉ
+                <span style="font-size: 20px; color: #666;">✦</span>
+              </h1>
+            </div>
+            
+            <!-- OTP Code -->
+            <div style="margin: 30px 0;">
+              <p style="font-size: 16px; color: #333; margin-bottom: 10px;">Your verification code:</p>
+              <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #000; margin: 20px 0;">${otp}</div>
+              <p style="font-size: 14px; color: #666;">This code can only be used once. It expires in 15 minutes.</p>
+            </div>
+            
+            <!-- Footer -->
+            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
+              <p style="font-size: 12px; color: #999; margin: 0;">© LUMÉ</p>
+              <div style="margin-top: 10px;">
+                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Privacy policy</a>
+                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Terms of service</a>
+              </div>
+            </div>
+          </div>
+        `,
+      )
+    } catch (error) {
+      console.error('Gửi email OTP thất bại:', (error as Error).message)
+      throw new InternalServerErrorException('Không thể gửi OTP, vui lòng thử lại sau')
+    }
+
+    return { message: 'Mã OTP đăng nhập đã được gửi đến email của bạn' }
+  }
+
   async verifyOtp(email: string, otp: string) {
     const record = await this.otpRepo.findOne({ where: { email, otp } })
 
@@ -178,6 +272,15 @@ export class OtpService {
 
     record.isVerified = true
     await this.otpRepo.save(record)
+
+    // Auto-create account after successful verification (registration flow)
+    let user = await this.userRepo.findOne({ where: { email } })
+    if (!user) {
+      const randomPassword = `${email}:${Date.now()}:${randomInt(100000, 999999)}`
+      const passwordHash = await bcrypt.hash(randomPassword, 12)
+      user = this.userRepo.create({ email, passwordHash, role: Role.USER })
+      await this.userRepo.save(user)
+    }
 
     return { message: 'OTP đã được xác thực thành công', status: 200 }
   }
