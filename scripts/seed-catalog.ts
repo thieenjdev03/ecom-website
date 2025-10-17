@@ -1,11 +1,10 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
 import ormConfig from '../src/database/typeorm.config';
-import { Category } from '../src/modules/categories/entities/category.entity';
+import { Category } from '../src/modules/products/entities/category.entity';
 import { Color } from '../src/modules/colors/entities/color.entity';
 import { Size } from '../src/modules/sizes/entities/size.entity';
 import { Product } from '../src/modules/products/entities/product.entity';
-import { ProductVariant } from '../src/modules/products/entities/product-variant.entity';
 
 async function run() {
   const ds = new DataSource((ormConfig as any).options);
@@ -15,7 +14,6 @@ async function run() {
     const colorRepo = ds.getRepository(Color);
     const sizeRepo = ds.getRepository(Size);
     const productRepo = ds.getRepository(Product);
-    const variantRepo = ds.getRepository(ProductVariant);
 
     // Seed categories (parent/child)
     const apparel = await categoryRepo.save(
@@ -45,6 +43,7 @@ async function run() {
         newLabel: 'New',
         isSale: false,
         isNew: true,
+        productPrice: 199000,
         colors: [red, blue],
         sizes: [sizeM, sizeL],
       }),

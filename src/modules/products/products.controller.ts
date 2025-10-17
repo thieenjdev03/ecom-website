@@ -1,177 +1,82 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  HttpCode,
-  HttpStatus,
-  ParseUUIDPipe,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ProductsService } from './products.service';
-import { CreateProductDto, CreateVariantDto } from './dto/create-product.dto';
+import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import {
-  ApiBearerAuth,
-  ApiTags,
-  ApiOperation,
-  ApiOkResponse,
-  ApiCreatedResponse,
-  ApiNoContentResponse,
-  ApiParam,
-  ApiBody,
-} from '@nestjs/swagger';
-import { ProductDto, ProductVariantDto } from './dto/product-response.dto';
+import { QueryProductDto } from './dto/query-product.dto';
 
-@ApiTags('Products')
-@ApiBearerAuth('bearer')
+@ApiTags('products')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create a new product with optional variants' })
-  @ApiBody({ type: CreateProductDto })
-  @ApiCreatedResponse({ description: 'Product created', type: ProductDto })
+  @ApiOperation({ summary: 'Create a new product' })
+  @ApiResponse({ status: 201, description: 'Product created successfully' })
   create(@Body() createProductDto: CreateProductDto) {
     return this.productsService.create(createProductDto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'List all products' })
-  @ApiOkResponse({ description: 'List of products', type: [ProductDto] })
-  findAll() {
-    return this.productsService.findAll();
+  @ApiOperation({ summary: 'Get all products with filters' })
+  @ApiResponse({ status: 200, description: 'Products retrieved successfully' })
+  findAll(@Query() query: QueryProductDto) {
+    return this.productsService.findAll(query);
+  }
+
+  @Get('search')
+  @ApiOperation({ summary: 'Search products by keyword' })
+  @ApiResponse({ status: 200, description: 'Search results' })
+  search(@Query('q') keyword: string, @Query('limit') limit?: number) {
+    return this.productsService.search(keyword, limit);
+  }
+
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Get product by slug' })
+  @ApiResponse({ status: 200, description: 'Product found' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  findBySlug(@Param('slug') slug: string) {
+    return this.productsService.findBySlug(slug);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get product by id' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiOkResponse({ description: 'Product details', type: ProductDto })
-  findOne(@Param('id', new ParseUUIDPipe()) id: string) {
+  @ApiOperation({ summary: 'Get product by ID' })
+  @ApiResponse({ status: 200, description: 'Product found' })
+  @ApiResponse({ status: 404, description: 'Product not found' })
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id);
   }
 
+  @Get(':id/stock')
+  @ApiOperation({ summary: 'Get total stock for product' })
+  @ApiResponse({ status: 200, description: 'Stock count retrieved' })
+  getTotalStock(@Param('id', ParseIntPipe) id: number) {
+    return this.productsService.getTotalStock(id);
+  }
+
   @Patch(':id')
-  @ApiOperation({ summary: 'Update a product' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiBody({ type: UpdateProductDto })
-  @ApiOkResponse({ description: 'Updated product', type: ProductDto })
-  update(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() updateProductDto: UpdateProductDto,
-  ) {
+  @ApiOperation({ summary: 'Update product' })
+  @ApiResponse({ status: 200, description: 'Product updated successfully' })
+  update(@Param('id', ParseIntPipe) id: number, @Body() updateProductDto: UpdateProductDto) {
     return this.productsService.update(id, updateProductDto);
+  }
+
+  @Patch(':id/variants/:sku/stock')
+  @ApiOperation({ summary: 'Update variant stock' })
+  @ApiResponse({ status: 200, description: 'Variant stock updated' })
+  updateVariantStock(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('sku') sku: string,
+    @Body('stock', ParseIntPipe) stock: number,
+  ) {
+    return this.productsService.updateVariantStock(id, sku, stock);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a product' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiNoContentResponse({ description: 'Product deleted' })
-  remove(@Param('id', new ParseUUIDPipe()) id: string) {
+  @ApiOperation({ summary: 'Soft delete product' })
+  @ApiResponse({ status: 204, description: 'Product deleted successfully' })
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.remove(id);
   }
-
-  // Colors
-  @Post(':id/colors')
-  @ApiOperation({ summary: 'Add colors to product' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiOkResponse({ description: 'Product with updated colors', type: ProductDto })
-  addColors(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body('colorIds') colorIds: string[],
-  ) {
-    return this.productsService.addColors(id, colorIds);
-  }
-
-  @Delete(':id/colors/:colorId')
-  @ApiOperation({ summary: 'Remove one color from product' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiParam({ name: 'colorId', type: String, format: 'uuid' })
-  @ApiOkResponse({ description: 'Product with updated colors', type: ProductDto })
-  removeColor(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Param('colorId', new ParseUUIDPipe()) colorId: string,
-  ) {
-    return this.productsService.removeColor(id, colorId);
-  }
-
-  // Sizes
-  @Post(':id/sizes')
-  @ApiOperation({ summary: 'Add sizes to product' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiOkResponse({ description: 'Product with updated sizes', type: ProductDto })
-  addSizes(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body('sizeIds') sizeIds: string[],
-  ) {
-    return this.productsService.addSizes(id, sizeIds);
-  }
-
-  @Delete(':id/sizes/:sizeId')
-  @ApiOperation({ summary: 'Remove one size from product' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiParam({ name: 'sizeId', type: String, format: 'uuid' })
-  @ApiOkResponse({ description: 'Product with updated sizes', type: ProductDto })
-  removeSize(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Param('sizeId', new ParseUUIDPipe()) sizeId: string,
-  ) {
-    return this.productsService.removeSize(id, sizeId);
-  }
-
-  // Variants
-  @Post(':id/variants')
-  @ApiOperation({ summary: 'Add a new variant to product' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiCreatedResponse({ description: 'Variant created', type: ProductVariantDto })
-  addVariant(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() variantDto: CreateVariantDto,
-  ) {
-    return this.productsService.addVariant(id, variantDto);
-  }
-
-  @Patch(':id/variants/:variantId')
-  @ApiOperation({ summary: 'Update a variant' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiParam({ name: 'variantId', type: String, format: 'uuid' })
-  @ApiOkResponse({ description: 'Updated variant', type: ProductVariantDto })
-  updateVariant(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Param('variantId', new ParseUUIDPipe()) variantId: string,
-    @Body() updateData: Partial<CreateVariantDto>,
-  ) {
-    return this.productsService.updateVariant(id, variantId, updateData);
-  }
-
-  @Delete(':id/variants/:variantId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete a variant' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiParam({ name: 'variantId', type: String, format: 'uuid' })
-  @ApiNoContentResponse({ description: 'Variant deleted' })
-  removeVariant(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Param('variantId', new ParseUUIDPipe()) variantId: string,
-  ) {
-    return this.productsService.removeVariant(id, variantId);
-  }
-
-  @Post(':id/variants/bulk')
-  @ApiOperation({ summary: 'Add multiple variants to product' })
-  @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiCreatedResponse({ description: 'Variants created', type: [ProductVariantDto] })
-  addVariantsBulk(
-    @Param('id', new ParseUUIDPipe()) id: string,
-    @Body() variantDtos: CreateVariantDto[],
-  ) {
-    return this.productsService.addVariantsBulk(id, variantDtos);
-  }
 }
-
-

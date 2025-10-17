@@ -1,91 +1,97 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  OneToMany,
-  ManyToMany,
-  JoinTable,
-  Index,
-} from 'typeorm';
-import { Category } from '../../categories/entities/category.entity';
-import { ProductVariant } from './product-variant.entity';
-import { Color } from '../../colors/entities/color.entity';
-import { Size } from '../../sizes/entities/size.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, DeleteDateColumn } from 'typeorm';
+import { Category } from './category.entity';
+
+export interface ProductVariant {
+  name: string;
+  color_id: string;
+  size_id: string;
+  sku: string;
+  price: number;
+  stock: number;
+  barcode?: string;
+}
+
+export interface ProductDimensions {
+  length: number;
+  width: number;
+  height: number;
+}
 
 @Entity('products')
 export class Product {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({ name: 'product_code', unique: true, length: 100 })
-  @Index()
-  productCode: string;
+  @Column({ length: 255 })
+  name: string;
 
-  @Column({ name: 'product_sku', length: 100, nullable: true })
-  productSku: string;
+  @Column({ length: 255, unique: true })
+  slug: string;
 
-  @ManyToOne(() => Category, { eager: true })
-  category: Category;
-
-  @Column({ type: 'int', default: 0 })
-  quantity: number;
-
-  @Column({ type: 'text', array: true, default: [] })
-  tags: string[];
-
-  @Column({ type: 'text', array: true, default: [] })
-  gender: string[];
-
-  @Column({ name: 'sale_label', nullable: true })
-  saleLabel: string;
-
-  @Column({ name: 'new_label', nullable: true })
-  newLabel: string;
-
-  @Column({ name: 'is_sale', default: false })
-  isSale: boolean;
-
-  @Column({ name: 'images', type: 'text', array: true, default: [] })
-  images: string[];
-
-  @Column({ name: 'description', type: 'text', nullable: true })
+  @Column({ type: 'text', nullable: true })
   description: string;
 
-  @Column({ name: 'is_featured', default: false })
-  isFeatured: boolean;
+  @Column({ length: 500, nullable: true })
+  short_description: string;
 
-  @Column({ name: 'is_new', default: false })
-  isNew: boolean;
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  price: number;
 
-  @OneToMany(() => ProductVariant, (variant) => variant.product, {
-    cascade: true,
-  })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  sale_price: number;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  cost_price: number;
+
+  @Column({ type: 'jsonb', default: [] })
+  images: string[];
+
+  @Column({ type: 'jsonb', default: [] })
   variants: ProductVariant[];
 
-  @ManyToMany(() => Color, { eager: true })
-  @JoinTable({
-    name: 'product_colors',
-    joinColumn: { name: 'product_id' },
-    inverseJoinColumn: { name: 'color_id' },
-  })
-  colors: Color[];
+  @Column({ default: 0 })
+  stock_quantity: number;
 
-  @ManyToMany(() => Size, { eager: true })
-  @JoinTable({
-    name: 'product_sizes',
-    joinColumn: { name: 'product_id' },
-    inverseJoinColumn: { name: 'size_id' },
-  })
-  sizes: Size[];
+  @Column({ length: 100, unique: true, nullable: true })
+  sku: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+  @Column({ length: 100, nullable: true })
+  barcode: string;
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt: Date;
+  @Column({ nullable: true })
+  category_id: number;
+
+  @ManyToOne(() => Category, { nullable: true })
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
+
+  @Column({ type: 'jsonb', default: [] })
+  tags: string[];
+
+  @Column({ length: 20, default: 'active' })
+  status: 'active' | 'draft' | 'out_of_stock' | 'discontinued';
+
+  @Column({ default: false })
+  is_featured: boolean;
+
+  @Column({ length: 255, nullable: true })
+  meta_title: string;
+
+  @Column({ length: 500, nullable: true })
+  meta_description: string;
+
+  @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true })
+  weight: number;
+
+  @Column({ type: 'jsonb', nullable: true })
+  dimensions: ProductDimensions;
+
+  @CreateDateColumn()
+  created_at: Date;
+
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  @DeleteDateColumn()
+  deleted_at: Date;
 }
-
-

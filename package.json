@@ -5,6 +5,10 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -38,7 +42,8 @@
     "seed:users": "ts-node -r tsconfig-paths/register ./scripts/seed-users.ts",
     "seed:carts-wishlists": "ts-node -r tsconfig-paths/register ./scripts/seed-carts-wishlists.ts",
     "seed:carts": "ts-node -r tsconfig-paths/register ./scripts/seed-carts.ts",
-    "seed:catalog": "ts-node -r tsconfig-paths/register ./scripts/seed-catalog.ts"
+    "seed:catalog": "ts-node -r tsconfig-paths/register ./scripts/seed-catalog.ts",
+    "seed:products-new": "ts-node -r tsconfig-paths/register ./scripts/seed-products-new.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",

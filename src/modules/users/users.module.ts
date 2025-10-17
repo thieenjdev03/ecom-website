@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
+import { MeController } from './me.controller';
 import { User } from './user.entity';
 import { UserPhoneNumber } from './entities/user-phone-number.entity';
 import { UserWishlist } from './entities/user-wishlist.entity';
@@ -12,7 +13,7 @@ import { UserWishlistController } from './user-wishlist.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, UserPhoneNumber, UserWishlist])],
-  controllers: [UsersController, UserPhoneController, UserWishlistController],
+  controllers: [UsersController, UserPhoneController, UserWishlistController, MeController],
   providers: [UsersService, UserPhoneService, UserWishlistService],
   exports: [UsersService, UserPhoneService, UserWishlistService],
 })

@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Size } from './entities/size.entity';
 import { CreateSizeDto } from './dto/create-size.dto';
 import { UpdateSizeDto } from './dto/update-size.dto';
-import { Category } from '../categories/entities/category.entity';
+import { Category } from '../products/entities/category.entity';
 
 @Injectable()
 export class SizesService {
@@ -25,7 +25,7 @@ export class SizesService {
     return await this.sizeRepo.save(entity);
   }
 
-  async findAll(categoryId?: string): Promise<Size[]> {
+  async findAll(categoryId?: number): Promise<Size[]> {
     const qb = this.sizeRepo.createQueryBuilder('size').leftJoinAndSelect('size.category', 'category');
     if (categoryId) {
       qb.where('category.id = :categoryId', { categoryId });

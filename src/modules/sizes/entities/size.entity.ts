@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, Index } from 'typeorm';
-import { Category } from '../../categories/entities/category.entity';
+import { Category } from '../../products/entities/category.entity';
 
 @Entity('sizes')
 export class Size {

@@ -1,9 +1,4 @@
-import { PartialType, OmitType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 import { CreateProductDto } from './create-product.dto';
-import { ApiPropertyOptional } from '@nestjs/swagger';
 
-export class UpdateProductDto extends PartialType(
-  OmitType(CreateProductDto, ['colorIds', 'sizeIds', 'variants'] as const),
-) {}
-
-
+export class UpdateProductDto extends PartialType(CreateProductDto) {}
