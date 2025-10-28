@@ -15,6 +15,24 @@ export class UserResponseDto {
   email: string;
 
   @ApiPropertyOptional({
+    description: 'User first name',
+    example: 'John',
+  })
+  firstName?: string;
+
+  @ApiPropertyOptional({
+    description: 'User last name',
+    example: 'Doe',
+  })
+  lastName?: string;
+
+  @ApiPropertyOptional({
+    description: 'User country',
+    example: 'Vietnam',
+  })
+  country?: string;
+
+  @ApiPropertyOptional({
     description: 'User phone number',
     example: '+84 901234567',
   })
@@ -52,16 +70,16 @@ export class UserResponseDto {
   addresses?: any[];
 
   @ApiPropertyOptional({
-    description: 'User orders',
-    type: 'array',
-  })
-  orders?: any[];
-
-  @ApiPropertyOptional({
     description: 'User wishlists',
     type: 'array',
   })
   wishlists?: any[];
+
+  @ApiPropertyOptional({
+    description: 'User orders',
+    type: 'array',
+  })
+  orders?: any[];
 
   @ApiPropertyOptional({
     description: 'User cart',

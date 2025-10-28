@@ -57,10 +57,10 @@ export class User {
   profile: string;
 
   @OneToMany(() => Address, (a) => a.user, { cascade: false })
-  addresses: Address[]; // address foreign to address table
+  addresses: Address[];
 
-  @OneToMany(() => UserWishlist, (w) => w.userId, { cascade: false })
-  wishlists: UserWishlist[]; // address foreign to address table
+  @OneToMany(() => UserWishlist, (w) => w.user, { cascade: false })
+  wishlists: UserWishlist[];
 
   @ApiProperty({
     description: 'User creation date',

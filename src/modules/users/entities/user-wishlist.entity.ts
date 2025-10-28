@@ -11,7 +11,7 @@ export class UserWishlist {
   @Column('uuid')
   userId: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, (u) => u.wishlists, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })
   user: User;
 

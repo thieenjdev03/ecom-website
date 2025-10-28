@@ -6,10 +6,30 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
-
+import * as bodyParser from 'body-parser';
+import * as express from 'express';
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true, // Enable raw body parsing for webhook signature verification
+    bodyParser: false, // Disable default body parser to handle manually
+  });
   const configService = app.get(ConfigService);
+
+  // Configure body parsers - raw for webhook, JSON for everything else
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    // Use raw parser only for PayPal webhook endpoint
+    if (req.originalUrl.startsWith('/paypal/webhook')) {
+      bodyParser.raw({ type: 'application/json', limit: '10mb' })(req, res, (err) => {
+        if (err) return next(err);
+        // Store rawBody string version for later signature verification
+        (req as any).rawBody = req.body?.toString?.() || req.body;
+        next();
+      });
+    } else {
+      // Default JSON parser for all other routes
+      bodyParser.json({ limit: '10mb' })(req, res, next);
+    }
+  });
 
   // Global validation pipe
   app.useGlobalPipes(new ValidationPipe({

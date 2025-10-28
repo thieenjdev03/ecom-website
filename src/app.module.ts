@@ -7,7 +7,6 @@ import dbConfig from './config/db.config';
 // Modules
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
-import { PaymentsModule } from './modules/payments/payments.module';
 import { FilesModule } from './modules/files/files.module';
 import { MailModule } from './modules/mail/mail.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
@@ -15,6 +14,7 @@ import { ColorsModule } from './modules/colors/colors.module';
 import { SizesModule } from './modules/sizes/sizes.module';
 import { ProductsModule } from './modules/products/products.module';
 import { OtpModule } from './modules/otp_service/otp.module';
+import { PaypalModule } from './modules/paypal/paypal.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,7 +37,6 @@ import { OtpModule } from './modules/otp_service/otp.module';
     }),
     AuthModule,
     UsersModule,
-    PaymentsModule,
     FilesModule,
     MailModule,
     AddressesModule,
@@ -45,6 +44,7 @@ import { OtpModule } from './modules/otp_service/otp.module';
     ProductsModule,
     ColorsModule,
     SizesModule,
+    PaypalModule,
   ],
 })
 export class AppModule {}

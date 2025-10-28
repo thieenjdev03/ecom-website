@@ -36,24 +36,31 @@ export class UsersService {
   async findAll(queryDto: QueryUserDto): Promise<UserListResponseDto> {
     const { email, role, page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'DESC' } = queryDto;
     
-    const where: any = {};
+    // Build query builder for advanced filtering
+    const queryBuilder = this.usersRepository.createQueryBuilder('user');
+    
+    // Add email filter
     if (email) {
-      where.email = Like(`%${email}%`);
+      queryBuilder.andWhere('user.email LIKE :email', { email: `%${email}%` });
     }
+    
+    // Add role filter
     if (role) {
-      where.role = role;
+      queryBuilder.andWhere('user.role = :role', { role });
     }
-    const options: FindManyOptions<User> = {
-      where,
-      order: { [sortBy]: sortOrder },
-      skip: (page - 1) * limit,
-      take: limit,
-    };
-
-    const [users, total] = await this.usersRepository.findAndCount({
-      ...options,
-      relations: ['addresses'],
-    });
+    
+    // Add ordering
+    queryBuilder.orderBy(`user.${sortBy}`, sortOrder);
+    
+    // Add pagination
+    queryBuilder.skip((page - 1) * limit).take(limit);
+    
+    // Load all relations
+    queryBuilder.leftJoinAndSelect('user.addresses', 'address');
+    queryBuilder.leftJoinAndSelect('user.wishlists', 'wishlist');
+    
+    const [users, total] = await queryBuilder.getManyAndCount();
+    
     return {
       data: users.map(user => this.toResponseDto(user)),
       total,
@@ -63,7 +70,14 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<UserResponseDto> {
-    const user = await this.usersRepository.findOne({ where: { id }, relations: ['addresses'] });
+    const queryBuilder = this.usersRepository
+      .createQueryBuilder('user')
+      .where('user.id = :id', { id })
+      .leftJoinAndSelect('user.addresses', 'address')
+      .leftJoinAndSelect('user.wishlists', 'wishlist');
+    
+    const user = await queryBuilder.getOne();
+    
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -116,16 +130,19 @@ export class UsersService {
     return {
       id: user.id,
       email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      country: user.country,
       phoneNumber: user.phoneNumber,
       role: user.role,
       profile: user.profile,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
-      addresses: (user as any).addresses,
-      orders: (user as any).orders,
-      wishlists: (user as any).wishlists,
-      cart: (user as any).cart,
-      payments: (user as any).payments,
+      addresses: user.addresses || [],
+      wishlists: user.wishlists || [],
+      orders: (user as any).orders || [],
+      cart: (user as any).cart || [],
+      payments: (user as any).payments || [],
     };
   }
 }
