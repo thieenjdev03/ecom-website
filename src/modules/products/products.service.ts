@@ -5,6 +5,10 @@ import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
+import { ColorsService } from '../colors/colors.service';
+import { SizesService } from '../sizes/sizes.service';
+import { Color } from '../colors/entities/color.entity';
+import { Size } from '../sizes/entities/size.entity';
 
 @Injectable()
 export class ProductsService {
@@ -12,6 +16,8 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
+    private colorsService: ColorsService,
+    private sizesService: SizesService,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -38,12 +44,11 @@ export class ProductsService {
       }
 
       const product = this.productsRepository.create(createProductDto);
-      return await this.productsRepository.save(product);
+      const savedProduct = await this.productsRepository.save(product);
+      return await this.enrichProductVariants(savedProduct);
     } catch (err) {
-      if (err instanceof HttpException) {
-        throw err;
-      }
-      throw new BadRequestException('Unable to create product');
+      // Map unexpected errors to meaningful HTTP responses
+      this.handleError(err, 'Unable to create product');
     }
   }
 
@@ -87,8 +92,13 @@ export class ProductsService {
 
       const [data, total] = await queryBuilder.getManyAndCount();
 
+      // Enrich variants with full color and size objects
+      const enrichedData = await Promise.all(
+        data.map(product => this.enrichProductVariants(product))
+      );
+
       return {
-        data,
+        data: enrichedData,
         meta: {
           total,
           page,
@@ -101,7 +111,7 @@ export class ProductsService {
     }
   }
 
-  async findOne(id: number): Promise<Product> {
+  async findOne(id: string): Promise<Product> {
     const product = await this.productsRepository.findOne({
       where: { id },
       relations: ['category'],
@@ -111,7 +121,7 @@ export class ProductsService {
       throw new NotFoundException(`Product #${id} not found`);
     }
 
-    return product;
+    return await this.enrichProductVariants(product);
   }
 
   async findBySlug(slug: string): Promise<Product> {
@@ -124,10 +134,10 @@ export class ProductsService {
       throw new NotFoundException(`Product with slug "${slug}" not found`);
     }
 
-    return product;
+    return await this.enrichProductVariants(product);
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto): Promise<Product> {
+  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
     try {
       const product = await this.findOne(id);
 
@@ -155,13 +165,14 @@ export class ProductsService {
       }
 
       Object.assign(product, updateProductDto);
-      return await this.productsRepository.save(product);
+      const savedProduct = await this.productsRepository.save(product);
+      return await this.enrichProductVariants(savedProduct);
     } catch (err) {
       this.handleError(err, 'Unable to update product');
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     try {
       const product = await this.findOne(id);
       await this.productsRepository.softDelete(id);
@@ -170,7 +181,7 @@ export class ProductsService {
     }
   }
 
-  async getTotalStock(id: number): Promise<number> {
+  async getTotalStock(id: string): Promise<number> {
     const product = await this.findOne(id);
 
     if (product.variants && product.variants.length > 0) {
@@ -180,7 +191,7 @@ export class ProductsService {
     return product.stock_quantity || 0;
   }
 
-  async updateVariantStock(id: number, sku: string, newStock: number): Promise<Product> {
+  async updateVariantStock(id: string, sku: string, newStock: number): Promise<Product> {
     try {
       const product = await this.findOne(id);
 
@@ -198,7 +209,8 @@ export class ProductsService {
       }
 
       product.variants[variantIndex].stock = newStock;
-      return await this.productsRepository.save(product);
+      const savedProduct = await this.productsRepository.save(product);
+      return await this.enrichProductVariants(savedProduct);
     } catch (err) {
       this.handleError(err, 'Unable to update variant stock');
     }
@@ -206,7 +218,7 @@ export class ProductsService {
 
   async search(keyword: string, limit: number = 20): Promise<Product[]> {
     try {
-      return await this.productsRepository
+      const products = await this.productsRepository
         .createQueryBuilder('product')
         .where('product.deleted_at IS NULL')
         .andWhere('product.status = :status', { status: 'active' })
@@ -216,9 +228,66 @@ export class ProductsService {
         )
         .take(limit)
         .getMany();
+      
+      // Enrich variants with full color and size objects
+      return await Promise.all(
+        products.map(product => this.enrichProductVariants(product))
+      );
     } catch (err) {
       this.handleError(err, 'Unable to search products');
     }
+  }
+
+  /**
+   * Enrich product variants with full color and size objects instead of just IDs
+   */
+  private async enrichProductVariants(product: Product): Promise<Product> {
+    if (!product.variants || product.variants.length === 0) {
+      return product;
+    }
+
+    // Collect all unique color_ids and size_ids
+    const colorIds = [...new Set(product.variants.map(v => v.color_id).filter(Boolean))];
+    const sizeIds = [...new Set(product.variants.map(v => v.size_id).filter(Boolean))];
+
+    // Fetch all colors and sizes in parallel
+    const [colors, sizes] = await Promise.all([
+      Promise.all(colorIds.map(id => this.colorsService.findOne(id).catch(() => null))),
+      Promise.all(sizeIds.map(id => this.sizesService.findOne(id).catch(() => null))),
+    ]);
+
+    // Create maps for quick lookup
+    const colorMap = new Map<string, Color>();
+    const sizeMap = new Map<string, Size>();
+    
+    colors.forEach(color => {
+      if (color) colorMap.set(color.id, color);
+    });
+    
+    sizes.forEach(size => {
+      if (size) sizeMap.set(size.id, size);
+    });
+
+    // Enrich variants
+    const enrichedVariants = product.variants.map(variant => {
+      const enriched: any = { ...variant };
+      
+      if (variant.color_id && colorMap.has(variant.color_id)) {
+        enriched.color = colorMap.get(variant.color_id);
+      }
+      
+      if (variant.size_id && sizeMap.has(variant.size_id)) {
+        enriched.size = sizeMap.get(variant.size_id);
+      }
+      
+      return enriched;
+    });
+
+    // Return product with enriched variants
+    return {
+      ...product,
+      variants: enrichedVariants,
+    } as Product;
   }
 
   private validateProduct(productDto: Partial<CreateProductDto>): void {
@@ -245,12 +314,24 @@ export class ProductsService {
 
     // Attempt to map common database error codes (e.g., Postgres)
     const code = (err && (err as any).code) || undefined;
+    const detail: string | undefined = (err && (err as any).detail) || (err && (err as any).message);
+    const constraint: string | undefined = (err && (err as any).constraint) || undefined;
     if (code === '23505') {
       // unique_violation
+      // Provide more specific messages when possible
+      if (constraint?.includes('products_slug_key') || detail?.toLowerCase().includes('slug')) {
+        throw new ConflictException('Slug already exists');
+      }
+      if (constraint?.includes('products_sku_key') || detail?.toLowerCase().includes('sku')) {
+        throw new ConflictException('SKU already exists');
+      }
       throw new ConflictException('Duplicate value violates unique constraint');
     }
     if (code === '23503') {
       // foreign_key_violation
+      if (detail?.toLowerCase().includes('category_id')) {
+        throw new BadRequestException('Invalid category_id (foreign key not found)');
+      }
       throw new BadRequestException('Invalid or missing related resource');
     }
     if (code === '22P02') {

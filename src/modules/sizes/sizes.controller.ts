@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, ParseUUIDPipe, Query, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, ParseUUIDPipe, Query } from '@nestjs/common';
 import { SizesService } from './sizes.service';
 import { CreateSizeDto } from './dto/create-size.dto';
 import { UpdateSizeDto } from './dto/update-size.dto';
@@ -14,7 +14,7 @@ export class SizesController {
   }
 
   @Get()
-  findAll(@Query('categoryId', new ParseIntPipe({ optional: true })) categoryId?: number) {
+  findAll(@Query('categoryId') categoryId?: string) {
     return this.sizesService.findAll(categoryId);
   }
 

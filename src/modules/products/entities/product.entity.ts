@@ -19,8 +19,8 @@ export interface ProductDimensions {
 
 @Entity('products')
 export class Product {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ length: 255 })
   name: string;
@@ -58,8 +58,8 @@ export class Product {
   @Column({ length: 100, nullable: true })
   barcode: string;
 
-  @Column({ nullable: true })
-  category_id: number;
+  @Column({ type: 'uuid', nullable: true })
+  category_id: string;
 
   @ManyToOne(() => Category, { nullable: true })
   @JoinColumn({ name: 'category_id' })
@@ -69,7 +69,7 @@ export class Product {
   tags: string[];
 
   @Column({ length: 20, default: 'active' })
-  status: 'active' | 'draft' | 'out_of_stock' | 'discontinued';
+  status: 'active' | 'inactive' | 'draft' | 'out_of_stock' | 'discontinued';
 
   @Column({ default: false })
   is_featured: boolean;

@@ -1,9 +1,9 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 
 @Entity('categories')
 export class Category {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ length: 100 })
   name: string;
@@ -17,12 +17,15 @@ export class Category {
   @Column({ length: 500, nullable: true })
   image_url: string;
 
-  @Column({ nullable: true })
-  parent_id: number;
+  @Column({ type: 'uuid', nullable: true })
+  parent_id: string;
 
   @ManyToOne(() => Category, { nullable: true })
   @JoinColumn({ name: 'parent_id' })
   parent: Category;
+
+  @OneToMany(() => Category, (category) => category.parent)
+  children: Category[];
 
   @Column({ default: 0 })
   display_order: number;

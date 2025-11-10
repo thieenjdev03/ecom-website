@@ -17,6 +17,89 @@ export class MailService {
   }
 
   /**
+   * Generic email sender used across services
+   * Accepts either direct HTML or a known template + data
+   */
+  async sendEmail(payload: {
+    to: string;
+    subject: string;
+    html?: string;
+    template?: 'payment-success' | 'order-confirmation' | 'password-reset' | 'welcome' | 'payment-failure';
+    data?: any;
+    from?: string;
+  }): Promise<void> {
+    try {
+      if (!this.resend) {
+        this.logger.warn('Resend not configured, skipping email');
+        return;
+      }
+
+      const fromAddress = payload.from || 'E-commerce Store <noreply@yourdomain.com>';
+
+      let html = payload.html;
+      if (!html && payload.template) {
+        switch (payload.template) {
+          case 'payment-success': {
+            const { orderNumber, customerName, amount, currency, items, summary } = payload.data || {};
+            html = this.generatePaymentSuccessHTML({
+              customerName: customerName || 'Customer',
+              orderNumber: orderNumber || 'N/A',
+              amount: amount ?? 0,
+              currency: currency || 'USD',
+              items: items || [],
+              summary: summary || {},
+            });
+            break;
+          }
+          case 'order-confirmation': {
+            // Backward compatibility with existing generator
+            const d = payload.data || {};
+            html = this.generateOrderConfirmationHTML({
+              customerName: d.customerName,
+              orderId: d.orderId,
+              orderTotal: d.orderTotal,
+              currency: d.currency,
+              items: d.items || [],
+            });
+            break;
+          }
+          case 'password-reset': {
+            const { resetUrl } = payload.data || {};
+            html = this.generatePasswordResetHTML(resetUrl || '#');
+            break;
+          }
+          case 'welcome': {
+            const { name } = payload.data || {};
+            html = this.generateWelcomeHTML(name || 'Customer');
+            break;
+          }
+          case 'payment-failure': {
+            const { orderId, reason } = payload.data || {};
+            html = this.generatePaymentFailureHTML(orderId || 'N/A', reason || 'Unknown');
+            break;
+          }
+        }
+      }
+
+      if (!html) {
+        html = '<p>No email content provided.</p>';
+      }
+
+      await this.resend.emails.send({
+        from: fromAddress,
+        to: [payload.to],
+        subject: payload.subject,
+        html,
+      });
+
+      this.logger.log(`Email sent to ${payload.to} with subject: ${payload.subject}`);
+    } catch (error) {
+      this.logger.error('Failed to send email:', error);
+      throw error;
+    }
+  }
+
+  /**
    * Send order confirmation email
    * @param orderData - Order information
    */
@@ -207,6 +290,70 @@ export class MailService {
           
           <p>We'll send you another email when your order ships.</p>
           <p>Thank you for shopping with us!</p>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  /**
+   * Generate payment success HTML (used by PaymentService)
+   */
+  private generatePaymentSuccessHTML(data: {
+    customerName: string;
+    orderNumber: string;
+    amount: number;
+    currency: string;
+    items: Array<{ name?: string; quantity?: number; price?: number }>;
+    summary: any;
+  }): string {
+    const itemsHTML = (data.items || [])
+      .map(
+        (item) => `
+      <tr>
+        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name ?? ''}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity ?? ''}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.price ?? ''} ${data.currency}</td>
+      </tr>
+    `,
+      )
+      .join('');
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Payment Confirmed</title>
+      </head>
+      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #2c3e50;">Payment Confirmed</h1>
+          <p>Dear ${data.customerName},</p>
+          <p>We have received your payment for order <strong>#${data.orderNumber}</strong>.</p>
+
+          <h2>Payment Summary</h2>
+          <p><strong>Amount:</strong> ${data.amount} ${data.currency}</p>
+
+          <h2>Order Items</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+              <tr style="background-color: #f8f9fa;">
+                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Item</th>
+                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Quantity</th>
+                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Price</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${itemsHTML}
+            </tbody>
+          </table>
+
+          <div style="margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+            <h3>Total: ${data.summary?.total ?? data.amount} ${data.currency}</h3>
+          </div>
+
+          <p>We'll send another update when your order ships. Thank you for your purchase!</p>
         </div>
       </body>
       </html>

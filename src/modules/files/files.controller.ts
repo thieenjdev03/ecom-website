@@ -1,5 +1,5 @@
-import { Controller, Post, Get, Delete, UploadedFile, UseInterceptors, Body, Param } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { Controller, Post, Get, Delete, UploadedFile, UploadedFiles, UseInterceptors, Body, Param } from '@nestjs/common';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { FilesService } from './files.service';
 import { 
@@ -29,8 +29,7 @@ export class FilesController {
         timestamp: 1704067200,
         cloudName: 'your-cloud-name',
         apiKey: 'your-api-key',
-        folder: 'products',
-        publicId: 'product_123_image'
+        folder: 'lume_ecom_uploads'
       }
     }
   })
@@ -39,7 +38,9 @@ export class FilesController {
   }
 
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  }))
   @ApiOperation({ 
     summary: 'Upload file to Cloudinary',
     description: 'Uploads a single file to Cloudinary with optional transformations and folder organization.'
@@ -79,12 +80,13 @@ export class FilesController {
     description: 'File uploaded successfully',
     schema: {
       example: {
-        url: 'https://res.cloudinary.com/your-cloud/image/upload/v1234567890/products/product_123_image.jpg',
-        publicId: 'products/product_123_image',
-        format: 'jpg',
+        success: true,
+        public_id: 'lume_ecom_uploads/products/abc123',
+        url: 'https://res.cloudinary.com/lume/image/upload/v1729990123/lume_ecom_uploads/products/abc123.webp',
+        format: 'webp',
+        bytes: 245231,
         width: 800,
-        height: 600,
-        bytes: 1024000
+        height: 600
       }
     }
   })
@@ -103,7 +105,9 @@ export class FilesController {
   }
 
   @Post('upload-multiple')
-  @UseInterceptors(FileInterceptor('files'))
+  @UseInterceptors(FilesInterceptor('files', 10, {
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit per file
+  }))
   @ApiOperation({ 
     summary: 'Upload multiple files to Cloudinary',
     description: 'Uploads multiple files to Cloudinary in batch with optional transformations.'
@@ -134,27 +138,32 @@ export class FilesController {
     status: 201,
     description: 'Files uploaded successfully',
     schema: {
-      example: [
-        {
-          url: 'https://res.cloudinary.com/your-cloud/image/upload/v1234567890/products/file1.jpg',
-          publicId: 'products/1704067200_0',
-          format: 'jpg',
-          width: 800,
-          height: 600,
-          bytes: 1024000
-        },
-        {
-          url: 'https://res.cloudinary.com/your-cloud/image/upload/v1234567890/products/file2.jpg',
-          publicId: 'products/1704067200_1',
-          format: 'jpg',
-          width: 800,
-          height: 600,
-          bytes: 1024000
-        }
-      ]
+      example: {
+        success: true,
+        files: [
+          {
+            success: true,
+            public_id: 'lume_ecom_uploads/products/file1',
+            url: 'https://res.cloudinary.com/lume/image/upload/v1729990123/lume_ecom_uploads/products/file1.webp',
+            format: 'webp',
+            bytes: 245231,
+            width: 800,
+            height: 600
+          },
+          {
+            success: true,
+            public_id: 'lume_ecom_uploads/products/file2',
+            url: 'https://res.cloudinary.com/lume/image/upload/v1729990124/lume_ecom_uploads/products/file2.webp',
+            format: 'webp',
+            bytes: 198765,
+            width: 800,
+            height: 600
+          }
+        ]
+      }
     }
   })
-  uploadMultipleFiles(@UploadedFile() files: Express.Multer.File[], @Body() options?: UploadFileDto) {
+  uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[], @Body() options?: UploadFileDto) {
     return this.filesService.uploadMultipleFiles(files, options);
   }
 
@@ -168,6 +177,7 @@ export class FilesController {
     description: 'File deleted successfully',
     schema: {
       example: {
+        success: true,
         result: 'ok'
       }
     }
@@ -224,20 +234,20 @@ export class FilesController {
   @Post('generate-url')
   @ApiOperation({ 
     summary: 'Generate optimized image URL',
-    description: 'Generates an optimized image URL with transformations for better performance.'
+    description: 'Generates an optimized image URL with transformations for better performance (default: 600x600, fill crop, auto format/webp).'
   })
   @ApiResponse({
     status: 200,
     description: 'Optimized URL generated successfully',
     schema: {
       example: {
-        url: 'https://res.cloudinary.com/your-cloud/image/upload/w_800,h_600,c_fill,q_auto,f_auto/products/product_123_image.jpg'
+        optimizedUrl: 'https://res.cloudinary.com/your-cloud/image/upload/w_600,h_600,c_fill,q_auto,f_auto/products/product_123_image.webp'
       }
     }
   })
   generateOptimizedUrl(@Body() data: GenerateUrlDto) {
     return {
-      url: this.filesService.generateOptimizedUrl(data.publicId, {
+      optimizedUrl: this.filesService.generateOptimizedUrl(data.publicId, {
         width: data.width,
         height: data.height,
         crop: data.crop,

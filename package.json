@@ -43,7 +43,8 @@
     "seed:carts-wishlists": "ts-node -r tsconfig-paths/register ./scripts/seed-carts-wishlists.ts",
     "seed:carts": "ts-node -r tsconfig-paths/register ./scripts/seed-carts.ts",
     "seed:catalog": "ts-node -r tsconfig-paths/register ./scripts/seed-catalog.ts",
-    "seed:products-new": "ts-node -r tsconfig-paths/register ./scripts/seed-products-new.ts"
+    "seed:products-new": "ts-node -r tsconfig-paths/register ./scripts/seed-products-new.ts",
+    "seed:complete": "ts-node -r tsconfig-paths/register ./scripts/seed-complete.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",
@@ -63,6 +64,7 @@
     "body-parser": "^2.2.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "cloudinary": "^2.8.0",
     "dotenv": "^16.6.1",
     "express": "^5.1.0",
     "helmet": "^8.0.0",

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -17,10 +17,56 @@ export class CategoriesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all categories' })
-  @ApiResponse({ status: 200, description: 'Categories retrieved successfully' })
-  findAll() {
-    return this.categoriesService.findAll();
+  @ApiOperation({ summary: 'Get all categories (Admin Management)' })
+  @ApiResponse({ status: 200, description: 'Fetched categories successfully' })
+  async getCategories(
+    @Query('with_children_count') withChildrenCount?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const count = withChildrenCount === 'true' || withChildrenCount === '1';
+    const categories = await this.categoriesService.findAllForAdmin(count);
+
+    const data = categories.map((cat) => ({
+      id: cat.id,
+      name: cat.name,
+      slug: cat.slug,
+      parent: cat.parent?.id ?? null,
+      parent_name: cat.parent?.name ?? 'Root Category',
+      display_order: cat.display_order ?? 0,
+      status: cat.is_active ? 'Active' : 'Inactive',
+      children_count: count ? (cat.children?.length ?? 0) : undefined,
+      created_at: cat.created_at,
+      created_at_display: formatDateTime(cat.created_at),
+    }));
+
+    return {
+      success: true,
+      message: 'Fetched categories successfully',
+      data,
+      meta: {
+        total: categories.length,
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : categories.length,
+      },
+    };
+  }
+
+  @Get('tree')
+  @ApiOperation({ summary: 'Get Category Tree (Frontend Navigation)' })
+  @ApiResponse({ status: 200, description: 'Category tree retrieved successfully' })
+  async getTree(@Query('active') active?: string) {
+    const onlyActive = active === 'true' || active === '1';
+    const roots = await this.categoriesService.findTree(onlyActive);
+    return roots.map((parent) => ({
+      id: parent.id,
+      name: parent.name,
+      slug: parent.slug,
+      children: (parent.children ?? [])
+        .filter((c) => (onlyActive ? c.is_active : true))
+        .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
+        .map((c) => ({ id: c.id, name: c.name, slug: c.slug })),
+    }));
   }
 
   @Get('active')
@@ -42,14 +88,14 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Get category by ID' })
   @ApiResponse({ status: 200, description: 'Category found' })
   @ApiResponse({ status: 404, description: 'Category not found' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(id);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update category' })
   @ApiResponse({ status: 200, description: 'Category updated successfully' })
-  update(@Param('id', ParseIntPipe) id: number, @Body() updateCategoryDto: UpdateCategoryDto) {
+  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 
@@ -57,7 +103,19 @@ export class CategoriesController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete category' })
   @ApiResponse({ status: 204, description: 'Category deleted successfully' })
-  remove(@Param('id', ParseIntPipe) id: number) {
+  remove(@Param('id') id: string) {
     return this.categoriesService.remove(id);
   }
+}
+
+function formatDateTime(date: Date | string | undefined) {
+  if (!date) return undefined;
+  const d = new Date(date);
+  const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`);
+  const yyyy = d.getFullYear();
+  const mm = pad(d.getMonth() + 1);
+  const dd = pad(d.getDate());
+  const hh = pad(d.getHours());
+  const mi = pad(d.getMinutes());
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}`;
 }

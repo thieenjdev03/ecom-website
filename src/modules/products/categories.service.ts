@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -31,6 +31,13 @@ export class CategoriesService {
     });
   }
 
+  async findAllForAdmin(withChildren: boolean): Promise<Category[]> {
+    return this.categoriesRepository.find({
+      relations: withChildren ? ['children', 'parent'] : ['parent'],
+      order: { display_order: 'ASC' },
+    });
+  }
+
   async findActive(): Promise<Category[]> {
     return this.categoriesRepository.find({
       where: { is_active: true },
@@ -38,7 +45,16 @@ export class CategoriesService {
     });
   }
 
-  async findOne(id: number): Promise<Category> {
+  async findTree(onlyActive: boolean): Promise<Category[]> {
+    const where = onlyActive ? { parent: IsNull(), is_active: true } : { parent: IsNull() };
+    return this.categoriesRepository.find({
+      where,
+      relations: ['children'],
+      order: { display_order: 'ASC' },
+    });
+  }
+
+  async findOne(id: string): Promise<Category> {
     const category = await this.categoriesRepository.findOne({
       where: { id },
       relations: ['parent'],
@@ -64,7 +80,7 @@ export class CategoriesService {
     return category;
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+  async update(id: string, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
     const category = await this.findOne(id);
 
     // Check slug uniqueness if changing
@@ -81,7 +97,7 @@ export class CategoriesService {
     return this.categoriesRepository.save(category);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     const category = await this.findOne(id);
     await this.categoriesRepository.remove(category);
   }

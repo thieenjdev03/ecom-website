@@ -1,24 +1,32 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-// import { v2 as cloudinary } from 'cloudinary';
-import { Readable } from 'stream';
+import { v2 as cloudinary } from 'cloudinary';
 
 @Injectable()
 export class FilesService {
   private readonly logger = new Logger(FilesService.name);
 
   constructor(private configService: ConfigService) {
-    // Configure Cloudinary - temporarily disabled due to Node.js version issues
-    // cloudinary.config({
-    //   cloud_name: this.configService.get<string>('CLOUDINARY_CLOUD_NAME'),
-    //   api_key: this.configService.get<string>('CLOUDINARY_API_KEY'),
-    //   api_secret: this.configService.get<string>('CLOUDINARY_API_SECRET'),
-    // });
+    const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME');
+    const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY');
+    const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET');
+
+    if (!cloudName || !apiKey || !apiSecret) {
+      this.logger.warn('Cloudinary credentials are missing. Please check your .env file.');
+      this.logger.warn('Required: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET');
+    } else {
+      cloudinary.config({
+        cloud_name: cloudName.trim(),
+        api_key: apiKey.trim(),
+        api_secret: apiSecret.trim(),
+      });
+      this.logger.log(`Cloudinary configured with cloud_name: ${cloudName.trim()}`);
+    }
   }
 
   /**
    * Generate Cloudinary signature for client-side uploads
-   * @param folder - Optional folder path
+   * @param folder - Optional folder path (defaults to CLOUDINARY_UPLOAD_FOLDER)
    * @param publicId - Optional public ID
    */
   async generateCloudinarySignature(
@@ -29,18 +37,28 @@ export class FilesService {
     timestamp: number;
     cloudName: string;
     apiKey: string;
-    folder?: string;
+    folder: string;
     publicId?: string;
   }> {
     try {
-      // Temporarily return mock data due to Cloudinary package issues
-      this.logger.warn('Cloudinary integration temporarily disabled');
+      const timestamp = Math.round(new Date().getTime() / 1000);
+      const cloudName = this.configService.get<string>('CLOUDINARY_CLOUD_NAME') || '';
+      const apiKey = this.configService.get<string>('CLOUDINARY_API_KEY') || '';
+      const apiSecret = this.configService.get<string>('CLOUDINARY_API_SECRET') || '';
+      const defaultFolder = this.configService.get<string>('CLOUDINARY_UPLOAD_FOLDER') || 'lume_ecom_uploads';
+      const uploadFolder = folder || defaultFolder;
+
+      const paramsToSign: Record<string, string | number> = { timestamp, folder: uploadFolder };
+      if (publicId) paramsToSign.public_id = publicId;
+
+      const signature = cloudinary.utils.api_sign_request(paramsToSign, apiSecret);
+
       return {
-        signature: 'mock-signature',
-        timestamp: Math.round(new Date().getTime() / 1000),
-        cloudName: this.configService.get<string>('CLOUDINARY_CLOUD_NAME') || 'mock-cloud',
-        apiKey: this.configService.get<string>('CLOUDINARY_API_KEY') || 'mock-key',
-        ...(folder && { folder }),
+        signature,
+        timestamp,
+        cloudName,
+        apiKey,
+        folder: uploadFolder,
         ...(publicId && { publicId }),
       };
     } catch (error) {
@@ -63,29 +81,73 @@ export class FilesService {
       resourceType?: 'image' | 'video' | 'raw' | 'auto';
     },
   ): Promise<{
+    success: boolean;
+    public_id: string;
     url: string;
-    publicId: string;
     format: string;
+    bytes: number;
     width?: number;
     height?: number;
-    bytes: number;
   }> {
     try {
-      this.logger.log(`Uploading file: ${file.originalname}`);
-      this.logger.warn('Cloudinary integration temporarily disabled - returning mock data');
+      // Validate file type
+      if (file.mimetype && !file.mimetype.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+      }
 
-      // Return mock data for now
+      // Validate file size (max 5MB)
+      const maxSize = 5 * 1024 * 1024; // 5MB
+      if (file.size > maxSize) {
+        throw new Error('File size exceeds 5MB limit');
+      }
+
+      this.logger.log(`Uploading file: ${file.originalname}`);
+      const resourceType = options?.resourceType || 'image';
+      const defaultFolder = this.configService.get<string>('CLOUDINARY_UPLOAD_FOLDER') || 'lume_ecom_uploads';
+      const uploadFolder = options?.folder || defaultFolder;
+
+      const result: any = await new Promise((resolve, reject) => {
+        const upload = cloudinary.uploader.upload_stream(
+          {
+            folder: uploadFolder,
+            public_id: options?.publicId,
+            resource_type: resourceType,
+            use_filename: !options?.publicId,
+            unique_filename: !options?.publicId,
+            overwrite: !!options?.publicId,
+            transformation: options?.transformation,
+          },
+          (error, res) => {
+            if (error) return reject(error);
+            resolve(res);
+          },
+        );
+
+        upload.end(file.buffer);
+      });
+
       return {
-        url: 'https://mock-cloudinary-url.com/image.jpg',
-        publicId: `mock_${Date.now()}`,
-        format: file.mimetype.split('/')[1] || 'jpg',
-        width: 800,
-        height: 600,
-        bytes: file.size,
+        success: true,
+        public_id: result.public_id,
+        url: result.secure_url || result.url,
+        format: result.format,
+        bytes: result.bytes,
+        width: result.width,
+        height: result.height,
       };
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Failed to upload file to Cloudinary:', error);
-      throw error;
+      
+      // Provide more helpful error messages
+      if (error.http_code === 401) {
+        throw new Error(`Cloudinary authentication failed: ${error.message}. Please check your Cloudinary credentials in .env file.`);
+      }
+      
+      if (error.message) {
+        throw new Error(`Upload failed: ${error.message}`);
+      }
+      
+      throw new Error('Failed to upload file to Cloudinary. Please check your Cloudinary configuration.');
     }
   }
 
@@ -101,28 +163,38 @@ export class FilesService {
       transformation?: any;
       resourceType?: 'image' | 'video' | 'raw' | 'auto';
     },
-  ): Promise<Array<{
-    url: string;
-    publicId: string;
-    format: string;
-    width?: number;
-    height?: number;
-    bytes: number;
-  }>> {
+  ): Promise<{
+    success: boolean;
+    files: Array<{
+      success: boolean;
+      public_id: string;
+      url: string;
+      format: string;
+      bytes: number;
+      width?: number;
+      height?: number;
+    }>;
+  }> {
     try {
       this.logger.log(`Uploading ${files.length} files`);
+
+      const defaultFolder = this.configService.get<string>('CLOUDINARY_UPLOAD_FOLDER') || 'lume_ecom_uploads';
+      const uploadFolder = options?.folder || defaultFolder;
 
       const uploadPromises = files.map((file, index) =>
         this.uploadFile(file, {
           ...options,
-          publicId: `${options?.folder || 'uploads'}/${Date.now()}_${index}`,
+          folder: uploadFolder,
         }),
       );
 
       const results = await Promise.all(uploadPromises);
       this.logger.log(`Successfully uploaded ${results.length} files`);
 
-      return results;
+      return {
+        success: true,
+        files: results,
+      };
     } catch (error) {
       this.logger.error('Failed to upload multiple files:', error);
       throw error;
@@ -137,13 +209,11 @@ export class FilesService {
   async deleteFile(
     publicId: string,
     resourceType: 'image' | 'video' | 'raw' = 'image',
-  ): Promise<{ result: string }> {
+  ): Promise<{ success: boolean; result: string }> {
     try {
       this.logger.log(`Deleting file: ${publicId}`);
-      this.logger.warn('Cloudinary integration temporarily disabled');
-
-      // Return mock result
-      return { result: 'ok' };
+      const res = await cloudinary.uploader.destroy(publicId, { resource_type: resourceType });
+      return { success: true, result: res.result };
     } catch (error) {
       this.logger.error(`Failed to delete file ${publicId}:`, error);
       throw error;
@@ -161,10 +231,11 @@ export class FilesService {
   ): Promise<{ result: string }> {
     try {
       this.logger.log(`Deleting ${publicIds.length} files`);
-      this.logger.warn('Cloudinary integration temporarily disabled');
-
-      // Return mock result
-      return { result: 'ok' };
+      const results = await Promise.all(
+        publicIds.map((pid) => cloudinary.uploader.destroy(pid, { resource_type: resourceType }).then((r) => r.result)),
+      );
+      const hasError = results.some((r) => r !== 'ok');
+      return { result: hasError ? 'partial' : 'ok' };
     } catch (error) {
       this.logger.error('Failed to delete multiple files:', error);
       throw error;
@@ -182,17 +253,8 @@ export class FilesService {
   ): Promise<any> {
     try {
       this.logger.log(`Getting file info: ${publicId}`);
-      this.logger.warn('Cloudinary integration temporarily disabled');
-
-      // Return mock result
-      return {
-        public_id: publicId,
-        format: 'jpg',
-        width: 800,
-        height: 600,
-        bytes: 1024000,
-        url: 'https://mock-cloudinary-url.com/image.jpg',
-      };
+      const info = await cloudinary.api.resource(publicId, { resource_type: resourceType });
+      return info;
     } catch (error) {
       this.logger.error(`Failed to get file info ${publicId}:`, error);
       throw error;
@@ -216,10 +278,23 @@ export class FilesService {
     },
   ): string {
     try {
-      this.logger.warn('Cloudinary integration temporarily disabled');
-      
-      // Return mock URL
-      return `https://mock-cloudinary-url.com/${publicId}`;
+      // Default values according to documentation
+      const width = transformations?.width ?? 600;
+      const height = transformations?.height ?? 600;
+      const crop = transformations?.crop ?? 'fill';
+      const format = transformations?.format ?? 'auto'; // Use 'auto' for optimal format (webp/avif)
+
+      const url = cloudinary.url(publicId, {
+        secure: true,
+        resource_type: 'image',
+        width,
+        height,
+        crop,
+        format,
+        quality: transformations?.quality ?? 'auto',
+        gravity: transformations?.gravity,
+      });
+      return url;
     } catch (error) {
       this.logger.error(`Failed to generate optimized URL for ${publicId}:`, error);
       throw error;

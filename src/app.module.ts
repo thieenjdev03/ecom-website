@@ -13,6 +13,7 @@ import { AddressesModule } from './modules/addresses/addresses.module';
 import { ColorsModule } from './modules/colors/colors.module';
 import { SizesModule } from './modules/sizes/sizes.module';
 import { ProductsModule } from './modules/products/products.module';
+import { OrdersModule } from './modules/orders/orders.module';
 import { OtpModule } from './modules/otp_service/otp.module';
 import { PaypalModule } from './modules/paypal/paypal.module';
 @Module({
@@ -42,6 +43,7 @@ import { PaypalModule } from './modules/paypal/paypal.module';
     AddressesModule,
     OtpModule,
     ProductsModule,
+    OrdersModule,
     ColorsModule,
     SizesModule,
     PaypalModule,

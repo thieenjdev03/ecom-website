@@ -5,8 +5,8 @@ export class CreateSizeDto {
   name: string;
 
   @IsOptional()
-  @IsNumber()
-  categoryId?: number;
+  @IsUUID()
+  categoryId?: string;
 
   @IsOptional()
   @IsNumber()

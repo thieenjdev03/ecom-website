@@ -31,14 +31,14 @@ export class RolesGuard implements CanActivate {
 
     // LẤY USER ĐÚNG CHỖ
     const user = req.user; // <-- JwtAuthGuard/Passport gắn ở đây
-
     if (!user) {
       // Thường là thiếu JwtAuthGuard chạy trước RolesGuard
-      throw new ForbiddenException('UNAUTHORIZED_OR_MISSING_JWT');
+      throw new ForbiddenException('You are not authenticated or your token is invalid. Please login to continue.');
     }
 
     if (!requiredRoles.includes(user.role)) {
-      throw new ForbiddenException('FORBIDDEN_ROLE');
+      const rolesText = requiredRoles.join(' or ');
+      throw new ForbiddenException(`You do not have permission to access this resource. Required role: ${rolesText}.`);
     }
     return true;
   }

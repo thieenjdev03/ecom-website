@@ -25,7 +25,7 @@ export class SizesService {
     return await this.sizeRepo.save(entity);
   }
 
-  async findAll(categoryId?: number): Promise<Size[]> {
+  async findAll(categoryId?: string): Promise<Size[]> {
     const qb = this.sizeRepo.createQueryBuilder('size').leftJoinAndSelect('size.category', 'category');
     if (categoryId) {
       qb.where('category.id = :categoryId', { categoryId });

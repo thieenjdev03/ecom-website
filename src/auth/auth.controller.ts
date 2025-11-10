@@ -3,11 +3,25 @@ import { Public } from './public.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { OtpService } from '../modules/otp_service/otp.service';
-import { IsEmail, IsString, Length } from 'class-validator';
+import { IsEmail, IsString, Length, IsNotEmpty } from 'class-validator';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
-class SendLoginOtpDto { @IsEmail() email: string }
-class VerifyLoginOtpDto { @IsEmail() email: string; @IsString() @Length(6,6) otp: string }
+class SendLoginOtpDto { 
+  @IsEmail({}, { message: 'Invalid email format. Please enter a valid email address.' })
+  @IsNotEmpty({ message: 'Email is required.' })
+  email: string 
+}
+
+class VerifyLoginOtpDto { 
+  @IsEmail({}, { message: 'Invalid email format. Please enter a valid email address.' })
+  @IsNotEmpty({ message: 'Email is required.' })
+  email: string; 
+  
+  @IsString({ message: 'OTP code must be a string.' })
+  @Length(6, 6, { message: 'OTP code must be exactly 6 characters.' })
+  @IsNotEmpty({ message: 'OTP code is required.' })
+  otp: string 
+}
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {

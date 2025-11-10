@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, Min, Max, ValidateNested, IsEnum, MaxLength } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, Min, Max, ValidateNested, IsEnum, MaxLength, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductVariantDto } from './product-variant.dto';
@@ -73,10 +73,10 @@ export class CreateProductDto {
   @MaxLength(100)
   barcode?: string;
 
-  @ApiPropertyOptional({ example: 1 })
+  @ApiPropertyOptional({ example: 'b4b2b07f-6825-402b-bd2c-f9aef8cfbba5' })
   @IsOptional()
-  @IsNumber()
-  category_id?: number;
+  @IsUUID()
+  category_id?: string;
 
   @ApiPropertyOptional({ example: ['polo', 'men', 'premium'] })
   @IsOptional()
@@ -84,10 +84,10 @@ export class CreateProductDto {
   @IsString({ each: true })
   tags?: string[];
 
-  @ApiPropertyOptional({ enum: ['active', 'draft', 'out_of_stock', 'discontinued'] })
+  @ApiPropertyOptional({ enum: ['active', 'inactive', 'draft', 'out_of_stock', 'discontinued'] })
   @IsOptional()
-  @IsEnum(['active', 'draft', 'out_of_stock', 'discontinued'])
-  status?: 'active' | 'draft' | 'out_of_stock' | 'discontinued';
+  @IsEnum(['active', 'inactive', 'draft', 'out_of_stock', 'discontinued'])
+  status?: 'active' | 'inactive' | 'draft' | 'out_of_stock' | 'discontinued';
 
   @ApiPropertyOptional({ example: false })
   @IsOptional()

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ProductVariantDto {
@@ -25,11 +25,11 @@ export class ProductVariantDto {
   @IsString()
   barcode?: string;
 
-  @ApiProperty({ example: '1' })
-  @IsString()
+  @ApiProperty({ example: '44fd41a7-63b1-41f6-b05d-1935d392f1d4' })
+  @IsUUID()
   color_id: string;
 
-  @ApiProperty({ example: '1' })
-  @IsString()
+  @ApiProperty({ example: '07bdcefc-da8a-4b29-9945-602abb4adc02' })
+  @IsUUID()
   size_id: string;  
 }

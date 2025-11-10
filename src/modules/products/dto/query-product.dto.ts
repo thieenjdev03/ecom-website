@@ -1,13 +1,12 @@
-import { IsOptional, IsString, IsNumber, IsBoolean, IsEnum, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsBoolean, IsEnum, Min, Max, IsUUID } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class QueryProductDto {
-  @ApiPropertyOptional({ example: 1 })
+  @ApiPropertyOptional({ example: 'b4b2b07f-6825-402b-bd2c-f9aef8cfbba5' })
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  category_id?: number;
+  @IsUUID()
+  category_id?: string;
 
   @ApiPropertyOptional({ enum: ['active', 'draft', 'out_of_stock', 'discontinued'] })
   @IsOptional()
