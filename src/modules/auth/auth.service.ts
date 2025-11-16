@@ -5,6 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from '../users/user.entity';
 import { Role } from '../../auth/enums/role.enum';
 import { JwtService } from '@nestjs/jwt';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly jwtService: JwtService,
+    private readonly mailService: MailService,
   ) {}
 
   async register(email: string, password: string, firstName: string, lastName: string, phoneNumber: string, country: string) {
@@ -31,6 +33,18 @@ export class AuthService {
       country,
     });
     const saved = await this.usersRepository.save(user);
+
+    // Send welcome email asynchronously; failure should not block registration flow
+    // Note: Errors are caught and logged inside MailService, but we also guard here
+    const displayName = saved.firstName && saved.lastName
+      ? `${saved.firstName} ${saved.lastName}`
+      : saved.firstName || saved.lastName || saved.email;
+    this.mailService
+      .sendWelcomeEmail(saved.email, displayName)
+      .catch(() => {
+        // Intentionally swallow errors to avoid impacting the registration response
+      });
+
     return { id: saved.id, email: saved.email, role: saved.role };
   }
 

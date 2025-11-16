@@ -47,6 +47,7 @@ export async function productSeeder(dataSource: DataSource) {
     tags: ['training', 'sports', 'women'],
     status: 'active',
     is_featured: true,
+    enable_sale_tag: true,
     meta_title: 'High Support Sports Bra',
     meta_description: 'Supportive sports bra designed for performance.',
     weight: 250,

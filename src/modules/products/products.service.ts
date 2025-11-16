@@ -58,6 +58,11 @@ export class ProductsService {
 
       const skip = (page - 1) * limit;
 
+      // Validate sort_by to prevent SQL injection
+      const allowedSortFields = ['created_at', 'updated_at', 'name', 'price', 'status'];
+      const validSortBy = allowedSortFields.includes(sort_by) ? sort_by : 'created_at';
+      const validSortOrder = sort_order === 'ASC' || sort_order === 'DESC' ? sort_order : 'DESC';
+
       const queryBuilder = this.productsRepository
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.category', 'category')
@@ -84,8 +89,8 @@ export class ProductsService {
         );
       }
 
-      // Sorting
-      queryBuilder.orderBy(`product.${sort_by}`, sort_order);
+      // Sorting - use validated values
+      queryBuilder.orderBy(`product.${validSortBy}`, validSortOrder);
 
       // Pagination
       queryBuilder.skip(skip).take(limit);
@@ -312,10 +317,14 @@ export class ProductsService {
       throw err;
     }
 
+    // Log the actual error for debugging
+    this.logger.error(`Error details: ${err?.message || err}`, err?.stack);
+
     // Attempt to map common database error codes (e.g., Postgres)
     const code = (err && (err as any).code) || undefined;
     const detail: string | undefined = (err && (err as any).detail) || (err && (err as any).message);
     const constraint: string | undefined = (err && (err as any).constraint) || undefined;
+    
     if (code === '23505') {
       // unique_violation
       // Provide more specific messages when possible
@@ -338,8 +347,14 @@ export class ProductsService {
       // invalid_text_representation (e.g., invalid UUID)
       throw new BadRequestException('Invalid input syntax');
     }
+    if (code === '42703') {
+      // undefined_column - column doesn't exist
+      throw new BadRequestException(`Invalid sort field: ${detail || 'unknown column'}`);
+    }
 
+    // Provide more detailed error message
+    const errorMessage = err?.message ? `${fallbackMessage}: ${err.message}` : fallbackMessage;
     this.logger.error(fallbackMessage, err?.stack || err);
-    throw new BadRequestException(fallbackMessage);
+    throw new BadRequestException(errorMessage);
   }
 }

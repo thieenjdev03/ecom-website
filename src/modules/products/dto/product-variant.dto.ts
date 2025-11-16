@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, Min, IsUUID } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, IsUUID, IsUrl } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class ProductVariantDto {
@@ -31,5 +31,17 @@ export class ProductVariantDto {
 
   @ApiProperty({ example: '07bdcefc-da8a-4b29-9945-602abb4adc02' })
   @IsUUID()
-  size_id: string;  
+  size_id: string;
+
+  @ApiPropertyOptional({ example: 'https://res.cloudinary.com/.../red.jpg' })
+  @IsOptional()
+  @IsString()
+  @IsUrl({ 
+    protocols: ['http', 'https'], 
+    require_protocol: true,
+    allow_underscores: true,
+    allow_trailing_dot: false,
+    require_tld: true
+  })
+  image_url?: string;
 }

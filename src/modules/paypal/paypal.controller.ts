@@ -1,6 +1,9 @@
-import { Controller, Post, Req, Res, HttpCode, Body } from '@nestjs/common';
+import { Controller, Post, Req, Res, HttpCode, Body, Param } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { PaypalService } from './paypal.service';
 import { PaymentService } from './payment.service';
+import { Order } from '../orders/entities/order.entity';
 import axios from 'axios';
 // @ts-ignore - PayPal SDK types may not be fully compatible
 import paypal = require('@paypal/checkout-server-sdk');
@@ -37,15 +40,15 @@ class CreatePaypalOrderDto {
 }
 
 class CaptureOrderDto {
-  @ApiProperty({ description: 'PayPal order ID', example: '6S5011234B5562345' })
+  @ApiProperty({ description: 'PayPal order ID - optional if provided in URL', example: '6S5011234B5562345', required: false })
   @IsString()
-  @IsNotEmpty()
-  paypalOrderId: string;
+  @IsOptional()
+  paypalOrderId?: string;
 
-  @ApiProperty({ description: 'Order ID (UUID)', example: 'order-uuid' })
+  @ApiProperty({ description: 'Order ID (UUID) - optional, can be found by paypalOrderId', example: 'order-uuid', required: false })
   @IsUUID()
-  @IsNotEmpty()
-  orderId: string;
+  @IsOptional()
+  orderId?: string;
 }
 
 @ApiTags('PayPal')
@@ -54,6 +57,8 @@ export class PaypalController {
   constructor(
     private readonly paypalService: PaypalService,
     private readonly paymentService: PaymentService,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
   ) {}
 
   @Post('create-order')
@@ -129,7 +134,7 @@ export class PaypalController {
     }
   }
 
-  @Post('capture-order')
+  @Post('capture-order/:paypalOrderId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Capture PayPal order after customer approval' })
   @ApiResponse({
@@ -139,22 +144,46 @@ export class PaypalController {
       example: {
         success: true,
         status: 'COMPLETED',
+        orderId: 'order-uuid-string',
+        orderNumber: 'ORD-20250101-1234',
+        paypalOrderId: '6S5011234B5562345',
         paypalTransactionId: '3GG57250SL7328348',
         paidAmount: '72.57',
         currency: 'USD',
         paidAt: '2025-01-01T10:05:00Z',
+        payer: {
+          email: 'buyer@example.com',
+          name: {
+            given_name: 'John',
+            surname: 'Doe',
+          },
+        },
       },
     },
   })
   @ApiResponse({ status: 400, description: 'Invalid request data' })
   @ApiResponse({ status: 404, description: 'Order not found' })
   @ApiResponse({ status: 500, description: 'Error capturing order' })
-  async captureOrder(@Body() body: CaptureOrderDto, @Res() res: any) {
+  async captureOrder(
+    @Param('paypalOrderId') paypalOrderId: string,
+    @Res() res: any,
+    @Body() body?: CaptureOrderDto,
+  ) {
     const client = this.paypalService.getClient();
 
     try {
+      // Use paypalOrderId from URL parameter or from body
+      const paypalOrderIdToUse = paypalOrderId || body?.paypalOrderId;
+      
+      if (!paypalOrderIdToUse) {
+        return res.status(400).json({
+          success: false,
+          message: 'PayPal order ID is required',
+        });
+      }
+
       // Initialize orders capture request
-      const request = new paypal.orders.OrdersCaptureRequest(body.paypalOrderId);
+      const request = new paypal.orders.OrdersCaptureRequest(paypalOrderIdToUse);
       request.requestBody({});
 
       // Execute request to PayPal
@@ -166,6 +195,54 @@ export class PaypalController {
       const captureCurrency = capture.result.purchase_units[0]?.payments?.captures?.[0]?.amount?.currency_code;
       const captureStatus = capture.result.purchase_units[0]?.payments?.captures?.[0]?.status;
 
+      // Extract payer information from PayPal response
+      const payer = capture.result.payer;
+      const payerInfo = payer
+        ? {
+            email: payer.email_address,
+            name: payer.name
+              ? {
+                  given_name: payer.name.given_name,
+                  surname: payer.name.surname,
+                }
+              : undefined,
+          }
+        : undefined;
+
+      // Fetch order from database to get orderId and orderNumber
+      // Try to find by paypalOrderId first, then by orderId from body
+      let order = await this.orderRepository.findOne({
+        where: { paypalOrderId: paypalOrderIdToUse },
+      });
+
+      if (!order && body?.orderId) {
+        order = await this.orderRepository.findOne({
+          where: { id: body.orderId },
+        });
+      }
+
+      // Prepare response data
+      const responseData: any = {
+        success: true,
+        status: captureStatus,
+        paypalOrderId: paypalOrderIdToUse,
+        paypalTransactionId: captureId,
+        paidAmount: captureAmount,
+        currency: captureCurrency,
+        paidAt: new Date().toISOString(),
+      };
+
+      // Add order information if found (High Priority - Required)
+      if (order) {
+        responseData.orderId = order.id;
+        responseData.orderNumber = order.orderNumber;
+      }
+
+      // Add payer information if available (Low Priority - Optional)
+      if (payerInfo) {
+        responseData.payer = payerInfo;
+      }
+
       if (captureStatus === 'COMPLETED') {
         // Update order in database
         await this.paymentService.handleCaptureCompleted({
@@ -173,19 +250,23 @@ export class PaypalController {
           amount: { value: captureAmount, currency_code: captureCurrency },
           status: captureStatus,
           supplementary_data: {
-            related_ids: { order_id: body.paypalOrderId },
+            related_ids: { order_id: paypalOrderIdToUse },
           },
         });
+
+        // Re-fetch order after update to ensure we have the latest data
+        if (!order) {
+          order = await this.orderRepository.findOne({
+            where: { paypalOrderId: paypalOrderIdToUse },
+          });
+          if (order) {
+            responseData.orderId = order.id;
+            responseData.orderNumber = order.orderNumber;
+          }
+        }
       }
 
-      return res.json({
-        success: true,
-        status: captureStatus,
-        paypalTransactionId: captureId,
-        paidAmount: captureAmount,
-        currency: captureCurrency,
-        paidAt: new Date().toISOString(),
-      });
+      return res.json(responseData);
     } catch (err) {
       console.error('❌ Capture order error:', err);
       return res.status(500).json({

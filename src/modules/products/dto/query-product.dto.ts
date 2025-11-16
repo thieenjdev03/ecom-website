@@ -19,6 +19,12 @@ export class QueryProductDto {
   @IsBoolean()
   is_featured?: boolean;
 
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @Type(() => Boolean)
+  @IsBoolean()
+  enable_sale_tag?: boolean;
+
   @ApiPropertyOptional({ example: 'polo' })
   @IsOptional()
   @IsString()
@@ -39,10 +45,10 @@ export class QueryProductDto {
   @Max(100)
   limit?: number = 20;
 
-  @ApiPropertyOptional({ example: 'created_at', enum: ['created_at', 'price', 'name'] })
+  @ApiPropertyOptional({ example: 'created_at', enum: ['created_at', 'updated_at', 'name', 'price', 'status'] })
   @IsOptional()
-  @IsString()
-  sort_by?: string = 'created_at';
+  @IsEnum(['created_at', 'updated_at', 'name', 'price', 'status'])
+  sort_by?: 'created_at' | 'updated_at' | 'name' | 'price' | 'status' = 'created_at';
 
   @ApiPropertyOptional({ example: 'DESC', enum: ['ASC', 'DESC'] })
   @IsOptional()

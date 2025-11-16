@@ -34,6 +34,7 @@ export class CategoriesController {
       parent: cat.parent?.id ?? null,
       parent_name: cat.parent?.name ?? 'Root Category',
       display_order: cat.display_order ?? 0,
+      is_active: cat.is_active,
       status: cat.is_active ? 'Active' : 'Inactive',
       children_count: count ? (cat.children?.length ?? 0) : undefined,
       created_at: cat.created_at,

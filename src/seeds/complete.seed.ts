@@ -109,6 +109,7 @@ export async function completeSeeder(dataSource: DataSource) {
         tags: ['t-shirt', 'basic', 'unisex'],
         status: 'active',
         is_featured: true,
+        enable_sale_tag: true,
       }),
       productRepo.create({
         name: 'Premium Black T-Shirt',
@@ -123,6 +124,7 @@ export async function completeSeeder(dataSource: DataSource) {
         tags: ['t-shirt', 'premium', 'unisex'],
         status: 'active',
         is_featured: false,
+        enable_sale_tag: false,
       }),
     ]);
     console.log(`✅ Created ${products.length} products`);

@@ -121,6 +121,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Get current user orders' })
   @ApiResponse({ status: 200, description: 'User orders retrieved successfully' })
   async getMyOrders(@Request() req) {
+    console.log('req.user check getMyOrders', req.user);
     const userId = req.user?.sub || req.user?.userId;
     if (!userId) {
       throw new UnauthorizedException('Unauthorized');

@@ -16,6 +16,7 @@ import { ProductsModule } from './modules/products/products.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { OtpModule } from './modules/otp_service/otp.module';
 import { PaypalModule } from './modules/paypal/paypal.module';
+import { HealthModule } from './modules/health/health.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -36,6 +37,7 @@ import { PaypalModule } from './modules/paypal/paypal.module';
         };
       },
     }),
+    HealthModule,
     AuthModule,
     UsersModule,
     FilesModule,

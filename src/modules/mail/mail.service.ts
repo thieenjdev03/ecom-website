@@ -6,6 +6,7 @@ import { Resend } from 'resend';
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private resend: Resend;
+  private readonly defaultFromAddress: string;
 
   constructor(private configService: ConfigService) {
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
@@ -13,6 +14,17 @@ export class MailService {
       this.resend = new Resend(apiKey);
     } else {
       this.logger.warn('RESEND_API_KEY not configured, email functionality disabled');
+    }
+
+    // Get from address from env or use Resend test domain for development
+    // Resend test domain: onboarding@resend.dev (works without domain verification)
+    this.defaultFromAddress = 
+      this.configService.get<string>('MAIL_FROM') || 
+      'E-commerce Store <noreply@talktodoc.online>';
+    
+    if (!this.configService.get<string>('MAIL_FROM')) {
+      this.logger.warn('MAIL_FROM not configured, using Resend test domain: onboarding@resend.dev');
+      this.logger.warn('For production, please set MAIL_FROM to a verified domain in Resend dashboard');
     }
   }
 
@@ -34,7 +46,7 @@ export class MailService {
         return;
       }
 
-      const fromAddress = payload.from || 'E-commerce Store <noreply@yourdomain.com>';
+      const fromAddress = payload.from || this.defaultFromAddress;
 
       let html = payload.html;
       if (!html && payload.template) {
@@ -132,7 +144,7 @@ export class MailService {
       });
 
       await this.resend.emails.send({
-        from: 'E-commerce Store <noreply@yourdomain.com>',
+        from: this.defaultFromAddress,
         to: [customerEmail],
         subject: `Order Confirmation - #${orderId}`,
         html: emailContent,
@@ -161,7 +173,7 @@ export class MailService {
       const emailContent = this.generatePasswordResetHTML(resetUrl);
 
       await this.resend.emails.send({
-        from: 'E-commerce Store <noreply@yourdomain.com>',
+        from: this.defaultFromAddress,
         to: [email],
         subject: 'Password Reset Request',
         html: emailContent,
@@ -189,7 +201,7 @@ export class MailService {
       const emailContent = this.generateWelcomeHTML(name);
 
       await this.resend.emails.send({
-        from: 'E-commerce Store <noreply@yourdomain.com>',
+        from: this.defaultFromAddress,
         to: [email],
         subject: 'Welcome to our store!',
         html: emailContent,
@@ -222,7 +234,7 @@ export class MailService {
       const emailContent = this.generatePaymentFailureHTML(orderId, reason);
 
       await this.resend.emails.send({
-        from: 'E-commerce Store <noreply@yourdomain.com>',
+        from: this.defaultFromAddress,
         to: [email],
         subject: `Payment Failed - Order #${orderId}`,
         html: emailContent,

@@ -1,7 +1,8 @@
-import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, Min, Max, ValidateNested, IsEnum, MaxLength, IsUUID } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, Min, Max, ValidateNested, IsEnum, MaxLength, IsUUID, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductVariantDto } from './product-variant.dto';
+import { DimensionsDto } from './dimensions.dto';
 
 export class CreateProductDto {
   @ApiProperty({ example: 'Premium Polo Shirt' })
@@ -94,6 +95,11 @@ export class CreateProductDto {
   @IsBoolean()
   is_featured?: boolean;
 
+  @ApiPropertyOptional({ example: false })
+  @IsOptional()
+  @IsBoolean()
+  enable_sale_tag?: boolean;
+
   @ApiPropertyOptional({ example: 'Buy Premium Polo Shirt' })
   @IsOptional()
   @IsString()
@@ -106,9 +112,20 @@ export class CreateProductDto {
   @MaxLength(500)
   meta_description?: string;
 
-  @ApiPropertyOptional({ example: 250 })
+  @ApiPropertyOptional({ example: 0.3, description: 'Weight in kg' })
   @IsOptional()
   @IsNumber()
   @Min(0)
   weight?: number;
+
+  @ApiPropertyOptional({ 
+    type: DimensionsDto,
+    example: { length: 28, width: 20, height: 2 },
+    description: 'Product dimensions in cm'
+  })
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => DimensionsDto)
+  dimensions?: DimensionsDto;
 }

@@ -147,3 +147,23 @@ export class SendPaymentFailureDto {
   @IsString()
   reason: string;
 }
+
+export class TestWelcomeEmailDto {
+  @ApiProperty({
+    description: 'Email address to send test welcome email',
+    example: 'test@example.com',
+    type: 'string'
+  })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({
+    description: 'User name (optional, defaults to "Test User")',
+    example: 'John Doe',
+    type: 'string',
+    required: false
+  })
+  @IsOptional()
+  @IsString()
+  name?: string;
+}

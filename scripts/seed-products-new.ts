@@ -63,6 +63,7 @@ async function run() {
         tags: ['t-shirt', 'basic', 'unisex'],
         status: 'active',
         is_featured: false,
+        enable_sale_tag: false,
       },
       {
         name: 'Black Basic T-Shirt',

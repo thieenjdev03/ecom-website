@@ -9,12 +9,13 @@ export interface ProductVariant {
   price: number;
   stock: number;
   barcode?: string;
+  image_url?: string;
 }
 
 export interface ProductDimensions {
-  length: number;
-  width: number;
-  height: number;
+  length?: number;
+  width?: number;
+  height?: number;
 }
 
 @Entity('products')
@@ -74,13 +75,16 @@ export class Product {
   @Column({ default: false })
   is_featured: boolean;
 
+  @Column({ default: false })
+  enable_sale_tag: boolean;
+
   @Column({ length: 255, nullable: true })
   meta_title: string;
 
   @Column({ length: 500, nullable: true })
   meta_description: string;
 
-  @Column({ type: 'decimal', precision: 8, scale: 2, nullable: true })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weight: number;
 
   @Column({ type: 'jsonb', nullable: true })
