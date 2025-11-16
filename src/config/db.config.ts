@@ -6,6 +6,6 @@ export default registerAs('database', (): TypeOrmModuleOptions => ({
   url: process.env.DATABASE_URL,
   entities: [__dirname + '/../modules/**/*.entity.{ts,js}'],
   migrations: [__dirname + '/../database/migrations/*.{ts,js}'],
-  synchronize: process.env.NODE_ENV === 'development',
+  synchronize: false, // Disabled to use migrations instead - set to true only for initial development
   logging: process.env.NODE_ENV === 'development',
 }));

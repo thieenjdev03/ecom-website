@@ -3,6 +3,10 @@ import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class QueryProductDto {
+  @ApiPropertyOptional({ example: 'en', description: 'Locale for language (default: en)', enum: ['en', 'vi'] })
+  @IsOptional()
+  @IsString()
+  locale?: string = 'en';
   @ApiPropertyOptional({ example: 'b4b2b07f-6825-402b-bd2c-f9aef8cfbba5' })
   @IsOptional()
   @IsUUID()

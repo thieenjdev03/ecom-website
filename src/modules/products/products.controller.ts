@@ -13,8 +13,8 @@ export class ProductsController {
   @Post()
   @ApiOperation({ summary: 'Create a new product' })
   @ApiResponse({ status: 201, description: 'Product created successfully' })
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  create(@Body() createProductDto: CreateProductDto, @Query('locale') locale?: string) {
+    return this.productsService.create(createProductDto, locale || 'en');
   }
 
   @Get()
@@ -27,24 +27,24 @@ export class ProductsController {
   @Get('search')
   @ApiOperation({ summary: 'Search products by keyword' })
   @ApiResponse({ status: 200, description: 'Search results' })
-  search(@Query('q') keyword: string, @Query('limit') limit?: number) {
-    return this.productsService.search(keyword, limit);
+  search(@Query('q') keyword: string, @Query('limit') limit?: number, @Query('locale') locale?: string) {
+    return this.productsService.search(keyword, limit, locale || 'en');
   }
 
   @Get('slug/:slug')
   @ApiOperation({ summary: 'Get product by slug' })
   @ApiResponse({ status: 200, description: 'Product found' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  findBySlug(@Param('slug') slug: string) {
-    return this.productsService.findBySlug(slug);
+  findBySlug(@Param('slug') slug: string, @Query('locale') locale?: string) {
+    return this.productsService.findBySlug(slug, locale || 'en');
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get product by ID' })
   @ApiResponse({ status: 200, description: 'Product found' })
   @ApiResponse({ status: 404, description: 'Product not found' })
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
+  findOne(@Param('id') id: string, @Query('locale') locale?: string) {
+    return this.productsService.findOne(id, locale || 'en');
   }
 
   @Get(':id/stock')
@@ -57,8 +57,8 @@ export class ProductsController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update product' })
   @ApiResponse({ status: 200, description: 'Product updated successfully' })
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
-    return this.productsService.update(id, updateProductDto);
+  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto, @Query('locale') locale?: string) {
+    return this.productsService.update(id, updateProductDto, locale || 'en');
   }
 
   @Patch(':id/variants/:sku/stock')
@@ -68,8 +68,9 @@ export class ProductsController {
     @Param('id') id: string,
     @Param('sku') sku: string,
     @Body('stock', ParseIntPipe) stock: number,
+    @Query('locale') locale?: string,
   ) {
-    return this.productsService.updateVariantStock(id, sku, stock);
+    return this.productsService.updateVariantStock(id, sku, stock, locale || 'en');
   }
 
   @Delete(':id')

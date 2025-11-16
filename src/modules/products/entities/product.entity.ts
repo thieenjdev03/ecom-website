@@ -1,8 +1,10 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, DeleteDateColumn } from 'typeorm';
 import { Category } from './category.entity';
 
+export type LangObject = Record<string, string | null>;
+
 export interface ProductVariant {
-  name: string;
+  name: LangObject;
   color_id: string;
   size_id: string;
   sku: string;
@@ -23,17 +25,17 @@ export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ length: 255 })
-  name: string;
+  @Column({ type: 'jsonb' })
+  name: LangObject;
 
-  @Column({ length: 255, unique: true })
-  slug: string;
+  @Column({ type: 'jsonb' })
+  slug: LangObject;
 
-  @Column({ type: 'text', nullable: true })
-  description: string;
+  @Column({ type: 'jsonb', nullable: true })
+  description: LangObject;
 
-  @Column({ length: 500, nullable: true })
-  short_description: string;
+  @Column({ type: 'jsonb', nullable: true })
+  short_description: LangObject;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
@@ -78,11 +80,11 @@ export class Product {
   @Column({ default: false })
   enable_sale_tag: boolean;
 
-  @Column({ length: 255, nullable: true })
-  meta_title: string;
+  @Column({ type: 'jsonb', nullable: true })
+  meta_title: LangObject | null;
 
-  @Column({ length: 500, nullable: true })
-  meta_description: string;
+  @Column({ type: 'jsonb', nullable: true })
+  meta_description: LangObject | null;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weight: number;

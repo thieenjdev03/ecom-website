@@ -1,10 +1,14 @@
-import { IsString, IsNumber, IsOptional, Min, IsUUID, IsUrl } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, IsUUID, IsUrl, IsObject } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { LangObject } from '../entities/product.entity';
 
 export class ProductVariantDto {
-  @ApiProperty({ example: 'M - Black' })
-  @IsString()
-  name: string;
+  @ApiProperty({ 
+    example: { en: 'M - Black', vi: 'M - Đen' },
+    description: 'Variant name in multiple languages'
+  })
+  @IsObject()
+  name: LangObject;
 
   @ApiProperty({ example: 'POLO-M-BLACK' })
   @IsString()

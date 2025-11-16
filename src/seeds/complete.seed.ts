@@ -96,10 +96,22 @@ export async function completeSeeder(dataSource: DataSource) {
     const tshirtCategory = categories.find((c) => c.slug === 't-shirts') || categories[0];
     products = await productRepo.save([
       productRepo.create({
-        name: 'Classic White T-Shirt',
-        slug: 'classic-white-tshirt',
-        description: '100% cotton, comfortable fit for everyday wear',
-        short_description: 'Classic white tee',
+        name: {
+          en: 'Classic White T-Shirt',
+          vi: 'Áo Thun Trắng Cổ Điển',
+        },
+        slug: {
+          en: 'classic-white-tshirt',
+          vi: 'ao-thun-trang-co-dien',
+        },
+        description: {
+          en: '100% cotton, comfortable fit for everyday wear',
+          vi: '100% cotton, vừa vặn thoải mái cho mặc hàng ngày',
+        },
+        short_description: {
+          en: 'Classic white tee',
+          vi: 'Áo thun trắng cổ điển',
+        },
         price: 299000,
         sale_price: 249000,
         images: ['https://via.placeholder.com/500x500?text=White+Tee'],
@@ -110,12 +122,32 @@ export async function completeSeeder(dataSource: DataSource) {
         status: 'active',
         is_featured: true,
         enable_sale_tag: true,
+        meta_title: {
+          en: 'Classic White T-Shirt',
+          vi: 'Áo Thun Trắng Cổ Điển',
+        },
+        meta_description: {
+          en: '100% cotton classic white t-shirt for everyday wear',
+          vi: 'Áo thun trắng cổ điển 100% cotton cho mặc hàng ngày',
+        },
       }),
       productRepo.create({
-        name: 'Premium Black T-Shirt',
-        slug: 'premium-black-tshirt',
-        description: 'Premium quality black t-shirt with soft fabric',
-        short_description: 'Premium black tee',
+        name: {
+          en: 'Premium Black T-Shirt',
+          vi: 'Áo Thun Đen Cao Cấp',
+        },
+        slug: {
+          en: 'premium-black-tshirt',
+          vi: 'ao-thun-den-cao-cap',
+        },
+        description: {
+          en: 'Premium quality black t-shirt with soft fabric',
+          vi: 'Áo thun đen chất lượng cao với vải mềm mại',
+        },
+        short_description: {
+          en: 'Premium black tee',
+          vi: 'Áo thun đen cao cấp',
+        },
         price: 349000,
         images: ['https://via.placeholder.com/500x500?text=Black+Tee'],
         stock_quantity: 45,
@@ -125,6 +157,14 @@ export async function completeSeeder(dataSource: DataSource) {
         status: 'active',
         is_featured: false,
         enable_sale_tag: false,
+        meta_title: {
+          en: 'Premium Black T-Shirt',
+          vi: 'Áo Thun Đen Cao Cấp',
+        },
+        meta_description: {
+          en: 'Premium quality black t-shirt with soft fabric',
+          vi: 'Áo thun đen chất lượng cao với vải mềm mại',
+        },
       }),
     ]);
     console.log(`✅ Created ${products.length} products`);
@@ -279,6 +319,10 @@ export async function completeSeeder(dataSource: DataSource) {
       // Use product.id (UUID string) as OrderItem interface expects UUID string
       const productId = product.id;
 
+      // Extract name and slug from multi-language object (fallback to English)
+      const productName = typeof product.name === 'object' ? (product.name.en || product.name.vi || '') : product.name;
+      const productSlug = typeof product.slug === 'object' ? (product.slug.en || product.slug.vi || '') : product.slug;
+
       const orderData = orderRepo.create({
         userId: user.id,
         orderNumber,
@@ -292,8 +336,8 @@ export async function completeSeeder(dataSource: DataSource) {
         items: [
           {
             productId,
-            productName: product.name,
-            productSlug: product.slug,
+            productName,
+            productSlug,
             quantity,
             unitPrice: String(unitPrice),
             totalPrice: String(totalPrice),

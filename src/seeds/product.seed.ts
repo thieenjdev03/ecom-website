@@ -14,17 +14,32 @@ export async function productSeeder(dataSource: DataSource) {
   }
 
   const sampleProduct = productRepo.create({
-    name: 'High Support Sports Bra',
-    slug: 'high-support-sports-bra',
-    description: 'Breathable, moisture-wicking fabric. Designed for high-intensity workouts.',
-    short_description: 'High support. Quick dry.',
+    name: {
+      en: 'High Support Sports Bra',
+      vi: 'Áo Ngực Thể Thao Hỗ Trợ Cao',
+    },
+    slug: {
+      en: 'high-support-sports-bra',
+      vi: 'ao-nguc-the-thao-ho-tro-cao',
+    },
+    description: {
+      en: 'Breathable, moisture-wicking fabric. Designed for high-intensity workouts.',
+      vi: 'Vải thở, thấm hút mồ hôi. Được thiết kế cho các bài tập cường độ cao.',
+    },
+    short_description: {
+      en: 'High support. Quick dry.',
+      vi: 'Hỗ trợ cao. Khô nhanh.',
+    },
     price: 499000,
     sale_price: 449000,
     cost_price: 300000,
     images: ['https://example.com/images/sports-bra-1.jpg'],
     variants: [
       {
-        name: 'S - Black',
+        name: {
+          en: 'S - Black',
+          vi: 'S - Đen',
+        },
         sku: 'BRA-S-BLACK',
         price: 499000,
         stock: 15,
@@ -32,7 +47,10 @@ export async function productSeeder(dataSource: DataSource) {
         size_id: 'S',
       },
       {
-        name: 'M - Black',
+        name: {
+          en: 'M - Black',
+          vi: 'M - Đen',
+        },
         sku: 'BRA-M-BLACK',
         price: 499000,
         stock: 20,
@@ -48,15 +66,20 @@ export async function productSeeder(dataSource: DataSource) {
     status: 'active',
     is_featured: true,
     enable_sale_tag: true,
-    meta_title: 'High Support Sports Bra',
-    meta_description: 'Supportive sports bra designed for performance.',
+    meta_title: {
+      en: 'High Support Sports Bra',
+      vi: 'Áo Ngực Thể Thao Hỗ Trợ Cao',
+    },
+    meta_description: {
+      en: 'Supportive sports bra designed for performance.',
+      vi: 'Áo ngực thể thao hỗ trợ được thiết kế cho hiệu suất.',
+    },
     weight: 250,
     dimensions: { length: 20, width: 15, height: 5 },
   });
 
   const saved = await productRepo.save(sampleProduct);
-  // eslint-disable-next-line no-console
-  console.log('✅ Seeded product:', `${saved.name} (${saved.id}) in category ${category.name}`);
+  console.log('✅ Seeded product:', `${saved.name?.en || saved.name} (${saved.id}) in category ${category.name}`);
   return saved;
 }
 

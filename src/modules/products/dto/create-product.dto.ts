@@ -3,28 +3,38 @@ import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductVariantDto } from './product-variant.dto';
 import { DimensionsDto } from './dimensions.dto';
+import { LangObject } from '../entities/product.entity';
 
 export class CreateProductDto {
-  @ApiProperty({ example: 'Premium Polo Shirt' })
-  @IsString()
-  @MaxLength(255)
-  name: string;
+  @ApiProperty({ 
+    example: { en: 'Premium Polo Shirt', vi: 'Áo Polo Cao Cấp' },
+    description: 'Product name in multiple languages'
+  })
+  @IsObject()
+  name: LangObject;
 
-  @ApiProperty({ example: 'premium-polo-shirt' })
-  @IsString()
-  @MaxLength(255)
-  slug: string;
+  @ApiProperty({ 
+    example: { en: 'premium-polo-shirt', vi: 'ao-polo-cao-cap' },
+    description: 'Product slug in multiple languages'
+  })
+  @IsObject()
+  slug: LangObject;
 
-  @ApiPropertyOptional({ example: 'High quality cotton polo shirt...' })
+  @ApiPropertyOptional({ 
+    example: { en: 'High quality cotton polo shirt...', vi: 'Áo polo cotton chất lượng cao...' },
+    description: 'Product description in multiple languages'
+  })
   @IsOptional()
-  @IsString()
-  description?: string;
+  @IsObject()
+  description?: LangObject;
 
-  @ApiPropertyOptional({ example: 'Premium cotton polo' })
+  @ApiPropertyOptional({ 
+    example: { en: 'Premium cotton polo', vi: 'Áo polo cotton cao cấp' },
+    description: 'Short description in multiple languages'
+  })
   @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  short_description?: string;
+  @IsObject()
+  short_description?: LangObject;
 
   @ApiProperty({ example: 399000 })
   @IsNumber()
@@ -100,17 +110,21 @@ export class CreateProductDto {
   @IsBoolean()
   enable_sale_tag?: boolean;
 
-  @ApiPropertyOptional({ example: 'Buy Premium Polo Shirt' })
+  @ApiPropertyOptional({ 
+    example: { en: 'Buy Premium Polo Shirt', vi: 'Mua Áo Polo Cao Cấp' },
+    description: 'Meta title in multiple languages'
+  })
   @IsOptional()
-  @IsString()
-  @MaxLength(255)
-  meta_title?: string;
+  @IsObject()
+  meta_title?: LangObject | null;
 
-  @ApiPropertyOptional({ example: 'High quality polo shirt...' })
+  @ApiPropertyOptional({ 
+    example: { en: 'High quality polo shirt...', vi: 'Áo polo chất lượng cao...' },
+    description: 'Meta description in multiple languages'
+  })
   @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  meta_description?: string;
+  @IsObject()
+  meta_description?: LangObject | null;
 
   @ApiPropertyOptional({ example: 0.3, description: 'Weight in kg' })
   @IsOptional()

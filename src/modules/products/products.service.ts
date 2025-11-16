@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, HttpException, ConflictException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
-import { Product } from './entities/product.entity';
+import { Product, LangObject, ProductVariant } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
@@ -20,17 +20,130 @@ export class ProductsService {
     private sizesService: SizesService,
   ) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> {
+  /**
+   * Validate language code to prevent SQL injection
+   */
+  private isValidLanguageCode(lang: string): boolean {
+    // Allow only alphanumeric and underscore, max 10 chars
+    return /^[a-zA-Z0-9_]{1,10}$/.test(lang);
+  }
+
+  /**
+   * Get localized value with fallback to English
+   * Handles both multi-language objects and plain strings (for backward compatibility)
+   */
+  private getLocalizedValue(field: LangObject | string | null | undefined, locale: string = 'en'): string {
+    if (!field) {
+      return '';
+    }
+    // If it's a string (backward compatibility), return as is
+    if (typeof field === 'string') {
+      return field;
+    }
+    // If it's an object (multi-language), get the localized value
+    if (typeof field === 'object') {
+      return field[locale] ?? field['en'] ?? '';
+    }
+    return '';
+  }
+
+  /**
+   * Transform product from multi-language to single language based on locale
+   */
+  private transformProductForLocale(product: Product, locale: string = 'en'): any {
+    const transformed: any = {
+      id: product.id,
+      name: this.getLocalizedValue(product.name, locale),
+      slug: this.getLocalizedValue(product.slug, locale),
+      description: this.getLocalizedValue(product.description, locale),
+      short_description: this.getLocalizedValue(product.short_description, locale),
+      price: product.price,
+      sale_price: product.sale_price,
+      cost_price: product.cost_price,
+      images: product.images,
+      stock_quantity: product.stock_quantity,
+      sku: product.sku,
+      barcode: product.barcode,
+      tags: product.tags,
+      status: product.status,
+      is_featured: product.is_featured,
+      enable_sale_tag: product.enable_sale_tag,
+      meta_title: product.meta_title ? this.getLocalizedValue(product.meta_title, locale) : null,
+      meta_description: product.meta_description ? this.getLocalizedValue(product.meta_description, locale) : null,
+      weight: product.weight,
+      dimensions: product.dimensions,
+      created_at: product.created_at,
+      updated_at: product.updated_at,
+    };
+
+    // Transform category if exists
+    if (product.category) {
+      transformed.category = {
+        id: product.category.id,
+        name: this.getLocalizedValue(product.category.name as any, locale),
+        slug: this.getLocalizedValue(product.category.slug as any, locale),
+      };
+    }
+
+    // Transform variants if exists
+    if (product.variants && product.variants.length > 0) {
+      transformed.variants = product.variants.map((variant: ProductVariant) => {
+        const transformedVariant: any = {
+          ...variant,
+          name: this.getLocalizedValue(variant.name, locale),
+        };
+
+        // Transform color if exists
+        if (variant.color_id && (product as any).variants) {
+          const variantWithColor = (product as any).variants.find((v: any) => v.sku === variant.sku);
+          if (variantWithColor?.color) {
+            transformedVariant.color = {
+              id: variantWithColor.color.id,
+              name: this.getLocalizedValue(variantWithColor.color.name as any, locale),
+              hexCode: variantWithColor.color.hexCode,
+            };
+          }
+        }
+
+        // Transform size if exists
+        if (variant.size_id && (product as any).variants) {
+          const variantWithSize = (product as any).variants.find((v: any) => v.sku === variant.sku);
+          if (variantWithSize?.size) {
+            transformedVariant.size = {
+              id: variantWithSize.size.id,
+              name: this.getLocalizedValue(variantWithSize.size.name as any, locale),
+            };
+          }
+        }
+
+        return transformedVariant;
+      });
+    }
+
+    return transformed;
+  }
+
+  async create(createProductDto: CreateProductDto, locale: string = 'en'): Promise<any> {
     try {
       // Validate business rules
       this.validateProduct(createProductDto);
 
-      // Check slug uniqueness
-      const existingSlug = await this.productsRepository.findOne({
-        where: { slug: createProductDto.slug },
-      });
-      if (existingSlug) {
-        throw new BadRequestException(`Slug "${createProductDto.slug}" already exists`);
+      // Check slug uniqueness - check all language slugs using JSONB operators
+      const slugKeys = Object.keys(createProductDto.slug);
+      for (const lang of slugKeys) {
+        if (!this.isValidLanguageCode(lang)) {
+          throw new BadRequestException(`Invalid language code: "${lang}"`);
+        }
+        const slugValue = createProductDto.slug[lang];
+        if (slugValue) {
+          const existingSlug = await this.productsRepository
+            .createQueryBuilder('product')
+            .where(`product.slug->>'${lang}' = :slugValue`, { slugValue })
+            .getOne();
+          if (existingSlug) {
+            throw new BadRequestException(`Slug "${slugValue}" for language "${lang}" already exists`);
+          }
+        }
       }
 
       // Check SKU uniqueness
@@ -45,16 +158,17 @@ export class ProductsService {
 
       const product = this.productsRepository.create(createProductDto);
       const savedProduct = await this.productsRepository.save(product);
-      return await this.enrichProductVariants(savedProduct);
+      const enrichedProduct = await this.enrichProductVariants(savedProduct);
+      return this.transformProductForLocale(enrichedProduct, locale);
     } catch (err) {
       // Map unexpected errors to meaningful HTTP responses
       this.handleError(err, 'Unable to create product');
     }
   }
 
-  async findAll(query: QueryProductDto): Promise<{ data: Product[]; meta: any }> {
+  async findAll(query: QueryProductDto): Promise<{ data: any[]; meta: any }> {
     try {
-      const { page = 1, limit = 20, category_id, status, is_featured, search, sort_by = 'created_at', sort_order = 'DESC' } = query;
+      const { page = 1, limit = 20, category_id, status, is_featured, search, sort_by = 'created_at', sort_order = 'DESC', locale = 'en' } = query;
 
       const skip = (page - 1) * limit;
 
@@ -81,16 +195,18 @@ export class ProductsService {
         queryBuilder.andWhere('product.is_featured = :is_featured', { is_featured });
       }
 
-      // Search
+      // Search - search in JSONB fields
       if (search) {
         queryBuilder.andWhere(
-          '(product.name ILIKE :search OR product.description ILIKE :search)',
+          '(product.name::text ILIKE :search OR product.description::text ILIKE :search)',
           { search: `%${search}%` }
         );
       }
 
       // Sorting - use validated values
-      queryBuilder.orderBy(`product.${validSortBy}`, validSortOrder);
+      // Note: Sorting by name on JSONB is complex, so we'll sort by created_at for now
+      const sortField = validSortBy === 'name' ? 'created_at' : validSortBy;
+      queryBuilder.orderBy(`product.${sortField}`, validSortOrder);
 
       // Pagination
       queryBuilder.skip(skip).take(limit);
@@ -102,8 +218,11 @@ export class ProductsService {
         data.map(product => this.enrichProductVariants(product))
       );
 
+      // Transform to single language
+      const transformedData = enrichedData.map(product => this.transformProductForLocale(product, locale));
+
       return {
-        data: enrichedData,
+        data: transformedData,
         meta: {
           total,
           page,
@@ -116,7 +235,7 @@ export class ProductsService {
     }
   }
 
-  async findOne(id: string): Promise<Product> {
+  async findOne(id: string, locale: string = 'en'): Promise<any> {
     const product = await this.productsRepository.findOne({
       where: { id },
       relations: ['category'],
@@ -126,38 +245,67 @@ export class ProductsService {
       throw new NotFoundException(`Product #${id} not found`);
     }
 
-    return await this.enrichProductVariants(product);
+    const enrichedProduct = await this.enrichProductVariants(product);
+    return this.transformProductForLocale(enrichedProduct, locale);
   }
 
-  async findBySlug(slug: string): Promise<Product> {
-    const product = await this.productsRepository.findOne({
-      where: { slug },
-      relations: ['category'],
-    });
+  async findBySlug(slug: string, locale: string = 'en'): Promise<any> {
+    // Validate locale to prevent SQL injection
+    if (!this.isValidLanguageCode(locale)) {
+      locale = 'en';
+    }
+    
+    // Search for slug in JSONB field using JSONB operator
+    const product = await this.productsRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .where(`product.slug->>'${locale}' = :slug`, { slug })
+      .orWhere(`product.slug->>'en' = :slug`, { slug }) // Fallback to English
+      .getOne();
 
     if (!product) {
       throw new NotFoundException(`Product with slug "${slug}" not found`);
     }
 
-    return await this.enrichProductVariants(product);
+    const enrichedProduct = await this.enrichProductVariants(product);
+    return this.transformProductForLocale(enrichedProduct, locale);
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
+  async update(id: string, updateProductDto: UpdateProductDto, locale: string = 'en'): Promise<any> {
     try {
-      const product = await this.findOne(id);
+      // Get product without transformation first
+      const product = await this.productsRepository.findOne({
+        where: { id },
+        relations: ['category'],
+      });
+
+      if (!product) {
+        throw new NotFoundException(`Product #${id} not found`);
+      }
 
       // Validate business rules
       if (Object.keys(updateProductDto).length > 0) {
         this.validateProduct(updateProductDto);
       }
 
-      // Check slug uniqueness if changing
-      if (updateProductDto.slug && updateProductDto.slug !== product.slug) {
-        const existingSlug = await this.productsRepository.findOne({
-          where: { slug: updateProductDto.slug },
-        });
-        if (existingSlug) {
-          throw new BadRequestException(`Slug "${updateProductDto.slug}" already exists`);
+      // Check slug uniqueness if changing - check all language slugs using JSONB operators
+      if (updateProductDto.slug) {
+        const slugKeys = Object.keys(updateProductDto.slug);
+        for (const lang of slugKeys) {
+          if (!this.isValidLanguageCode(lang)) {
+            throw new BadRequestException(`Invalid language code: "${lang}"`);
+          }
+          const slugValue = updateProductDto.slug[lang];
+          if (slugValue) {
+            const existingSlug = await this.productsRepository
+              .createQueryBuilder('product')
+              .where('product.id != :id', { id })
+              .andWhere(`product.slug->>'${lang}' = :slugValue`, { slugValue })
+              .getOne();
+            if (existingSlug) {
+              throw new BadRequestException(`Slug "${slugValue}" for language "${lang}" already exists`);
+            }
+          }
         }
       }
 
@@ -171,7 +319,8 @@ export class ProductsService {
 
       Object.assign(product, updateProductDto);
       const savedProduct = await this.productsRepository.save(product);
-      return await this.enrichProductVariants(savedProduct);
+      const enrichedProduct = await this.enrichProductVariants(savedProduct);
+      return this.transformProductForLocale(enrichedProduct, locale);
     } catch (err) {
       this.handleError(err, 'Unable to update product');
     }
@@ -179,26 +328,28 @@ export class ProductsService {
 
   async remove(id: string): Promise<void> {
     try {
-      const product = await this.findOne(id);
+      const product = await this.productsRepository.findOne({
+        where: { id },
+      });
+      if (!product) {
+        throw new NotFoundException(`Product #${id} not found`);
+      }
       await this.productsRepository.softDelete(id);
     } catch (err) {
       this.handleError(err, 'Unable to delete product');
     }
   }
 
-  async getTotalStock(id: string): Promise<number> {
-    const product = await this.findOne(id);
-
-    if (product.variants && product.variants.length > 0) {
-      return product.variants.reduce((sum, variant) => sum + (variant.stock || 0), 0);
-    }
-
-    return product.stock_quantity || 0;
-  }
-
-  async updateVariantStock(id: string, sku: string, newStock: number): Promise<Product> {
+  async updateVariantStock(id: string, sku: string, newStock: number, locale: string = 'en'): Promise<any> {
     try {
-      const product = await this.findOne(id);
+      const product = await this.productsRepository.findOne({
+        where: { id },
+        relations: ['category'],
+      });
+
+      if (!product) {
+        throw new NotFoundException(`Product #${id} not found`);
+      }
 
       if (!product.variants || product.variants.length === 0) {
         throw new BadRequestException('Product has no variants');
@@ -215,29 +366,50 @@ export class ProductsService {
 
       product.variants[variantIndex].stock = newStock;
       const savedProduct = await this.productsRepository.save(product);
-      return await this.enrichProductVariants(savedProduct);
+      const enrichedProduct = await this.enrichProductVariants(savedProduct);
+      return this.transformProductForLocale(enrichedProduct, locale);
     } catch (err) {
       this.handleError(err, 'Unable to update variant stock');
     }
   }
 
-  async search(keyword: string, limit: number = 20): Promise<Product[]> {
+  async getTotalStock(id: string): Promise<number> {
+    const product = await this.productsRepository.findOne({
+      where: { id },
+    });
+
+    if (!product) {
+      throw new NotFoundException(`Product #${id} not found`);
+    }
+
+    if (!product.variants || product.variants.length === 0) {
+      return product.stock_quantity || 0;
+    }
+
+    return product.variants.reduce((sum, variant) => sum + (variant.stock || 0), 0);
+  }
+
+  async search(keyword: string, limit: number = 20, locale: string = 'en'): Promise<any[]> {
     try {
       const products = await this.productsRepository
         .createQueryBuilder('product')
+        .leftJoinAndSelect('product.category', 'category')
         .where('product.deleted_at IS NULL')
         .andWhere('product.status = :status', { status: 'active' })
         .andWhere(
-          '(product.name ILIKE :keyword OR product.description ILIKE :keyword)',
+          '(product.name::text ILIKE :keyword OR product.description::text ILIKE :keyword)',
           { keyword: `%${keyword}%` }
         )
         .take(limit)
         .getMany();
       
       // Enrich variants with full color and size objects
-      return await Promise.all(
+      const enrichedProducts = await Promise.all(
         products.map(product => this.enrichProductVariants(product))
       );
+
+      // Transform to single language
+      return enrichedProducts.map(product => this.transformProductForLocale(product, locale));
     } catch (err) {
       this.handleError(err, 'Unable to search products');
     }
