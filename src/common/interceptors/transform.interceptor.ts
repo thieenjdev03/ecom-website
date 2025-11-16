@@ -21,6 +21,13 @@ export class TransformInterceptor<T>
     context: ExecutionContext,
     next: CallHandler,
   ): Observable<Response<T>> {
+    const request = context.switchToHttp().getRequest();
+    
+    // Skip transformation for HEAD requests (no body should be sent)
+    if (request.method === 'HEAD') {
+      return next.handle();
+    }
+
     return next.handle().pipe(
       map((data) => ({
         data,

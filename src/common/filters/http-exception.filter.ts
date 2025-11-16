@@ -48,14 +48,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
     };
 
-    // Minimal logging without sensitive data
-    this.logger.warn({
-      status,
-      error: errorName,
-      path: request.url,
-      method: request.method,
-      messages,
-    });
+    // Skip logging for HEAD /health requests (to avoid log spam from uptime monitors)
+    const isHeadHealth = request.method === 'HEAD' && request.url?.split('?')[0] === '/health';
+    
+    // Minimal logging without sensitive data (skip HEAD /health to avoid spam)
+    if (!isHeadHealth) {
+      this.logger.warn({
+        status,
+        error: errorName,
+        path: request.url,
+        method: request.method,
+        messages,
+      });
+    }
 
     response.status(status).json(payload);
   }

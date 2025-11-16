@@ -55,15 +55,20 @@ export class AllExceptionsFilter extends BaseExceptionFilter {
       }
     }
 
-    // Log error for debugging
-    this.logger.error(`API Error [${status}]: ${message}`, {
-      path: request.url,
-      method: request.method,
-      body: request.body,
-      query: request.query,
-      params: request.params,
-      stack: exception instanceof Error ? exception.stack : undefined,
-    });
+    // Skip logging for HEAD /health requests (to avoid log spam from uptime monitors)
+    const isHeadHealth = request.method === 'HEAD' && request.url?.split('?')[0] === '/health';
+    
+    // Log error for debugging (skip HEAD /health to avoid spam)
+    if (!isHeadHealth) {
+      this.logger.error(`API Error [${status}]: ${message}`, {
+        path: request.url,
+        method: request.method,
+        body: request.body,
+        query: request.query,
+        params: request.params,
+        stack: exception instanceof Error ? exception.stack : undefined,
+      });
+    }
 
     const payload = {
       success: false,
