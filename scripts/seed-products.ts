@@ -16,9 +16,12 @@ try {
 async function run() {
   await dataSource.initialize();
   try {
-    await productSeeder(dataSource);
+    // Get total from command line argument or default to 20
+    const total = process.argv[2] ? parseInt(process.argv[2], 10) : 20;
+    console.log(`🌱 Seeding ${total} products...\n`);
+    await productSeeder(dataSource, total);
     // eslint-disable-next-line no-console
-    console.log('🎉 Product seeding completed');
+    console.log('\n🎉 Product seeding completed');
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('❌ Product seeding failed:', error);

@@ -256,12 +256,24 @@ export class ProductsService {
     }
     
     // Search for slug in JSONB field using JSONB operator
-    const product = await this.productsRepository
+    // First try to find with the specified locale, then fallback to English
+    // Also exclude soft-deleted products
+    let product = await this.productsRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category')
-      .where(`product.slug->>'${locale}' = :slug`, { slug })
-      .orWhere(`product.slug->>'en' = :slug`, { slug }) // Fallback to English
+      .where('product.deleted_at IS NULL')
+      .andWhere(`product.slug->>'${locale}' = :slug`, { slug })
       .getOne();
+
+    // If not found with locale, try English as fallback
+    if (!product && locale !== 'en') {
+      product = await this.productsRepository
+        .createQueryBuilder('product')
+        .leftJoinAndSelect('product.category', 'category')
+        .where('product.deleted_at IS NULL')
+        .andWhere(`product.slug->>'en' = :slug`, { slug })
+        .getOne();
+    }
 
     if (!product) {
       throw new NotFoundException(`Product with slug "${slug}" not found`);
