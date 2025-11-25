@@ -88,6 +88,13 @@ export class PaypalController {
       
       request.requestBody({
         intent: 'CAPTURE',
+        application_context: {
+          brand_name: 'Your Store',
+          landing_page: 'LOGIN',
+          user_action: 'PAY_NOW',
+          return_url: `https://ecom-website-production.up.railway.app/paypal/return`,
+          cancel_url: `https://ecom-website-production.up.railway.app/paypal/cancel`,
+        },
         purchase_units: [
           {
             amount: {

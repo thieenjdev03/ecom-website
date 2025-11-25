@@ -143,69 +143,7 @@ export class OrdersService {
       throw new NotFoundException(`Order with ID ${id} not found`);
     }
 
-    // Enrich items with product thumbnail URLs
-    if (order.items && order.items.length > 0) {
-      try {
-        // Validate UUID format and filter out invalid IDs
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        const productIds = order.items
-          .map(item => item.productId)
-          .filter((id) => {
-            const isValid = uuidRegex.test(id);
-            if (!isValid) {
-              this.logger.warn(`Invalid productId format in order ${order.orderNumber}: "${id}". Skipping thumbnail fetch for this product.`);
-            }
-            return isValid;
-          })
-          .filter((id, index, self) => self.indexOf(id) === index); // Remove duplicates
-
-        if (productIds.length > 0) {
-          const products = await this.productRepository.find({
-            where: { id: In(productIds) },
-            select: ['id', 'images'],
-          });
-
-          const productMap = new Map(products.map(p => [p.id, p]));
-
-          // Add productThumbnailUrl to each item
-          order.items = order.items.map(item => {
-            // Skip if productId is not a valid UUID
-            if (!uuidRegex.test(item.productId)) {
-              return {
-                ...item,
-                productThumbnailUrl: null,
-              };
-            }
-
-            const product = productMap.get(item.productId);
-            const thumbnailUrl = product?.images && product.images.length > 0 
-              ? product.images[0] 
-              : null;
-            
-            return {
-              ...item,
-              productThumbnailUrl: thumbnailUrl,
-            };
-          });
-        } else {
-          // No valid UUIDs found, set all thumbnails to null
-          this.logger.warn(`No valid product UUIDs found in order ${order.orderNumber}. All product thumbnails will be null.`);
-          order.items = order.items.map(item => ({
-            ...item,
-            productThumbnailUrl: null,
-          }));
-        }
-      } catch (error) {
-        // Log error but don't fail the entire request
-        this.logger.error(`Failed to fetch product thumbnails for order ${order.orderNumber}: ${error.message}`, error.stack);
-        
-        // Set all thumbnails to null on error
-        order.items = order.items.map(item => ({
-          ...item,
-          productThumbnailUrl: null,
-        }));
-      }
-    }
+    await this.populateProductThumbnails(order);
 
     return order;
   }
@@ -276,11 +214,15 @@ export class OrdersService {
   }
 
   async getUserOrders(userId: string): Promise<Order[]> {
-    return await this.orderRepository.find({
+    const orders = await this.orderRepository.find({
       where: { userId },
       relations: ['shippingAddress', 'billingAddress'],
       order: { createdAt: 'DESC' },
     });
+
+    await this.populateProductThumbnails(orders);
+
+    return orders;
   }
 
   private generateOrderNumber(): string {
@@ -404,5 +346,93 @@ export class OrdersService {
     };
 
     return validTransitions[currentStatus] || [];
+  }
+
+  /**
+   * Populate productThumbnailUrl for order items by fetching product images
+   */
+  private async populateProductThumbnails(orderOrOrders: Order | Order[]): Promise<void> {
+    const orders = Array.isArray(orderOrOrders) ? orderOrOrders : [orderOrOrders];
+    if (!orders.length) {
+      return;
+    }
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const productIdSet = new Set<string>();
+
+    orders.forEach(order => {
+      if (!order.items || order.items.length === 0) {
+        return;
+      }
+
+      order.items.forEach(item => {
+        if (!item.productId || !uuidRegex.test(item.productId)) {
+          this.logger.warn(
+            `Invalid or missing productId in order ${order.orderNumber}: "${item.productId ?? 'undefined'}". Skipping thumbnail fetch for this item.`
+          );
+          return;
+        }
+
+        productIdSet.add(item.productId);
+      });
+    });
+
+    if (productIdSet.size === 0) {
+      orders.forEach(order => {
+        if (!order.items || order.items.length === 0) {
+          return;
+        }
+
+        order.items = order.items.map(item => ({
+          ...item,
+          productThumbnailUrl: null,
+        }));
+      });
+      return;
+    }
+
+    try {
+      const products = await this.productRepository.find({
+        where: { id: In(Array.from(productIdSet)) },
+        select: ['id', 'images'],
+      });
+
+      const productMap = new Map(products.map(product => [product.id, product]));
+
+      orders.forEach(order => {
+        if (!order.items || order.items.length === 0) {
+          return;
+        }
+
+        order.items = order.items.map(item => {
+          if (!item.productId || !uuidRegex.test(item.productId)) {
+            return {
+              ...item,
+              productThumbnailUrl: null,
+            };
+          }
+
+          const product = productMap.get(item.productId);
+          const thumbnailUrl = product?.images && product.images.length > 0 ? product.images[0] : null;
+
+          return {
+            ...item,
+            productThumbnailUrl: thumbnailUrl,
+          };
+        });
+      });
+    } catch (error) {
+      this.logger.error(`Failed to fetch product thumbnails for orders list: ${error.message}`, error.stack);
+      orders.forEach(order => {
+        if (!order.items || order.items.length === 0) {
+          return;
+        }
+
+        order.items = order.items.map(item => ({
+          ...item,
+          productThumbnailUrl: null,
+        }));
+      });
+    }
   }
 }

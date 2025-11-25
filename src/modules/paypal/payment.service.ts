@@ -76,7 +76,7 @@ export class PaymentService {
 
       if (order) {
         // ✅ 5. Send payment confirmation email
-        await this.sendPaymentSuccessEmail(order, amount, currency);
+        await this.sendPaymentSuccessEmail(order, amount, currency, transactionId);
 
         // ✅ 6. Additional business logic can be added here
         // e.g., inventory management, subscription activation, etc.
@@ -193,28 +193,28 @@ export class PaymentService {
     }
   }
 
-  private async sendPaymentSuccessEmail(order: Order, amount: number, currency: string): Promise<void> {
+  private async sendPaymentSuccessEmail(
+    order: Order,
+    amount: number,
+    currency: string,
+    transactionId?: string,
+  ): Promise<void> {
     try {
-      const emailData = {
+      await this.mailService.sendEmail({
         to: order.user.email,
-        subject: `Payment Confirmed - Order ${order.orderNumber}`,
-        template: 'payment-success',
+        subject: `Order ${order.orderNumber} confirmed`,
+        template: 'paid-order-confirmation',
         data: {
           orderNumber: order.orderNumber,
-          customerName: `${order.user.firstName} ${order.user.lastName}`,
-          amount: amount,
-          currency: currency,
+          customerName: [order.user.firstName, order.user.lastName].filter(Boolean).join(' ') || order.user.email,
+          amount,
+          currency,
           items: order.items,
           summary: order.summary,
           shippingAddress: order.shippingAddress,
+          paidAt: order.paidAt || new Date(),
+          transactionId,
         },
-      };
-
-      await this.mailService.sendEmail({
-        to: order.user.email,
-        subject: `Payment Confirmed - Order ${order.orderNumber}`,
-        template: 'payment-success',
-        data: emailData,
       });
       this.logger.log(`📧 Payment confirmation email sent for order ${order.orderNumber}`);
     } catch (error) {

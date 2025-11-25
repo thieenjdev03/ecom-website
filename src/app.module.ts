@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from './config/app.config';
 import dbConfig from './config/db.config';
+import shippingConfig from './config/shipping.config';
 
 // Modules
 import { AuthModule } from './modules/auth/auth.module';
@@ -17,11 +18,12 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { OtpModule } from './modules/otp_service/otp.module';
 import { PaypalModule } from './modules/paypal/paypal.module';
 import { HealthModule } from './modules/health/health.module';
+import { ShippingModule } from './modules/shipping/shipping.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, dbConfig],
+      load: [appConfig, dbConfig, shippingConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -49,6 +51,7 @@ import { HealthModule } from './modules/health/health.module';
     ColorsModule,
     SizesModule,
     PaypalModule,
+    ShippingModule,
   ],
 })
 export class AppModule {}

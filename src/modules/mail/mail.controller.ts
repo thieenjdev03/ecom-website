@@ -1,12 +1,14 @@
 import { Controller, Post, Body, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { MailService } from './mail.service';
-import { 
-  SendOrderConfirmationDto, 
-  SendPasswordResetDto, 
+import {
+  SendOrderConfirmationDto,
+  SendPasswordResetDto,
   SendWelcomeEmailDto,
   SendPaymentFailureDto,
-  TestWelcomeEmailDto
+  TestWelcomeEmailDto,
+  TestTemplateEmailDto,
+  MailTemplateType,
 } from './dto/send-email.dto';
 
 @ApiTags('Mail')
@@ -273,5 +275,125 @@ export class MailController {
       throw new BadRequestException('email, orderId, and reason are required');
     }
     return this.mailService.sendPaymentFailureNotification(data.email, data.orderId, data.reason);
+  }
+
+  @Post('test-template')
+  @ApiOperation({
+    summary: 'Send a template test email with mock data',
+    description: 'Quickly preview any template by sending a mock email to your address.',
+  })
+  @ApiBody({
+    type: TestTemplateEmailDto,
+    examples: {
+      paid: {
+        summary: 'Paid order confirmation template',
+        value: {
+          email: 'qa@example.com',
+          template: 'paid-order-confirmation',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Test email sent successfully',
+    schema: {
+      example: {
+        success: true,
+        message: 'Test paid-order-confirmation email sent to qa@example.com',
+      },
+    },
+  })
+  async sendTemplateTestEmail(@Body() data: TestTemplateEmailDto) {
+    if (!data?.email || !data?.template) {
+      throw new BadRequestException('email and template are required');
+    }
+
+    const mockPayload = this.getMockTemplateData(data.template);
+
+    await this.mailService.sendEmail({
+      to: data.email,
+      subject: `[Test] ${data.template} template`,
+      template: data.template,
+      data: mockPayload,
+    });
+
+    return {
+      success: true,
+      message: `Test ${data.template} email sent to ${data.email}`,
+    };
+  }
+
+  private getMockTemplateData(template: MailTemplateType) {
+    switch (template) {
+      case 'order-confirmation':
+        return {
+          customerName: 'Ava Stone',
+          orderId: 'ORD-1001',
+          orderTotal: 168,
+          currency: 'USD',
+          items: [
+            { name: 'Sculpt Knit Dress', quantity: 1, price: 98 },
+            { name: 'Soft Lounge Boxer', quantity: 2, price: 35 },
+          ],
+        };
+      case 'payment-success':
+        return {
+          customerName: 'Ava Stone',
+          orderNumber: 'ORD-1001',
+          amount: 168,
+          currency: 'USD',
+          items: [
+            { name: 'Sculpt Knit Dress', quantity: 1, price: 98 },
+            { name: 'Soft Lounge Boxer', quantity: 2, price: 35 },
+          ],
+          summary: {
+            total: 168,
+          },
+        };
+      case 'password-reset':
+        return {
+          resetUrl: `${process.env.FRONTEND_URL || 'https://example.com'}/reset-password?token=mock-token`,
+        };
+      case 'welcome':
+        return {
+          name: 'Ava',
+        };
+      case 'payment-failure':
+        return {
+          orderId: 'ORD-1001',
+          reason: 'Card declined by issuer',
+        };
+      case 'paid-order-confirmation':
+        return {
+          customerName: 'Ava Stone',
+          orderNumber: 'ORD-1001',
+          amount: 168,
+          currency: 'USD',
+          items: [
+            { name: 'Sculpt Knit Dress', quantity: 1, price: 98 },
+            { name: 'Soft Lounge Boxer', quantity: 2, price: 35 },
+          ],
+          summary: {
+            subtotal: 168,
+            shipping: 0,
+            tax: 0,
+            total: 168,
+          },
+          shippingAddress: {
+            fullName: 'Ava Stone',
+            line1: '123 Ocean Ave',
+            city: 'Los Angeles',
+            state: 'CA',
+            postalCode: '90001',
+            country: 'US',
+            phone: '+1 555 123 4567',
+          },
+          paidAt: new Date().toISOString(),
+          transactionId: 'PAYPAL-123456',
+        };
+      default:
+        return {};
+    }
   }
 }

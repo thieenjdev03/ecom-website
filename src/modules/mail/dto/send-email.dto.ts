@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsArray, ValidateNested, IsNumber } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsArray, ValidateNested, IsNumber, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -166,4 +166,31 @@ export class TestWelcomeEmailDto {
   @IsOptional()
   @IsString()
   name?: string;
+}
+
+export type MailTemplateType =
+  | 'payment-success'
+  | 'order-confirmation'
+  | 'password-reset'
+  | 'welcome'
+  | 'payment-failure'
+  | 'paid-order-confirmation';
+
+export class TestTemplateEmailDto {
+  @ApiProperty({
+    description: 'Email address to send the test email to',
+    example: 'qa@example.com',
+    type: 'string',
+  })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({
+    description: 'Mail template to test',
+    example: 'paid-order-confirmation',
+    enum: ['payment-success', 'order-confirmation', 'password-reset', 'welcome', 'payment-failure', 'paid-order-confirmation'],
+  })
+  @IsString()
+  @IsIn(['payment-success', 'order-confirmation', 'password-reset', 'welcome', 'payment-failure', 'paid-order-confirmation'])
+  template: MailTemplateType;
 }
