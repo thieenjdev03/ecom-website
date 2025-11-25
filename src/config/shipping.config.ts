@@ -19,7 +19,7 @@ export default registerAs('shipping', () => {
     currency: process.env.SHIPPING_CURRENCY ?? 'VND',
     supportedMethods:
       configuredMethods.length > 0 ? configuredMethods : defaultMethods,
-    credentialsJson: JSON.stringify(process.env.GOOGLE_SHEETS_SECRET_KEY)  ,
+    credentialsJson: process.env.GOOGLE_SHEETS_SECRET_KEY,
   };
 });
 

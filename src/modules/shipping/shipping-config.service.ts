@@ -447,6 +447,7 @@ export class ShippingConfigService {
     if (this.credentialsJson) {
       try {
         parsedCredentials = JSON.parse(this.credentialsJson);
+        this.logger.log('Parsed credentials', parsedCredentials);
       } catch (error) {
         this.logger.error('Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON', error);
         throw new InternalServerErrorException(
