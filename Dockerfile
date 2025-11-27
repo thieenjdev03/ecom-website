@@ -16,7 +16,7 @@ COPY src ./src
 RUN npm run build  # expects to output to ./dist
 
 # ---------- Runtime (small image)
-FROM node:20-alpine AS runtime
+FROM node:22-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 # system tz/ca-certificates optional
