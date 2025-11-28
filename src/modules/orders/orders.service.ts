@@ -2,10 +2,13 @@ import { Injectable, NotFoundException, BadRequestException, Logger } from '@nes
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
 import { Order } from './entities/order.entity';
-import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
+import { CreateOrderDto, ShippingAddressDto, UpdateOrderDto } from './dto/order.dto';
 import { User } from '../users/user.entity';
 import { Address } from '../addresses/address.entity';
 import { Product } from '../products/entities/product.entity';
+import { AddressesService } from '../addresses/addresses.service';
+import { UpdateAddressDto } from '../addresses/dto/update-address.dto';
+import { OrderStatus } from './enums/order-status.enum';
 
 @Injectable()
 export class OrdersService {
@@ -20,6 +23,7 @@ export class OrdersService {
     private addressRepository: Repository<Address>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
+    private readonly addressesService: AddressesService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
@@ -67,9 +71,16 @@ export class OrdersService {
       // Generate unique order number
       const orderNumber = this.generateOrderNumber();
 
-      // Handle shipping_address object - format it into notes if provided
+      // Normalize shipping address payload by syncing user address if necessary
       let notes = createOrderDto.notes || '';
-      if (createOrderDto.shipping_address && !createOrderDto.shippingAddressId) {
+      let shippingAddressId = createOrderDto.shippingAddressId;
+      if (createOrderDto.shipping_address && !shippingAddressId) {
+        const syncedAddress = await this.addressesService.upsertByUser(
+          createOrderDto.userId,
+          this.mapShippingPayloadToAddressDto(createOrderDto.shipping_address),
+        );
+        shippingAddressId = syncedAddress.id;
+
         const addr = createOrderDto.shipping_address;
         const addressText = `Shipping Address: ${addr.full_name}, ${addr.phone}, ${addr.address_line}${addr.city ? `, ${addr.city}` : ''}${addr.district ? `, ${addr.district}` : ''}${addr.ward ? `, ${addr.ward}` : ''}`;
         notes = notes ? `${notes}\n${addressText}` : addressText;
@@ -79,11 +90,11 @@ export class OrdersService {
       const order = this.orderRepository.create({
         userId: createOrderDto.userId,
         orderNumber,
-        status: 'PENDING',
+        status: OrderStatus.PENDING_PAYMENT,
         paymentMethod: createOrderDto.paymentMethod || 'PAYPAL',
         items: createOrderDto.items,
         summary: createOrderDto.summary,
-        shippingAddressId: createOrderDto.shippingAddressId,
+        shippingAddressId,
         billingAddressId: createOrderDto.billingAddressId,
         notes: notes,
       });
@@ -308,6 +319,15 @@ export class OrdersService {
       if (!addr.address_line || addr.address_line.trim().length === 0) {
         throw new BadRequestException('Shipping address: Address line is required.');
       }
+      if (!addr.province || addr.province.trim().length === 0) {
+        throw new BadRequestException('Shipping address: Province is required.');
+      }
+      if (!addr.district || addr.district.trim().length === 0) {
+        throw new BadRequestException('Shipping address: District is required.');
+      }
+      if (!addr.countryCode || addr.countryCode.trim().length !== 2) {
+        throw new BadRequestException('Shipping address: countryCode must be provided as ISO alpha-2 code.');
+      }
     }
 
     // Validate that at least one shipping option is provided
@@ -318,34 +338,45 @@ export class OrdersService {
     }
   }
 
-  private isValidStatusTransition(currentStatus: string, newStatus: string): boolean {
-    const validTransitions: Record<string, string[]> = {
-      'PENDING': ['PAID', 'CANCELLED', 'FAILED'],
-      'PAID': ['PROCESSING', 'CANCELLED', 'REFUNDED'],
-      'PROCESSING': ['SHIPPED', 'CANCELLED'],
-      'SHIPPED': ['DELIVERED'],
-      'DELIVERED': ['REFUNDED'],
-      'CANCELLED': [],
-      'FAILED': ['PENDING'],
-      'REFUNDED': [],
-    };
+  private readonly fulfillmentFlow: OrderStatus[] = [
+    OrderStatus.PENDING_PAYMENT,
+    OrderStatus.PAID,
+    OrderStatus.PROCESSING,
+    OrderStatus.PACKED,
+    OrderStatus.READY_TO_GO,
+    OrderStatus.AT_CARRIER_FACILITY,
+    OrderStatus.IN_TRANSIT,
+    OrderStatus.ARRIVED_IN_COUNTRY,
+    OrderStatus.AT_LOCAL_FACILITY,
+    OrderStatus.OUT_FOR_DELIVERY,
+    OrderStatus.DELIVERED,
+  ];
 
-    return validTransitions[currentStatus]?.includes(newStatus) || false;
+  private readonly overrideTransitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
+    [OrderStatus.PENDING_PAYMENT]: [OrderStatus.CANCELLED],
+    [OrderStatus.PAID]: [OrderStatus.CANCELLED, OrderStatus.REFUNDED],
+    [OrderStatus.PROCESSING]: [OrderStatus.CANCELLED],
+    [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED],
+    [OrderStatus.FAILED]: [OrderStatus.PENDING_PAYMENT],
+  };
+
+  private isValidStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus): boolean {
+    return this.getValidStatusTransitions(currentStatus).includes(newStatus);
   }
 
-  private getValidStatusTransitions(currentStatus: string): string[] {
-    const validTransitions: Record<string, string[]> = {
-      'PENDING': ['PAID', 'CANCELLED', 'FAILED'],
-      'PAID': ['PROCESSING', 'CANCELLED', 'REFUNDED'],
-      'PROCESSING': ['SHIPPED', 'CANCELLED'],
-      'SHIPPED': ['DELIVERED'],
-      'DELIVERED': ['REFUNDED'],
-      'CANCELLED': [],
-      'FAILED': ['PENDING'],
-      'REFUNDED': [],
-    };
+  private getValidStatusTransitions(currentStatus: OrderStatus): OrderStatus[] {
+    const sequentialNext = this.getNextSequentialStatus(currentStatus);
+    const overrideStatuses = this.overrideTransitions[currentStatus] ?? [];
+    const candidates = sequentialNext ? [sequentialNext, ...overrideStatuses] : overrideStatuses;
+    return Array.from(new Set(candidates));
+  }
 
-    return validTransitions[currentStatus] || [];
+  private getNextSequentialStatus(currentStatus: OrderStatus): OrderStatus | null {
+    const index = this.fulfillmentFlow.indexOf(currentStatus);
+    if (index === -1 || index === this.fulfillmentFlow.length - 1) {
+      return null;
+    }
+    return this.fulfillmentFlow[index + 1];
   }
 
   /**
@@ -434,5 +465,24 @@ export class OrdersService {
         }));
       });
     }
+  }
+
+  private mapShippingPayloadToAddressDto(payload: ShippingAddressDto): UpdateAddressDto {
+    return {
+      recipientName: payload.full_name,
+      recipientPhone: payload.phone,
+      label: payload.label ?? 'Checkout',
+      countryCode: payload.countryCode,
+      province: payload.province,
+      district: payload.district,
+      ward: payload.ward ?? payload.city,
+      streetLine1: payload.address_line,
+      streetLine2: payload.address_line2,
+      postalCode: payload.postalCode,
+      note: payload.note,
+      isShipping: true,
+      isBilling: payload.isBilling ?? false,
+      isDefault: payload.isDefault ?? true,
+    };
   }
 }

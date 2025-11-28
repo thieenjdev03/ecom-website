@@ -2,6 +2,26 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 
+type MailOrderItemInput = {
+  name?: string;
+  productName?: string;
+  productSlug?: string;
+  variantName?: string;
+  quantity?: number;
+  price?: number | string;
+  unitPrice?: string;
+  totalPrice?: string;
+  sku?: string;
+};
+
+type NormalizedMailOrderItem = {
+  title: string;
+  variant?: string;
+  quantity: number;
+  unitPrice?: string;
+  totalPrice?: string;
+};
+
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
@@ -290,21 +310,34 @@ export class MailService {
   private generateOrderConfirmationHTML(data: {
     customerName: string;
     orderId: string;
-    orderTotal: number;
+    orderTotal: number | string;
     currency: string;
-    items: Array<{ name: string; quantity: number; price: number }>;
+    items: Array<MailOrderItemInput>;
   }): string {
-    const itemsHTML = data.items
-      .map(
-        (item) => `
-      <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.price} ${data.currency}</td>
-      </tr>
-    `,
-      )
-      .join('');
+    const normalizedItems = this.normalizeOrderItems(data.items, data.currency);
+    const itemsHTML = normalizedItems.length
+      ? normalizedItems
+          .map(
+            (item) => `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">
+            <div style="font-weight: 600;">${item.title}</div>
+            ${item.variant ? `<div style="color: #666; font-size: 12px;">${item.variant}</div>` : ''}
+            ${item.unitPrice ? `<div style="color: #999; font-size: 12px;">Unit: ${item.unitPrice}</div>` : ''}
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.totalPrice ?? item.unitPrice ?? '-'}</td>
+        </tr>
+      `,
+          )
+          .join('')
+      : `
+        <tr>
+          <td colspan="3" style="padding: 16px; text-align: center; color: #888;">No order items provided.</td>
+        </tr>
+      `;
+
+    const totalDisplay = this.formatMoneyFromUnknown(data.orderTotal, data.currency) ?? '-';
 
     const content = `
       <h1 style="color: #2c3e50; margin: 0 0 16px;">Order Confirmation</h1>
@@ -326,7 +359,7 @@ export class MailService {
       </table>
 
       <div style="margin: 0 0 24px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-        <h3 style="margin: 0; font-size: 18px;">Total: ${data.orderTotal} ${data.currency}</h3>
+        <h3 style="margin: 0; font-size: 18px;">Total: ${totalDisplay}</h3>
       </div>
 
       <p style="margin: 0 0 8px;">We'll send you another email when your order ships.</p>
@@ -342,22 +375,36 @@ export class MailService {
   private generatePaymentSuccessHTML(data: {
     customerName: string;
     orderNumber: string;
-    amount: number;
+    amount: number | string;
     currency: string;
-    items: Array<{ name?: string; quantity?: number; price?: number }>;
+    items: Array<MailOrderItemInput>;
     summary: any;
   }): string {
-    const itemsHTML = (data.items || [])
-      .map(
-        (item) => `
-      <tr>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name ?? ''}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity ?? ''}</td>
-        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.price ?? ''} ${data.currency}</td>
-      </tr>
-    `,
-      )
-      .join('');
+    const normalizedItems = this.normalizeOrderItems(data.items, data.currency);
+    const itemsHTML = normalizedItems.length
+      ? normalizedItems
+          .map(
+            (item) => `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">
+            <div style="font-weight: 600;">${item.title}</div>
+            ${item.variant ? `<div style="color: #666; font-size: 12px;">${item.variant}</div>` : ''}
+            ${item.unitPrice ? `<div style="color: #999; font-size: 12px;">Unit: ${item.unitPrice}</div>` : ''}
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity ?? ''}</td>
+          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.totalPrice ?? item.unitPrice ?? '-'}</td>
+        </tr>
+      `,
+          )
+          .join('')
+      : `
+        <tr>
+          <td colspan="3" style="padding: 16px; text-align: center; color: #888;">No items available</td>
+        </tr>
+      `;
+
+    const totalDisplay =
+      this.formatMoneyFromUnknown(data.summary?.total ?? data.amount, data.currency) ?? '-';
 
     const content = `
       <h1 style="color: #2c3e50; margin: 0 0 16px;">Payment Confirmed</h1>
@@ -382,7 +429,7 @@ export class MailService {
       </table>
 
       <div style="margin: 0 0 24px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
-        <h3 style="margin: 0;">Total: ${data.summary?.total ?? data.amount} ${data.currency}</h3>
+        <h3 style="margin: 0;">Total: ${totalDisplay}</h3>
       </div>
 
       <p style="margin: 0;">We'll send another update when your order ships. Thank you for your purchase!</p>
@@ -456,102 +503,90 @@ export class MailService {
   private generatePaidOrderConfirmationHTML(data: {
     customerName?: string;
     orderNumber?: string;
-    amount?: number;
+    amount?: number | string;
     currency?: string;
-    items?: Array<{ name?: string; quantity?: number; price?: number }>;
+    items?: Array<MailOrderItemInput>;
     summary?: {
-      subtotal?: number;
-      shipping?: number;
-      tax?: number;
-      discount?: number;
-      total?: number;
+      subtotal?: number | string;
+      shipping?: number | string;
+      tax?: number | string;
+      discount?: number | string;
+      total?: number | string;
     };
-    shippingAddress?: {
-      fullName?: string;
-      line1?: string;
-      line2?: string;
-      city?: string;
-      state?: string;
-      postalCode?: string;
-      country?: string;
-      phone?: string;
-    };
+    shippingAddress?: any;
     paidAt?: string | Date;
     transactionId?: string;
   }): string {
-    const itemsHTML = (data.items || [])
-      .map(
-        (item) => `
-      <tr>
-        <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-          ${item.name ?? 'Item'}
-        </td>
-        <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: center;">
-          ${item.quantity ?? 1}
-        </td>
-        <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">
-          ${item.price != null ? `${item.price} ${data.currency ?? ''}` : '-'}
-        </td>
-      </tr>
-    `,
-      )
-      .join('') || `
-      <tr>
-        <td colspan="3" style="padding: 16px 0; text-align: center; color: #8c8c8c;">
-          No items available
-        </td>
-      </tr>
-    `;
+    const normalizedItems = this.normalizeOrderItems(data.items, data.currency);
+    const itemsHTML = normalizedItems.length
+      ? normalizedItems
+          .map(
+            (item) => `
+        <tr>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
+            <div style="font-weight: 600;">${item.title}</div>
+            ${item.variant ? `<div style="color: #666; font-size: 12px;">${item.variant}</div>` : ''}
+            ${item.unitPrice ? `<div style="color: #9a8c82; font-size: 12px;">Unit: ${item.unitPrice}</div>` : ''}
+          </td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: center;">
+            ${item.quantity}
+          </td>
+          <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">
+            ${item.totalPrice ?? item.unitPrice ?? '-'}
+          </td>
+        </tr>
+      `,
+          )
+          .join('')
+      : `
+        <tr>
+          <td colspan="3" style="padding: 16px 0; text-align: center; color: #8c8c8c;">
+            No items available
+          </td>
+        </tr>
+      `;
 
     const summary = data.summary || {};
-    const summaryRows = [
-      summary.subtotal != null
-        ? { label: 'Subtotal', value: `${summary.subtotal} ${data.currency ?? ''}` }
-        : null,
-      summary.shipping != null
-        ? { label: 'Shipping', value: `${summary.shipping} ${data.currency ?? ''}` }
-        : null,
-      summary.tax != null ? { label: 'Tax', value: `${summary.tax} ${data.currency ?? ''}` } : null,
-      summary.discount != null
-        ? { label: 'Discount', value: `- ${summary.discount} ${data.currency ?? ''}` }
-        : null,
-    ].filter(Boolean) as Array<{ label: string; value: string }>;
+    const summaryRows: Array<{ label: string; value: string }> = [];
+
+    const subtotalValue = this.formatMoneyFromUnknown(summary.subtotal, data.currency);
+    if (subtotalValue) {
+      summaryRows.push({ label: 'Subtotal', value: subtotalValue });
+    }
+
+    const shippingValue = this.formatMoneyFromUnknown(summary.shipping, data.currency);
+    if (shippingValue) {
+      summaryRows.push({ label: 'Shipping', value: shippingValue });
+    }
+
+    const taxValue = this.formatMoneyFromUnknown(summary.tax, data.currency);
+    if (taxValue) {
+      summaryRows.push({ label: 'Tax', value: taxValue });
+    }
+
+    const discountValue = this.formatMoneyFromUnknown(summary.discount, data.currency);
+    if (discountValue) {
+      summaryRows.push({ label: 'Discount', value: `- ${discountValue}` });
+    }
 
     const paidTotal =
-      summary.total != null
-        ? `${summary.total} ${data.currency ?? ''}`
-        : data.amount != null
-          ? `${data.amount} ${data.currency ?? ''}`
-          : '-';
+      this.formatMoneyFromUnknown(summary.total ?? data.amount, data.currency) ?? '-';
 
     const summaryHTML =
       summaryRows.length > 0
         ? summaryRows
             .map(
               (row) => `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;">
-          <span>${row.label}</span>
-          <span>${row.value}</span>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; gap: 10px;">
+          <div style="color: #5a5148;">${row.label}:</div>
+          <div style="font-weight: 600;">${row.value}</div>
         </div>
       `,
             )
             .join('')
         : '';
 
-    const shipping = data.shippingAddress;
-    const shippingLines = shipping
-      ? [
-          shipping.fullName,
-          shipping.line1,
-          shipping.line2,
-          [shipping.city, shipping.state, shipping.postalCode].filter(Boolean).join(', '),
-          shipping.country,
-          shipping.phone ? `Phone: ${shipping.phone}` : null,
-        ]
-          .filter((line) => line && line.toString().trim().length > 0)
-          .map((line) => `<p style="margin: 0;">${line}</p>`)
-          .join('')
-      : '<p style="margin: 0;">Shipping address not available.</p>';
+    const shippingLines = this.renderShippingAddress(data.shippingAddress);
 
     const paidDate = data.paidAt ? new Date(data.paidAt).toLocaleString('en-US') : null;
     const detailRows = [
@@ -594,9 +629,9 @@ export class MailService {
 
       <div style="margin-bottom: 24px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
         ${summaryHTML}
-        <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; margin-top: 8px;">
-          <span>Total Paid</span>
-          <span>${paidTotal}</span>
+        <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; margin-top: 8px; gap: 10px;">
+          <div>Total Paid:</div>
+          <div>${paidTotal}</div>
         </div>
       </div>
 
@@ -617,6 +652,118 @@ export class MailService {
     `;
 
     return this.wrapWithLayout(content);
+  }
+
+  private normalizeOrderItems(
+    items: MailOrderItemInput[] = [],
+    currency?: string,
+  ): NormalizedMailOrderItem[] {
+    return items.map((item) => {
+      const quantity = item.quantity ?? 1;
+      const unitPriceValue = this.parseNumericValue(item.unitPrice ?? item.price);
+      const totalPriceValue =
+        this.parseNumericValue(item.totalPrice) ??
+        (unitPriceValue != null ? unitPriceValue * quantity : undefined);
+
+      return {
+        title: item.productName || item.name || 'Item',
+        variant: item.variantName,
+        quantity,
+        unitPrice: unitPriceValue != null ? this.formatMoney(unitPriceValue, currency) : undefined,
+        totalPrice: totalPriceValue != null ? this.formatMoney(totalPriceValue, currency) : undefined,
+      };
+    });
+  }
+
+  private parseNumericValue(value: string | number | undefined | null): number | undefined {
+    if (value === undefined || value === null) {
+      return undefined;
+    }
+
+    if (typeof value === 'number') {
+      return Number.isFinite(value) ? value : undefined;
+    }
+
+    const sanitized = value.replace(/,/g, '').trim();
+    if (!sanitized) {
+      return undefined;
+    }
+
+    const parsed = parseFloat(sanitized);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  private formatMoney(value: number, currency?: string): string {
+    const formatted = value.toFixed(2);
+    return currency ? `${formatted} ${currency}` : formatted;
+  }
+
+  private formatMoneyFromUnknown(
+    value: string | number | undefined,
+    currency?: string,
+  ): string | undefined {
+    const numeric = this.parseNumericValue(value);
+    if (numeric != null) {
+      return this.formatMoney(numeric, currency);
+    }
+
+    if (typeof value === 'string' && value.trim().length > 0) {
+      return currency ? `${value} ${currency}` : value;
+    }
+
+    return undefined;
+  }
+
+  private renderShippingAddress(address: any): string {
+    if (!address) {
+      return '<p style="margin: 0;">Shipping address not available.</p>';
+    }
+
+    const lines: string[] = [];
+    const name = address.recipientName ?? address.fullName ?? address.name;
+    if (name) {
+      lines.push(name);
+    }
+
+    const line1 = address.streetLine1 ?? address.line1 ?? address.address_line;
+    if (line1) {
+      lines.push(line1);
+    }
+
+    const line2 = address.streetLine2 ?? address.line2 ?? address.address_line2;
+    if (line2) {
+      lines.push(line2);
+    }
+
+    const locality = [
+      address.ward ?? address.city,
+      address.district ?? address.state,
+      address.province ?? address.region,
+    ]
+      .filter((part) => part && part.toString().trim().length > 0)
+      .join(', ');
+    if (locality) {
+      lines.push(locality);
+    }
+
+    const country =
+      address.country ??
+      (address.countryCode ? String(address.countryCode).toUpperCase() : undefined);
+    const postalLine = [address.postalCode, country]
+      .filter((part) => part && part.toString().trim().length > 0)
+      .join(', ');
+    if (postalLine) {
+      lines.push(postalLine);
+    }
+
+    const phone = address.recipientPhone ?? address.phone;
+    if (phone) {
+      lines.push(`Phone: ${phone}`);
+    }
+
+    return lines.length
+      ? lines.map((line) => `<p style="margin: 0;">${line}</p>`).join('')
+      : '<p style="margin: 0;">Shipping address not available.</p>';
   }
 
   private wrapWithLayout(content: string): string {

@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Req, UseGuards, ParseUUIDPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Req, UseGuards, ParseUUIDPipe, Put, ForbiddenException } from '@nestjs/common';
 import { ApiBearerAuth, ApiBadRequestResponse, ApiForbiddenResponse, ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AddressesService } from './addresses.service';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { JwtGuard } from '../auth/jwt/jwt.guard';
 import { RolesGuard } from '../../auth/roles.guard';
+import { Role } from '../../auth/enums/role.enum';
 
 @ApiTags('Addresses')
 @ApiBearerAuth('bearer')
@@ -35,6 +36,26 @@ export class AddressesController {
     @Req() req: any,
   ) {
     return this.addressesService.update(userId, addressId, dto, req.user);
+  }
+
+  @Put('shipping')
+  @ApiOperation({ summary: 'Create or update default shipping address for user' })
+  @ApiOkResponse({ description: 'Shipping address synced successfully' })
+  @ApiBadRequestResponse({ description: 'Invalid input data' })
+  @ApiForbiddenResponse({ description: 'FORBIDDEN' })
+  async upsertShipping(
+    @Param('userId', new ParseUUIDPipe({ version: '4' })) userId: string,
+    @Body() dto: UpdateAddressDto,
+    @Req() req: any,
+  ) {
+    const currentUser = req.user;
+    const isOwner = currentUser?.sub === userId;
+    const isAdmin = currentUser?.role === Role.ADMIN;
+    if (!isOwner && !isAdmin) {
+      throw new ForbiddenException('FORBIDDEN');
+    }
+
+    return this.addressesService.upsertByUser(userId, dto);
   }
 }
 

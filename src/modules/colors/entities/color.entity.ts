@@ -12,6 +12,9 @@ export class Color {
   @Column({ name: 'hex_code', length: 7, nullable: true })
   hexCode: string;
 
+  @Column({ name: 'image_url', type: 'text', nullable: true })
+  imageUrl: string;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

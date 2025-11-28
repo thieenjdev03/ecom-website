@@ -162,16 +162,21 @@ curl -X GET \
 
 ### Order Status Values
 
-| Status      | Description                                    |
-| ----------- | ---------------------------------------------- |
-| `PENDING`   | Order created, awaiting payment                |
-| `PAID`      | Payment completed                              |
-| `PROCESSING` | Order is being prepared                        |
-| `SHIPPED`   | Order has been shipped                         |
-| `DELIVERED` | Order delivered to customer                    |
-| `CANCELLED` | Order cancelled                                |
-| `FAILED`    | Payment failed                                 |
-| `REFUNDED`  | Order refunded                                 |
+| Status                | Description                                                        |
+| --------------------- | ------------------------------------------------------------------ |
+| `PENDING_PAYMENT`     | Waiting for the customer to finish checkout/payment                |
+| `PAID`                | Funds captured successfully                                        |
+| `PROCESSING`          | Backoffice is building the order, creating bill, validating stock  |
+| `PACKED`              | Items packed and sealed                                            |
+| `READY_TO_GO`         | Packed order staged in internal warehouse, awaiting carrier handoff|
+| `AT_CARRIER_FACILITY` | Package received by the first carrier hub                          |
+| `IN_TRANSIT`          | Package is moving between carrier hubs/countries                   |
+| `ARRIVED_IN_COUNTRY`  | Package reached the destination country                            |
+| `AT_LOCAL_FACILITY`   | Package at the final-mile warehouse near the customer              |
+| `OUT_FOR_DELIVERY`    | Local courier is on the way to the customer                        |
+| `DELIVERED`           | Package delivered successfully                                     |
+
+> `CANCELLED`, `FAILED`, and `REFUNDED` are still available for exceptional payment flows but they are outside of the standard fulfillment pipeline above.
 
 ### Payment Method Values
 
@@ -234,13 +239,18 @@ Each item in the `items` array contains:
 **Display:**
 - **Order Number**: `order.orderNumber` (e.g., "ORD-20251105-0001")
 - **Order Status**: Badge with status color coding
-  - `PENDING`: Yellow/Orange
-  - `PAID`: Blue
+  - `PENDING_PAYMENT`: Amber
+  - `PAID`: Navy
   - `PROCESSING`: Purple
-  - `SHIPPED`: Cyan
+  - `PACKED`: Teal
+  - `READY_TO_GO`: Indigo
+  - `AT_CARRIER_FACILITY`: Cyan
+  - `IN_TRANSIT`: Royal blue
+  - `ARRIVED_IN_COUNTRY`: Lime
+  - `AT_LOCAL_FACILITY`: Light green
+  - `OUT_FOR_DELIVERY`: Orange
   - `DELIVERED`: Green
-  - `CANCELLED`: Red
-  - `FAILED`: Red
+  - `CANCELLED` / `FAILED`: Red
   - `REFUNDED`: Gray
 - **Payment Method**: Display `order.paymentMethod` (PAYPAL, STRIPE, COD)
 - **Payment Status**:
@@ -478,22 +488,27 @@ PATCH /orders/:orderId/status
 
 ```json
 {
-  "status": "SHIPPED"
+  "status": "READY_TO_GO"
 }
 ```
 
 #### Valid Status Transitions
 
-| Current Status | Valid Next Statuses                    |
-| ------------- | --------------------------------------- |
-| `PENDING`     | `PAID`, `CANCELLED`, `FAILED`           |
-| `PAID`        | `PROCESSING`, `CANCELLED`, `REFUNDED`   |
-| `PROCESSING`  | `SHIPPED`, `CANCELLED`                  |
-| `SHIPPED`     | `DELIVERED`                             |
-| `DELIVERED`   | `REFUNDED`                              |
-| `CANCELLED`   | (no transitions)                        |
-| `FAILED`      | `PENDING`                               |
-| `REFUNDED`    | (no transitions)                        |
+| Current Status         | Valid Next Statuses                                              |
+| ---------------------- | ---------------------------------------------------------------- |
+| `PENDING_PAYMENT`      | `PAID`, `CANCELLED`, `FAILED`                                    |
+| `PAID`                 | `PROCESSING`, `CANCELLED`, `REFUNDED`                            |
+| `PROCESSING`           | `PACKED`, `CANCELLED`                                            |
+| `PACKED`               | `READY_TO_GO`                                                    |
+| `READY_TO_GO`          | `AT_CARRIER_FACILITY`                                            |
+| `AT_CARRIER_FACILITY`  | `IN_TRANSIT`                                                     |
+| `IN_TRANSIT`           | `ARRIVED_IN_COUNTRY`                                             |
+| `ARRIVED_IN_COUNTRY`   | `AT_LOCAL_FACILITY`                                              |
+| `AT_LOCAL_FACILITY`    | `OUT_FOR_DELIVERY`                                               |
+| `OUT_FOR_DELIVERY`     | `DELIVERED`                                                      |
+| `DELIVERED`            | `REFUNDED`                                                       |
+| `FAILED`               | `PENDING_PAYMENT`                                                |
+| `CANCELLED` / `REFUNDED` | (no further transitions)                                      |
 
 #### Response (200)
 
@@ -501,7 +516,7 @@ PATCH /orders/:orderId/status
 {
   "id": "2313cdd6-e689-45da-947c-18c414a44dcf",
   "orderNumber": "ORD-20251105-0001",
-  "status": "SHIPPED",
+  "status": "READY_TO_GO",
   "updatedAt": "2025-11-06T12:00:00.000Z"
 }
 ```
@@ -535,7 +550,7 @@ PATCH /orders/:orderId/tracking
   "trackingNumber": "1Z999AA1234567890",
   "carrier": "DHL",
   "shippedAt": "2025-11-06T10:00:00.000Z",
-  "status": "SHIPPED",
+  "status": "READY_TO_GO",
   "updatedAt": "2025-11-06T12:00:00.000Z"
 }
 ```

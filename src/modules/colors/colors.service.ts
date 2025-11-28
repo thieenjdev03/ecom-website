@@ -42,6 +42,7 @@ export class ColorsService {
 
     if (dto.name !== undefined) color.name = dto.name;
     if (dto.hexCode !== undefined) (color as any).hexCode = dto.hexCode;
+    if (dto.imageUrl !== undefined) (color as any).imageUrl = dto.imageUrl;
 
     try {
       return await this.colorRepo.save(color);

@@ -277,10 +277,16 @@ const getOrderStatus = async (orderId) => {
 
 | Status | Description | Frontend Action |
 |--------|-------------|-----------------|
-| `PENDING` | Order created, payment not started | Show "Payment Pending" |
+| `PENDING_PAYMENT` | Order created, payment not finished | Show "Payment Pending" and PayPal CTA |
 | `PAID` | Payment completed successfully | Show success message, redirect to order details |
-| `PROCESSING` | Payment received, order being prepared | Show "Processing" status |
-| `SHIPPED` | Order shipped | Show tracking information |
+| `PROCESSING` | Payment received, order being prepared internally | Show "Processing" badge |
+| `PACKED` | Warehouse packed the parcel | Show "Packed" with warehouse note |
+| `READY_TO_GO` | Waiting for carrier pickup | Show "Ready to hand off" |
+| `AT_CARRIER_FACILITY` | Arrived at first carrier hub | Show carrier info + hub indicator |
+| `IN_TRANSIT` | Moving between carrier hubs/countries | Show progress timeline |
+| `ARRIVED_IN_COUNTRY` | Arrived in destination country | Highlight customs/clearance stage |
+| `AT_LOCAL_FACILITY` | At last-mile depot | Show "Local facility" status |
+| `OUT_FOR_DELIVERY` | Courier is delivering | Show dynamic "Out for delivery" banner |
 | `DELIVERED` | Order delivered | Show completion message |
 | `CANCELLED` | Order cancelled | Show cancellation message |
 | `FAILED` | Payment failed | Show error, allow retry |
@@ -323,10 +329,16 @@ const PayPalPaymentButton = ({ orderData, onSuccess, onError }) => {
 const OrderStatus = ({ order }) => {
   const getStatusColor = (status) => {
     const colors = {
-      PENDING: 'orange',
-      PAID: 'green',
-      PROCESSING: 'blue',
-      SHIPPED: 'purple',
+      PENDING_PAYMENT: 'orange',
+      PAID: 'blue',
+      PROCESSING: 'purple',
+      PACKED: 'teal',
+      READY_TO_GO: 'indigo',
+      AT_CARRIER_FACILITY: 'cyan',
+      IN_TRANSIT: 'royalblue',
+      ARRIVED_IN_COUNTRY: 'limegreen',
+      AT_LOCAL_FACILITY: 'lightgreen',
+      OUT_FOR_DELIVERY: 'darkorange',
       DELIVERED: 'green',
       CANCELLED: 'red',
       FAILED: 'red',

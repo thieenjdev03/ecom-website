@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { User } from '../../users/user.entity';
 import { Address } from '../../addresses/address.entity';
+import { OrderStatus } from '../enums/order-status.enum';
 
 export interface OrderItem {
   productId: string; // UUID string
@@ -53,8 +54,8 @@ export class Order {
   @Column({ length: 50, unique: true })
   orderNumber: string; // Format: ORD-YYYYMMDD-XXXX
 
-  @Column({ length: 20, default: 'PENDING' })
-  status: 'PENDING' | 'PAID' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED' | 'FAILED' | 'REFUNDED';
+  @Column({ length: 30, default: OrderStatus.PENDING_PAYMENT })
+  status: OrderStatus;
 
   @Column({ length: 20, nullable: true })
   paymentMethod: 'PAYPAL' | 'STRIPE' | 'COD';

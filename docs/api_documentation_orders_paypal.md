@@ -154,7 +154,7 @@ PATCH /orders/{id}
 Request Body:
 
 {
-  "status": "SHIPPED",
+  "status": "READY_TO_GO",
   "trackingNumber": "1Z999AA1234567890",
   "carrier": "UPS",
   "internalNotes": "Customer requested expedited shipping"
@@ -256,14 +256,20 @@ Response:
 📊 Data Models
 
 Order Status Values
-	•	PENDING
+	•	PENDING_PAYMENT
 	•	PAID
 	•	PROCESSING
-	•	SHIPPED
+	•	PACKED
+	•	READY_TO_GO
+	•	AT_CARRIER_FACILITY
+	•	IN_TRANSIT
+	•	ARRIVED_IN_COUNTRY
+	•	AT_LOCAL_FACILITY
+	•	OUT_FOR_DELIVERY
 	•	DELIVERED
-	•	CANCELLED
-	•	FAILED
-	•	REFUNDED
+	•	CANCELLED (exceptional)
+	•	FAILED (exceptional)
+	•	REFUNDED (exceptional)
 
 ⸻
 

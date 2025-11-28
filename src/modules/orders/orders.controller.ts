@@ -36,7 +36,7 @@ export class OrdersController {
         id: 'order-uuid',
         orderNumber: 'ORD-20250101-1234',
         userId: 'user-uuid',
-        status: 'PENDING',
+        status: 'PENDING_PAYMENT',
         paymentMethod: 'PAYPAL',
         items: [
           {
@@ -176,7 +176,7 @@ export class OrdersController {
       example: {
         id: 'order-uuid',
         orderNumber: 'ORD-20250101-1234',
-        status: 'SHIPPED',
+        status: 'READY_TO_GO',
         trackingNumber: '1Z999AA1234567890',
         carrier: 'UPS',
         internalNotes: 'Customer requested expedited shipping',

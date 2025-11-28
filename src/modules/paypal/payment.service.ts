@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Order } from '../orders/entities/order.entity';
 import { PaypalEvent } from './entities/paypal-event.entity';
 import { MailService } from '../mail/mail.service';
+import { OrderStatus } from '../orders/enums/order-status.enum';
 
 @Injectable()
 export class PaymentService {
@@ -55,7 +56,7 @@ export class PaymentService {
       const updateResult = await this.orderRepository.update(
         { paypalOrderId: orderId },
         {
-          status: 'PAID',
+          status: OrderStatus.PAID,
           paypalTransactionId: transactionId,
           paidAmount: paidAmount, // String with 2 decimals
           paidCurrency: currency,
@@ -134,7 +135,7 @@ export class PaymentService {
       await this.orderRepository.update(
         { paypalOrderId: orderId },
         {
-          status: 'FAILED',
+          status: OrderStatus.FAILED,
           paypalTransactionId: transactionId,
         },
       );
@@ -181,7 +182,7 @@ export class PaymentService {
       await this.orderRepository.update(
         { paypalOrderId: orderId },
         {
-          status: 'REFUNDED',
+          status: OrderStatus.REFUNDED,
           paypalTransactionId: transactionId,
         },
       );

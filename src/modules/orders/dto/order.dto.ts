@@ -1,6 +1,7 @@
-import { IsString, IsNumber, IsOptional, IsArray, IsEnum, IsUUID, ValidateNested, IsNotEmpty, Matches, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, IsEnum, IsUUID, ValidateNested, IsNotEmpty, Matches, Min, Length } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { OrderStatus } from '../enums/order-status.enum';
 
 export class OrderItemDto {
   @ApiProperty({ description: 'Product ID (UUID)', example: 'fc734035-40fe-441c-a989-92004dc368fb' })
@@ -85,30 +86,68 @@ export class ShippingAddressDto {
   @IsNotEmpty()
   full_name: string;
 
-  @ApiProperty({ description: 'Phone number', example: '0123456789' })
+  @ApiProperty({ description: 'Phone number', example: '+84 912345678' })
   @IsString()
   @IsNotEmpty()
   phone: string;
 
-  @ApiProperty({ description: 'Address line', example: '123 Main St' })
+  @ApiProperty({ description: 'Two-letter country code', example: 'VN' })
+  @IsString()
+  @Length(2, 2)
+  countryCode: string;
+
+  @ApiProperty({ description: 'Province/State', example: 'Ho Chi Minh' })
   @IsString()
   @IsNotEmpty()
-  address_line: string;
+  province: string;
 
-  @ApiPropertyOptional({ description: 'City', example: 'New York' })
-  @IsOptional()
+  @ApiProperty({ description: 'District/County', example: 'District 1' })
   @IsString()
-  city?: string;
+  @IsNotEmpty()
+  district: string;
 
   @ApiPropertyOptional({ description: 'Ward', example: 'Ward 1' })
   @IsOptional()
   @IsString()
   ward?: string;
 
-  @ApiPropertyOptional({ description: 'District', example: 'District 1' })
+  @ApiProperty({ description: 'Primary street line', example: '123 Main St' })
+  @IsString()
+  @IsNotEmpty()
+  address_line: string;
+
+  @ApiPropertyOptional({ description: 'Second street line', example: 'Apt 12B' })
   @IsOptional()
   @IsString()
-  district?: string;
+  address_line2?: string;
+
+  @ApiPropertyOptional({ description: 'City name (if different from province)', example: 'Ho Chi Minh City' })
+  @IsOptional()
+  @IsString()
+  city?: string;
+
+  @ApiPropertyOptional({ description: 'Postal code', example: '700000' })
+  @IsOptional()
+  @IsString()
+  postalCode?: string;
+
+  @ApiPropertyOptional({ description: 'Custom label for the address', example: 'Checkout - July' })
+  @IsOptional()
+  @IsString()
+  label?: string;
+
+  @ApiPropertyOptional({ description: 'Address note', example: 'Call before arrival' })
+  @IsOptional()
+  @IsString()
+  note?: string;
+
+  @ApiPropertyOptional({ description: 'Mark as billing address', example: false })
+  @IsOptional()
+  isBilling?: boolean;
+
+  @ApiPropertyOptional({ description: 'Mark as default shipping address', example: true })
+  @IsOptional()
+  isDefault?: boolean;
 }
 
 export class CreateOrderDto {
@@ -155,10 +194,13 @@ export class CreateOrderDto {
 }
 
 export class UpdateOrderDto {
-  @ApiPropertyOptional({ description: 'Order status', enum: ['PENDING', 'PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'FAILED', 'REFUNDED'] })
+  @ApiPropertyOptional({
+    description: 'Order status',
+    enum: Object.values(OrderStatus),
+  })
   @IsOptional()
-  @IsEnum(['PENDING', 'PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'FAILED', 'REFUNDED'])
-  status?: string;
+  @IsEnum(OrderStatus)
+  status?: OrderStatus;
 
   @ApiPropertyOptional({ description: 'Payment method', enum: ['PAYPAL', 'STRIPE', 'COD'], example: 'PAYPAL' })
   @IsOptional()

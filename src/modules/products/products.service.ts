@@ -101,6 +101,7 @@ export class ProductsService {
               id: variantWithColor.color.id,
               name: this.getLocalizedValue(variantWithColor.color.name as any, locale),
               hexCode: variantWithColor.color.hexCode,
+              imageUrl: variantWithColor.color.imageUrl || null,
             };
           }
         }

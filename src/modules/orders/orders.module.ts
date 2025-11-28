@@ -7,11 +7,13 @@ import { User } from '../users/user.entity';
 import { Address } from '../addresses/address.entity';
 import { Product } from '../products/entities/product.entity';
 import { MailModule } from '../mail/mail.module';
+import { AddressesModule } from '../addresses/addresses.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, User, Address, Product]),
     MailModule,
+    AddressesModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

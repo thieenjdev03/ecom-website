@@ -10,6 +10,7 @@ import { Category } from '../modules/products/entities/category.entity';
 import { Color } from '../modules/colors/entities/color.entity';
 import { Size } from '../modules/sizes/entities/size.entity';
 import { Role } from '../auth/enums/role.enum';
+import { OrderStatus } from '../modules/orders/enums/order-status.enum';
 
 export async function completeSeeder(dataSource: DataSource) {
   const userRepo = dataSource.getRepository(User);
@@ -326,7 +327,7 @@ export async function completeSeeder(dataSource: DataSource) {
       const orderData = orderRepo.create({
         userId: user.id,
         orderNumber,
-        status: i === 0 ? 'PAID' : i === 1 ? 'PROCESSING' : 'PENDING',
+        status: i === 0 ? OrderStatus.PAID : i === 1 ? OrderStatus.PROCESSING : OrderStatus.PENDING_PAYMENT,
         paymentMethod: i === 0 ? 'PAYPAL' : i === 1 ? 'PAYPAL' : 'COD',
         paypalOrderId: i < 2 ? `PAYPAL-${Date.now()}-${i}` : null,
         paypalTransactionId: i < 2 ? `TXN-${Date.now()}-${i}` : null,
@@ -371,7 +372,7 @@ export async function completeSeeder(dataSource: DataSource) {
   console.log('💳 Seeding PayPal events...');
   const existingPaypalEvents = await paypalEventRepo.find();
   if (existingPaypalEvents.length === 0) {
-    const paidOrders = orders.filter((o) => o.status === 'PAID' && o.paypalOrderId);
+    const paidOrders = orders.filter((o) => o.status === OrderStatus.PAID && o.paypalOrderId);
     const paypalEvents = [];
     for (const order of paidOrders) {
       paypalEvents.push(

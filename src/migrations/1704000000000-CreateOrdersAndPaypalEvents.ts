@@ -18,7 +18,24 @@ export class CreateOrdersAndPaypalEvents1704000000000 implements MigrationInterf
           id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
           "userId" UUID NOT NULL,
           "orderNumber" VARCHAR(50) UNIQUE NOT NULL,
-          status VARCHAR(20) DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'PAID', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'FAILED', 'REFUNDED')),
+          status VARCHAR(30) DEFAULT 'PENDING_PAYMENT' CHECK (
+            status IN (
+              'PENDING_PAYMENT',
+              'PAID',
+              'PROCESSING',
+              'PACKED',
+              'READY_TO_GO',
+              'AT_CARRIER_FACILITY',
+              'IN_TRANSIT',
+              'ARRIVED_IN_COUNTRY',
+              'AT_LOCAL_FACILITY',
+              'OUT_FOR_DELIVERY',
+              'DELIVERED',
+              'CANCELLED',
+              'FAILED',
+              'REFUNDED'
+            )
+          ),
           
           -- PayPal integration fields
           "paypalOrderId" VARCHAR(100),
