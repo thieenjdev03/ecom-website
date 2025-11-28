@@ -6,6 +6,7 @@ import { User } from '../users/user.entity';
 import { Role } from '../../auth/enums/role.enum';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
+import { MarketingService } from '../marketing/marketing.service';
 
 @Injectable()
 export class AuthService {
@@ -14,9 +15,18 @@ export class AuthService {
     private readonly usersRepository: Repository<User>,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly marketingService: MarketingService,
   ) {}
 
-  async register(email: string, password: string, firstName: string, lastName: string, phoneNumber: string, country: string) {
+  async register(
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    phoneNumber: string,
+    country: string,
+    marketingOptIn = true,
+  ) {
     const exists = await this.usersRepository.findOne({ where: { email } });
     if (exists) {
       throw new ConflictException('User with this email already exists');
@@ -43,6 +53,16 @@ export class AuthService {
       .sendWelcomeEmail(saved.email, displayName)
       .catch(() => {
         // Intentionally swallow errors to avoid impacting the registration response
+      });
+
+    this.marketingService
+      .handleUserRegistration({
+        email: saved.email,
+        userId: saved.id,
+        marketingOptIn,
+      })
+      .catch(() => {
+        // Ignore marketing sync failures to avoid blocking registration
       });
 
     return { id: saved.id, email: saved.email, role: saved.role };

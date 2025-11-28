@@ -19,6 +19,7 @@ import { OtpModule } from './modules/otp_service/otp.module';
 import { PaypalModule } from './modules/paypal/paypal.module';
 import { HealthModule } from './modules/health/health.module';
 import { ShippingModule } from './modules/shipping/shipping.module';
+import { MarketingModule } from './modules/marketing/marketing.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -52,6 +53,7 @@ import { ShippingModule } from './modules/shipping/shipping.module';
     SizesModule,
     PaypalModule,
     ShippingModule,
+    MarketingModule,
   ],
 })
 export class AppModule {}

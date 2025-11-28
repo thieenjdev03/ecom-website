@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsString, MinLength, IsNotEmpty } from "class-validator";
+import { IsEmail, IsString, MinLength, IsNotEmpty, IsBoolean, IsOptional } from "class-validator";
 
 export class RegisterDto {
   @ApiProperty({ example: 'user@gmail.com' })
@@ -31,4 +31,9 @@ export class RegisterDto {
   @IsString({ message: 'Country must be a string.' })
   @IsNotEmpty({ message: 'Country is required.' })
   country: string;
+
+  @ApiProperty({ example: true, required: false, default: true })
+  @IsBoolean({ message: 'marketingOptIn must be a boolean.' })
+  @IsOptional()
+  marketingOptIn?: boolean;
 }

@@ -8,6 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { User } from '../users/user.entity';
 import { JwtStrategy } from '../../auth/jwt.strategy';
 import { MailModule } from '../mail/mail.module';
+import { MarketingModule } from '../marketing/marketing.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MailModule } from '../mail/mail.module';
       }),
       inject: [ConfigService],
     }),
+    MarketingModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],

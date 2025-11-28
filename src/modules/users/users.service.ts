@@ -84,6 +84,19 @@ export class UsersService {
     return this.toResponseDto(user);
   }
 
+  async findFullEntity(id: string): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['addresses', 'wishlists'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return user;
+  }
+
   async findOneByEmail(email: string): Promise<User> {
     return this.usersRepository.findOne({ where: { email } });
   }
