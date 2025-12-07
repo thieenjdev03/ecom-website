@@ -31,6 +31,8 @@ export class CategoriesController {
       id: cat.id,
       name: cat.name,
       slug: cat.slug,
+      description: cat.description,
+      image_url: cat.image_url,
       parent: cat.parent?.id ?? null,
       parent_name: cat.parent?.name ?? 'Root Category',
       display_order: cat.display_order ?? 0,
@@ -63,10 +65,18 @@ export class CategoriesController {
       id: parent.id,
       name: parent.name,
       slug: parent.slug,
+      description: parent.description,
+      image_url: parent.image_url,
       children: (parent.children ?? [])
         .filter((c) => (onlyActive ? c.is_active : true))
         .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
-        .map((c) => ({ id: c.id, name: c.name, slug: c.slug })),
+        .map((c) => ({ 
+          id: c.id, 
+          name: c.name, 
+          slug: c.slug,
+          description: c.description,
+          image_url: c.image_url,
+        })),
     }));
   }
 

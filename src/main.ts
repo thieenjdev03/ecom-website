@@ -15,6 +15,16 @@ async function bootstrap() {
   });
   const configService = app.get(ConfigService);
 
+  // Normalize Content-Type header to handle charset parameter
+  app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const contentType = req.headers['content-type'];
+    if (contentType && contentType.includes('application/json')) {
+      // Remove charset parameter from Content-Type header to avoid body-parser issues
+      req.headers['content-type'] = 'application/json';
+    }
+    next();
+  });
+
   // Configure body parsers - raw for webhook, JSON for everything else
   app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
     // Use raw parser only for PayPal webhook endpoint

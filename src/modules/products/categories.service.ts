@@ -27,12 +27,14 @@ export class CategoriesService {
 
   async findAll(): Promise<Category[]> {
     return this.categoriesRepository.find({
+      select: ['id', 'name', 'slug', 'description', 'image_url', 'parent_id', 'display_order', 'is_active', 'created_at', 'updated_at'],
       order: { display_order: 'ASC', name: 'ASC' },
     });
   }
 
   async findAllForAdmin(withChildren: boolean): Promise<Category[]> {
     return this.categoriesRepository.find({
+      select: ['id', 'name', 'slug', 'description', 'image_url', 'parent_id', 'display_order', 'is_active', 'created_at', 'updated_at'],
       relations: withChildren ? ['children', 'parent'] : ['parent'],
       order: { display_order: 'ASC' },
     });
@@ -40,6 +42,7 @@ export class CategoriesService {
 
   async findActive(): Promise<Category[]> {
     return this.categoriesRepository.find({
+      select: ['id', 'name', 'slug', 'description', 'image_url', 'parent_id', 'display_order', 'is_active', 'created_at', 'updated_at'],
       where: { is_active: true },
       order: { display_order: 'ASC', name: 'ASC' },
     });
@@ -48,6 +51,7 @@ export class CategoriesService {
   async findTree(onlyActive: boolean): Promise<Category[]> {
     const where = onlyActive ? { parent: IsNull(), is_active: true } : { parent: IsNull() };
     return this.categoriesRepository.find({
+      select: ['id', 'name', 'slug', 'description', 'image_url', 'parent_id', 'display_order', 'is_active', 'created_at', 'updated_at'],
       where,
       relations: ['children'],
       order: { display_order: 'ASC' },
@@ -56,6 +60,7 @@ export class CategoriesService {
 
   async findOne(id: string): Promise<Category> {
     const category = await this.categoriesRepository.findOne({
+      select: ['id', 'name', 'slug', 'description', 'image_url', 'parent_id', 'display_order', 'is_active', 'created_at', 'updated_at'],
       where: { id },
       relations: ['parent'],
     });
@@ -69,6 +74,7 @@ export class CategoriesService {
 
   async findBySlug(slug: string): Promise<Category> {
     const category = await this.categoriesRepository.findOne({
+      select: ['id', 'name', 'slug', 'description', 'image_url', 'parent_id', 'display_order', 'is_active', 'created_at', 'updated_at'],
       where: { slug },
       relations: ['parent'],
     });
