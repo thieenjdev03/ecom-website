@@ -20,6 +20,7 @@ import { PaypalModule } from './modules/paypal/paypal.module';
 import { HealthModule } from './modules/health/health.module';
 import { ShippingModule } from './modules/shipping/shipping.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
+import { CollectionsModule } from './modules/collections/collections.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -54,6 +55,7 @@ import { MarketingModule } from './modules/marketing/marketing.module';
     PaypalModule,
     ShippingModule,
     MarketingModule,
+    CollectionsModule,
   ],
 })
 export class AppModule {}

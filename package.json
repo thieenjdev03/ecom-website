@@ -44,6 +44,7 @@
     "seed:carts": "ts-node -r tsconfig-paths/register ./scripts/seed-carts.ts",
     "seed:catalog": "ts-node -r tsconfig-paths/register ./scripts/seed-catalog.ts",
     "seed:products-new": "ts-node -r tsconfig-paths/register ./scripts/seed-products-new.ts",
+    "seed:collections": "ts-node -r tsconfig-paths/register ./scripts/seed-collections.ts",
     "seed:complete": "ts-node -r tsconfig-paths/register ./scripts/seed-complete.ts"
   },
   "dependencies": {

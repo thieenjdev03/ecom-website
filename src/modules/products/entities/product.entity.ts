@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, DeleteDateColumn, OneToMany } from 'typeorm';
 import { Category } from './category.entity';
+import { ProductCollection } from '../../collections/entities/product-collection.entity';
 
 export type LangObject = Record<string, string | null>;
 
@@ -67,6 +68,9 @@ export class Product {
   @ManyToOne(() => Category, { nullable: true })
   @JoinColumn({ name: 'category_id' })
   category: Category;
+
+  @OneToMany(() => ProductCollection, (productCollection) => productCollection.product)
+  productCollections: ProductCollection[];
 
   @Column({ type: 'jsonb', default: [] })
   tags: string[];
