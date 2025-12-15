@@ -169,7 +169,7 @@ export class ProductsService {
 
   async findAll(query: QueryProductDto): Promise<{ data: any[]; meta: any }> {
     try {
-      const { page = 1, limit = 20, category_id, status, is_featured, search, sort_by = 'created_at', sort_order = 'DESC', locale = 'en' } = query;
+      const { page = 1, limit = 20, category_id, collection_id, status, is_featured, search, sort_by = 'created_at', sort_order = 'DESC', locale = 'en' } = query;
 
       const skip = (page - 1) * limit;
 
@@ -182,6 +182,13 @@ export class ProductsService {
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.category', 'category')
         .where('product.deleted_at IS NULL');
+
+      // Filter by collection if collection_id is provided
+      if (collection_id) {
+        queryBuilder
+          .innerJoin('product_collections', 'pc', 'pc.product_id = product.id')
+          .andWhere('pc.collection_id = :collection_id', { collection_id });
+      }
 
       // Filters
       if (status) {

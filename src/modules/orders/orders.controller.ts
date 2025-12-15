@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery, ApiBody } from '@nestjs/swagger';
 import { OrdersService } from './orders.service';
-import { CreateOrderDto, UpdateOrderDto } from './dto/order.dto';
+import { CreateOrderDto, UpdateOrderDto, ChangeOrderStatusDto, StatusHistoryItemDto } from './dto/order.dto';
 import { JwtGuard } from '../../auth/jwt.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
@@ -190,6 +190,65 @@ export class OrdersController {
   @Roles(Role.ADMIN)
   async update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
     return await this.ordersService.update(id, updateOrderDto);
+  }
+
+  @Post(':id/status')
+  @ApiOperation({ summary: 'Change order status with tracking history (Admin Only)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Order status changed successfully',
+    schema: {
+      example: {
+        id: 'order-uuid',
+        orderNumber: 'ORD-20250101-1234',
+        status: 'PACKED',
+        tracking_history: [
+          {
+            from_status: 'PROCESSING',
+            to_status: 'PACKED',
+            changed_at: '2025-01-01T01:00:00.000Z',
+            changed_by: 'ADMIN',
+            note: 'Order packed at warehouse',
+          },
+        ],
+      },
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  @ApiResponse({ status: 400, description: 'Invalid status transition' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  async changeStatus(
+    @Param('id') id: string,
+    @Body() changeOrderStatusDto: ChangeOrderStatusDto,
+    @Request() req,
+  ) {
+    const changedBy = req.user?.sub || req.user?.userId || 'SYSTEM';
+    return await this.ordersService.changeOrderStatus(id, changeOrderStatusDto, changedBy);
+  }
+
+  @Get(':id/status-history')
+  @ApiOperation({ summary: 'Get order status history with duration tracking' })
+  @ApiResponse({
+    status: 200,
+    description: 'Status history retrieved successfully',
+    schema: {
+      example: [
+        {
+          from_status: 'PAID',
+          to_status: 'PROCESSING',
+          changed_at: '2025-01-01T01:00:00Z',
+          changed_by: 'ADMIN',
+          duration_seconds: 3600,
+        },
+      ],
+    },
+  })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getStatusHistory(@Param('id') id: string): Promise<StatusHistoryItemDto[]> {
+    return await this.ordersService.getStatusHistory(id);
   }
 
   @Delete(':id')

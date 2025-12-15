@@ -7,10 +7,15 @@ export class QueryProductDto {
   @IsOptional()
   @IsString()
   locale?: string = 'en';
-  @ApiPropertyOptional({ example: 'b4b2b07f-6825-402b-bd2c-f9aef8cfbba5' })
+  @ApiPropertyOptional({ example: 'b4b2b07f-6825-402b-bd2c-f9aef8cfbba5', description: 'Filter by category ID' })
   @IsOptional()
   @IsUUID()
   category_id?: string;
+
+  @ApiPropertyOptional({ example: 'c5c5d08f-7936-503c-ce3d-g0bgf9cfccb6', description: 'Filter by collection ID' })
+  @IsOptional()
+  @IsUUID()
+  collection_id?: string;
 
   @ApiPropertyOptional({ enum: ['active', 'draft', 'out_of_stock', 'discontinued'] })
   @IsOptional()

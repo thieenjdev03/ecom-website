@@ -209,7 +209,10 @@ curl -X PATCH 'http://localhost:3000/products/123/variants/POLO-M-BLACK/stock' \
 - Tìm kiếm: `GET /products/search?q=keyword&limit=20`
 - Tính tổng tồn kho: `GET /products/:id/stock` (tổng của `variants.stock`, hoặc `stock_quantity` nếu không có variants)
 - Danh sách với filter/pagination/sort: `GET /products`
-  - Query (tham khảo): `page`, `limit`, `category_id`, `status`, `is_featured`, `search`, `sort_by` (`created_at|price|name`), `sort_order` (`ASC|DESC`)
+  - Query (tham khảo): `page`, `limit`, `category_id`, `collection_id` ✨, `status`, `is_featured`, `search`, `sort_by` (`created_at|price|name`), `sort_order` (`ASC|DESC`)
+  - **Mới**: `collection_id` - Filter products theo collection UUID (ví dụ: `/products?collection_id=550e8400-e29b-41d4-a716-446655440000`)
+  - Có thể kết hợp nhiều filters: `/products?collection_id=xxx&category_id=yyy&status=active&search=shirt`
+  - Chi tiết: Xem [Products Filter by Collection](./products_filter_by_collection.md)
 
 ---
 

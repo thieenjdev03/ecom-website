@@ -2,6 +2,7 @@ import { IsString, IsNumber, IsOptional, IsArray, IsEnum, IsUUID, ValidateNested
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { OrderStatus } from '../enums/order-status.enum';
+import { TrackingHistoryItem } from '../entities/order.entity';
 
 export class OrderItemDto {
   @ApiProperty({ description: 'Product ID (UUID)', example: 'fc734035-40fe-441c-a989-92004dc368fb' })
@@ -242,4 +243,42 @@ export class UpdateOrderDto {
   @IsOptional()
   @IsString()
   internalNotes?: string;
+}
+
+export class ChangeOrderStatusDto {
+  @ApiProperty({
+    description: 'New order status',
+    enum: Object.values(OrderStatus),
+    example: OrderStatus.PACKED
+  })
+  @IsEnum(OrderStatus)
+  toStatus: OrderStatus;
+
+  @ApiPropertyOptional({
+    description: 'Optional note for status change',
+    example: 'Order packed at warehouse'
+  })
+  @IsOptional()
+  @IsString()
+  note?: string;
+}
+
+export class StatusHistoryItemDto {
+  @ApiProperty({ description: 'Previous status', enum: Object.values(OrderStatus) })
+  from_status: OrderStatus;
+
+  @ApiProperty({ description: 'New status', enum: Object.values(OrderStatus) })
+  to_status: OrderStatus;
+
+  @ApiProperty({ description: 'Timestamp when status changed', example: '2025-01-01T01:00:00.000Z' })
+  changed_at: Date;
+
+  @ApiProperty({ description: 'User ID who changed the status', example: 'user-uuid' })
+  changed_by: string;
+
+  @ApiPropertyOptional({ description: 'Optional note for the change', example: 'Order packed at warehouse' })
+  note?: string;
+
+  @ApiPropertyOptional({ description: 'Duration in seconds since previous status change', example: 3600 })
+  duration_seconds?: number;
 }

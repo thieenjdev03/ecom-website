@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
-import { Order } from './entities/order.entity';
-import { CreateOrderDto, ShippingAddressDto, UpdateOrderDto } from './dto/order.dto';
+import { Order, TrackingHistoryItem } from './entities/order.entity';
+import { CreateOrderDto, ShippingAddressDto, UpdateOrderDto, ChangeOrderStatusDto, StatusHistoryItemDto } from './dto/order.dto';
 import { User } from '../users/user.entity';
 import { Address } from '../addresses/address.entity';
 import { Product } from '../products/entities/product.entity';
@@ -338,45 +338,36 @@ export class OrdersService {
     }
   }
 
-  private readonly fulfillmentFlow: OrderStatus[] = [
-    OrderStatus.PENDING_PAYMENT,
-    OrderStatus.PAID,
-    OrderStatus.PROCESSING,
-    OrderStatus.PACKED,
-    OrderStatus.READY_TO_GO,
-    OrderStatus.AT_CARRIER_FACILITY,
-    OrderStatus.IN_TRANSIT,
-    OrderStatus.ARRIVED_IN_COUNTRY,
-    OrderStatus.AT_LOCAL_FACILITY,
-    OrderStatus.OUT_FOR_DELIVERY,
-    OrderStatus.DELIVERED,
-  ];
-
-  private readonly overrideTransitions: Partial<Record<OrderStatus, OrderStatus[]>> = {
-    [OrderStatus.PENDING_PAYMENT]: [OrderStatus.CANCELLED],
-    [OrderStatus.PAID]: [OrderStatus.CANCELLED, OrderStatus.REFUNDED],
-    [OrderStatus.PROCESSING]: [OrderStatus.CANCELLED],
-    [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED],
-    [OrderStatus.FAILED]: [OrderStatus.PENDING_PAYMENT],
+  // Order status transition map according to business rules
+  private readonly ORDER_STATUS_FLOW: Record<OrderStatus, OrderStatus[]> = {
+    [OrderStatus.PENDING_PAYMENT]: [OrderStatus.PAID, OrderStatus.CANCELLED],
+    [OrderStatus.PAID]: [OrderStatus.PROCESSING, OrderStatus.REFUNDED],
+    [OrderStatus.PROCESSING]: [OrderStatus.PACKED, OrderStatus.CANCELLED],
+    [OrderStatus.PACKED]: [OrderStatus.READY_TO_GO],
+    [OrderStatus.READY_TO_GO]: [OrderStatus.AT_CARRIER_FACILITY],
+    [OrderStatus.AT_CARRIER_FACILITY]: [OrderStatus.IN_TRANSIT],
+    [OrderStatus.IN_TRANSIT]: [OrderStatus.ARRIVED_IN_COUNTRY],
+    [OrderStatus.ARRIVED_IN_COUNTRY]: [OrderStatus.AT_LOCAL_FACILITY],
+    [OrderStatus.AT_LOCAL_FACILITY]: [OrderStatus.OUT_FOR_DELIVERY],
+    [OrderStatus.OUT_FOR_DELIVERY]: [OrderStatus.DELIVERED, OrderStatus.FAILED],
+    [OrderStatus.DELIVERED]: [],
+    [OrderStatus.FAILED]: [OrderStatus.PROCESSING, OrderStatus.REFUNDED],
+    [OrderStatus.CANCELLED]: [OrderStatus.REFUNDED],
+    [OrderStatus.REFUNDED]: [],
   };
 
   private isValidStatusTransition(currentStatus: OrderStatus, newStatus: OrderStatus): boolean {
-    return this.getValidStatusTransitions(currentStatus).includes(newStatus);
+    // Cannot transition to the same status
+    if (currentStatus === newStatus) {
+      return false;
+    }
+
+    // Check if the transition is allowed according to the flow
+    return this.ORDER_STATUS_FLOW[currentStatus]?.includes(newStatus) ?? false;
   }
 
   private getValidStatusTransitions(currentStatus: OrderStatus): OrderStatus[] {
-    const sequentialNext = this.getNextSequentialStatus(currentStatus);
-    const overrideStatuses = this.overrideTransitions[currentStatus] ?? [];
-    const candidates = sequentialNext ? [sequentialNext, ...overrideStatuses] : overrideStatuses;
-    return Array.from(new Set(candidates));
-  }
-
-  private getNextSequentialStatus(currentStatus: OrderStatus): OrderStatus | null {
-    const index = this.fulfillmentFlow.indexOf(currentStatus);
-    if (index === -1 || index === this.fulfillmentFlow.length - 1) {
-      return null;
-    }
-    return this.fulfillmentFlow[index + 1];
+    return this.ORDER_STATUS_FLOW[currentStatus] ?? [];
   }
 
   /**
@@ -464,6 +455,101 @@ export class OrdersService {
           productThumbnailUrl: null,
         }));
       });
+    }
+  }
+
+  /**
+   * Change order status with tracking history
+   */
+  async changeOrderStatus(id: string, changeOrderStatusDto: ChangeOrderStatusDto, changedBy: string): Promise<Order> {
+    try {
+      const order = await this.findOne(id);
+
+      // Validate transition
+      if (!this.isValidStatusTransition(order.status, changeOrderStatusDto.toStatus)) {
+        const validTransitions = this.getValidStatusTransitions(order.status);
+        throw new BadRequestException(
+          `Invalid status transition from "${order.status}" to "${changeOrderStatusDto.toStatus}". ` +
+          `Valid transitions from "${order.status}" are: ${validTransitions.join(', ')}.`
+        );
+      }
+
+      // Initialize tracking_history if it doesn't exist
+      if (!order.tracking_history) {
+        order.tracking_history = [];
+      }
+
+      // Append new tracking history record
+      const trackingItem: TrackingHistoryItem = {
+        from_status: order.status,
+        to_status: changeOrderStatusDto.toStatus,
+        changed_at: new Date(),
+        changed_by: changedBy,
+        note: changeOrderStatusDto.note ?? null,
+      };
+
+      order.tracking_history.push(trackingItem);
+
+      // Update order status
+      order.status = changeOrderStatusDto.toStatus;
+
+      const updatedOrder = await this.orderRepository.save(order);
+      this.logger.log(`Order ${updatedOrder.orderNumber} status changed from ${trackingItem.from_status} to ${trackingItem.to_status} by ${changedBy}`);
+      return updatedOrder;
+    } catch (error) {
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.logger.error(`Failed to change order status for order ${id}: ${error.message}`, error.stack);
+      throw new BadRequestException(`Failed to change order status: ${error.message || 'Unknown error occurred'}`);
+    }
+  }
+
+  /**
+   * Get status history with duration calculations
+   */
+  async getStatusHistory(id: string): Promise<StatusHistoryItemDto[]> {
+    try {
+      const order = await this.findOne(id);
+
+      if (!order.tracking_history || order.tracking_history.length === 0) {
+        return [];
+      }
+
+      // Sort by changed_at ascending
+      const sortedHistory = [...order.tracking_history].sort(
+        (a, b) => new Date(a.changed_at).getTime() - new Date(b.changed_at).getTime()
+      );
+
+      // Add duration_seconds to each item
+      const historyWithDuration: StatusHistoryItemDto[] = sortedHistory.map((item, index) => {
+        let duration_seconds: number | undefined;
+
+        if (index < sortedHistory.length - 1) {
+          const currentTime = new Date(item.changed_at).getTime();
+          const nextTime = new Date(sortedHistory[index + 1].changed_at).getTime();
+          duration_seconds = Math.floor((nextTime - currentTime) / 1000);
+        }
+
+        return {
+          from_status: item.from_status,
+          to_status: item.to_status,
+          changed_at: item.changed_at,
+          changed_by: item.changed_by,
+          note: item.note,
+          duration_seconds,
+        };
+      });
+
+      return historyWithDuration;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      this.logger.error(`Failed to get status history for order ${id}: ${error.message}`, error.stack);
+      throw new BadRequestException(`Failed to get status history: ${error.message || 'Unknown error occurred'}`);
     }
   }
 

@@ -12,6 +12,8 @@ import { User } from '../../users/user.entity';
 import { Address } from '../../addresses/address.entity';
 import { OrderStatus } from '../enums/order-status.enum';
 
+export { OrderStatus };
+
 export interface OrderItem {
   productId: string; // UUID string
   productName: string;
@@ -23,6 +25,14 @@ export interface OrderItem {
   totalPrice: string; // Formatted as string with two decimals (e.g., "59.98")
   sku?: string;
   productThumbnailUrl?: string; // Added when fetching order detail, first image from product.images array
+}
+
+export interface TrackingHistoryItem {
+  from_status: OrderStatus; // status trước
+  to_status: OrderStatus; // status mới
+  changed_at: Date; // thời điểm đổi
+  changed_by: string; // userId / SYSTEM / CRON
+  note?: string | null; // optional
 }
 
 export interface OrderSummary {
@@ -56,6 +66,10 @@ export class Order {
 
   @Column({ length: 30, default: OrderStatus.PENDING_PAYMENT })
   status: OrderStatus;
+
+  // Tracking history for status changes
+  @Column({ type: 'jsonb', default: [] })
+  tracking_history: TrackingHistoryItem[];
 
   @Column({ length: 20, nullable: true })
   paymentMethod: 'PAYPAL' | 'STRIPE' | 'COD';
