@@ -224,7 +224,7 @@ export class OrdersController {
     @Body() changeOrderStatusDto: ChangeOrderStatusDto,
     @Request() req,
   ) {
-    const changedBy = req.user?.sub || req.user?.userId || 'SYSTEM';
+    const changedBy = req.user?.id || req.user?.sub || req.user?.userId || 'SYSTEM';
     return await this.ordersService.changeOrderStatus(id, changeOrderStatusDto, changedBy);
   }
 
