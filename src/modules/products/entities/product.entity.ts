@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, DeleteDateColumn, OneToMany } from 'typeorm';
 import { Category } from './category.entity';
 import { ProductCollection } from '../../collections/entities/product-collection.entity';
+import { Brand } from '../../brands/entities/brand.entity';
 
 export type LangObject = Record<string, string | null>;
 
@@ -68,6 +69,13 @@ export class Product {
   @ManyToOne(() => Category, { nullable: true })
   @JoinColumn({ name: 'category_id' })
   category: Category;
+
+  @Column({ type: 'uuid', nullable: true })
+  brand_id: string;
+
+  @ManyToOne(() => Brand, { nullable: true })
+  @JoinColumn({ name: 'brand_id' })
+  brand: Brand;
 
   @OneToMany(() => ProductCollection, (productCollection) => productCollection.product)
   productCollections: ProductCollection[];

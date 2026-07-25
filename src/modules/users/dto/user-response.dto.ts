@@ -66,30 +66,35 @@ export class UserResponseDto {
   @ApiPropertyOptional({
     description: 'User addresses',
     type: 'array',
+    items: { type: 'object' },
   })
   addresses?: any[];
 
   @ApiPropertyOptional({
     description: 'User wishlists',
     type: 'array',
+    items: { type: 'object' },
   })
   wishlists?: any[];
 
   @ApiPropertyOptional({
     description: 'User orders',
     type: 'array',
+    items: { type: 'object' },
   })
   orders?: any[];
 
   @ApiPropertyOptional({
     description: 'User cart',
     type: 'array',
+    items: { type: 'object' },
   })
   cart?: any[];
 
   @ApiPropertyOptional({
     description: 'User payments',
     type: 'array',
+    items: { type: 'object' },
   })
   payments?: any[];
 }

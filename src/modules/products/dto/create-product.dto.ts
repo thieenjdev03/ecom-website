@@ -3,38 +3,46 @@ import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductVariantDto } from './product-variant.dto';
 import { DimensionsDto } from './dimensions.dto';
-import { LangObject } from '../entities/product.entity';
+import { LocalizedStringDto } from './localized-string.dto';
 
 export class CreateProductDto {
-  @ApiProperty({ 
+  @ApiProperty({
+    type: () => LocalizedStringDto,
     example: { en: 'Premium Polo Shirt', vi: 'Áo Polo Cao Cấp' },
     description: 'Product name in multiple languages'
   })
-  @IsObject()
-  name: LangObject;
+  @ValidateNested()
+  @Type(() => LocalizedStringDto)
+  name: LocalizedStringDto;
 
-  @ApiProperty({ 
+  @ApiProperty({
+    type: () => LocalizedStringDto,
     example: { en: 'premium-polo-shirt', vi: 'ao-polo-cao-cap' },
     description: 'Product slug in multiple languages'
   })
-  @IsObject()
-  slug: LangObject;
+  @ValidateNested()
+  @Type(() => LocalizedStringDto)
+  slug: LocalizedStringDto;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
+    type: () => LocalizedStringDto,
     example: { en: 'High quality cotton polo shirt...', vi: 'Áo polo cotton chất lượng cao...' },
     description: 'Product description in multiple languages'
   })
   @IsOptional()
-  @IsObject()
-  description?: LangObject;
+  @ValidateNested()
+  @Type(() => LocalizedStringDto)
+  description?: LocalizedStringDto;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
+    type: () => LocalizedStringDto,
     example: { en: 'Premium cotton polo', vi: 'Áo polo cotton cao cấp' },
     description: 'Short description in multiple languages'
   })
   @IsOptional()
-  @IsObject()
-  short_description?: LangObject;
+  @ValidateNested()
+  @Type(() => LocalizedStringDto)
+  short_description?: LocalizedStringDto;
 
   @ApiProperty({ example: 399000 })
   @IsNumber()
@@ -110,21 +118,25 @@ export class CreateProductDto {
   @IsBoolean()
   enable_sale_tag?: boolean;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
+    type: () => LocalizedStringDto,
     example: { en: 'Buy Premium Polo Shirt', vi: 'Mua Áo Polo Cao Cấp' },
     description: 'Meta title in multiple languages'
   })
   @IsOptional()
-  @IsObject()
-  meta_title?: LangObject | null;
+  @ValidateNested()
+  @Type(() => LocalizedStringDto)
+  meta_title?: LocalizedStringDto | null;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
+    type: () => LocalizedStringDto,
     example: { en: 'High quality polo shirt...', vi: 'Áo polo chất lượng cao...' },
     description: 'Meta description in multiple languages'
   })
   @IsOptional()
-  @IsObject()
-  meta_description?: LangObject | null;
+  @ValidateNested()
+  @Type(() => LocalizedStringDto)
+  meta_description?: LocalizedStringDto | null;
 
   @ApiPropertyOptional({ example: 0.3, description: 'Weight in kg' })
   @IsOptional()

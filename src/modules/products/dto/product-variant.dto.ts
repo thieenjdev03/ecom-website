@@ -1,14 +1,17 @@
-import { IsString, IsNumber, IsOptional, Min, IsUUID, IsUrl, IsObject } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, IsUUID, IsUrl, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { LangObject } from '../entities/product.entity';
+import { LocalizedStringDto } from './localized-string.dto';
 
 export class ProductVariantDto {
-  @ApiProperty({ 
+  @ApiProperty({
+    type: () => LocalizedStringDto,
     example: { en: 'M - Black', vi: 'M - Đen' },
     description: 'Variant name in multiple languages'
   })
-  @IsObject()
-  name: LangObject;
+  @ValidateNested()
+  @Type(() => LocalizedStringDto)
+  name: LocalizedStringDto;
 
   @ApiProperty({ example: 'POLO-M-BLACK' })
   @IsString()

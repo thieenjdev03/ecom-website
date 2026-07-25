@@ -32,7 +32,7 @@
     "migration:revert": "npm run typeorm -- migration:revert",
     "clean:js": "node scripts/clean-js.js",
     "openapi:export": "ts-node -r tsconfig-paths/register ./scripts/export-openapi.ts",
-    "openapi:md": "widdershins ./docs/openapi.json -o ./docs/API_REVIEW.md --summary --expandBody --language_tabs \"shell:Shell\" \"javascript:JavaScript\"",
+    "openapi:md": "widdershins ../shared/openapi.json -o ../shared/API_REVIEW.md --summary --expandBody --language_tabs \"shell:Shell\" \"javascript:JavaScript\"",
     "seed:admin": "ts-node -r tsconfig-paths/register ./scripts/seed-admin.ts",
     "seed:mock": "ts-node -r tsconfig-paths/register ./scripts/seed-mock.ts",
     "seed:products": "ts-node -r tsconfig-paths/register ./scripts/seed-products.ts",
@@ -45,7 +45,8 @@
     "seed:catalog": "ts-node -r tsconfig-paths/register ./scripts/seed-catalog.ts",
     "seed:products-new": "ts-node -r tsconfig-paths/register ./scripts/seed-products-new.ts",
     "seed:collections": "ts-node -r tsconfig-paths/register ./scripts/seed-collections.ts",
-    "seed:complete": "ts-node -r tsconfig-paths/register ./scripts/seed-complete.ts"
+    "seed:complete": "ts-node -r tsconfig-paths/register ./scripts/seed-complete.ts",
+    "seed:careers": "ts-node -r tsconfig-paths/register ./scripts/seed-careers.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",
@@ -77,6 +78,7 @@
     "reflect-metadata": "^0.2.2",
     "resend": "^6.1.1",
     "rxjs": "^7.8.2",
+    "sanitize-html": "^2.17.6",
     "swagger-ui-express": "^5.0.1",
     "typeorm": "^0.3.27"
   },
@@ -90,6 +92,7 @@
     "@types/multer": "^2.0.0",
     "@types/node": "^22.10.2",
     "@types/pg": "^8.11.10",
+    "@types/sanitize-html": "^2.16.1",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",

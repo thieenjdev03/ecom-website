@@ -21,6 +21,7 @@ import { HealthModule } from './modules/health/health.module';
 import { ShippingModule } from './modules/shipping/shipping.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
 import { CollectionsModule } from './modules/collections/collections.module';
+import { CareersModule } from './modules/careers/careers.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -56,6 +57,7 @@ import { CollectionsModule } from './modules/collections/collections.module';
     ShippingModule,
     MarketingModule,
     CollectionsModule,
+    CareersModule,
   ],
 })
 export class AppModule {}

@@ -11,15 +11,7 @@ export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(ctx: ExecutionContext): boolean {
-    const req = ctx.switchToHttp().getRequest<{ user?: JwtUser; method?: string; originalUrl?: string; path?: string }>();
-
-    // Bypass ở local cho GET /users
-    const isProduction = (process.env.NODE_ENV || 'development') === 'production';
-    if (!isProduction) {
-      const urlPath = (req.originalUrl || req.path || '').split('?')[0];
-      const isGetAllUsers = req.method === 'GET' && urlPath === '/users';
-      if (isGetAllUsers) return true;
-    }
+    const req = ctx.switchToHttp().getRequest<{ user?: JwtUser }>();
 
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
       ctx.getHandler(),

@@ -1,14 +1,18 @@
-import { Controller, Post, Get, Delete, UploadedFile, UploadedFiles, UseInterceptors, Body, Param } from '@nestjs/common';
+import { Controller, Post, Get, Delete, UploadedFile, UploadedFiles, UseInterceptors, Body, Param, UseGuards } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { FilesService } from './files.service';
-import { 
-  GenerateSignatureDto, 
-  UploadFileDto, 
-  DeleteFileDto, 
+import {
+  GenerateSignatureDto,
+  UploadFileDto,
+  DeleteFileDto,
   GetFileInfoDto,
-  GenerateUrlDto 
+  GenerateUrlDto
 } from './dto/file-upload.dto';
+import { JwtGuard } from '../../auth/jwt.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../auth/roles.decorator';
+import { Role } from '../../auth/enums/role.enum';
 
 @ApiTags('Files')
 @Controller('files')
@@ -38,6 +42,9 @@ export class FilesController {
   }
 
   @Post('upload')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file', {
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   }))
@@ -105,6 +112,9 @@ export class FilesController {
   }
 
   @Post('upload-multiple')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @UseInterceptors(FilesInterceptor('files', 10, {
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit per file
   }))
@@ -168,7 +178,10 @@ export class FilesController {
   }
 
   @Delete(':publicId')
-  @ApiOperation({ 
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({
     summary: 'Delete file from Cloudinary',
     description: 'Deletes a file from Cloudinary using its public ID.'
   })
@@ -232,7 +245,10 @@ export class FilesController {
   }
 
   @Post('generate-url')
-  @ApiOperation({ 
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({
     summary: 'Generate optimized image URL',
     description: 'Generates an optimized image URL with transformations for better performance (default: 600x600, fill crop, auto format/webp).'
   })

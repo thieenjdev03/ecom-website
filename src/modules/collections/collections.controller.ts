@@ -1,21 +1,26 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Body, 
-  Patch, 
-  Param, 
-  Delete, 
-  Query, 
-  HttpCode, 
-  HttpStatus 
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+  HttpCode,
+  HttpStatus,
+  UseGuards
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { CollectionsService } from './collections.service';
 import { CreateCollectionDto } from './dto/create-collection.dto';
 import { UpdateCollectionDto } from './dto/update-collection.dto';
 import { AssignProductsDto } from './dto/assign-products.dto';
 import { QueryCollectionDto } from './dto/query-collection.dto';
+import { JwtGuard } from '../../auth/jwt.guard';
+import { RolesGuard } from '../../auth/roles.guard';
+import { Roles } from '../../auth/roles.decorator';
+import { Role } from '../../auth/enums/role.enum';
 
 @ApiTags('collections')
 @Controller('collections')
@@ -23,6 +28,9 @@ export class CollectionsController {
   constructor(private readonly collectionsService: CollectionsService) {}
 
   @Post()
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new collection' })
   @ApiResponse({ status: 201, description: 'Collection created successfully' })
   @ApiResponse({ status: 400, description: 'Bad request' })
@@ -75,6 +83,9 @@ export class CollectionsController {
   }
 
   @Patch(':id')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update collection' })
   @ApiParam({ name: 'id', description: 'Collection UUID' })
   @ApiResponse({ status: 200, description: 'Collection updated successfully' })
@@ -85,6 +96,9 @@ export class CollectionsController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete collection' })
   @ApiParam({ name: 'id', description: 'Collection UUID' })
@@ -95,6 +109,9 @@ export class CollectionsController {
   }
 
   @Post(':id/products')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Assign products to a collection' })
   @ApiParam({ name: 'id', description: 'Collection UUID' })
   @ApiResponse({ status: 200, description: 'Products assigned successfully' })
@@ -105,6 +122,9 @@ export class CollectionsController {
   }
 
   @Delete(':id/products')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Remove products from a collection' })
   @ApiParam({ name: 'id', description: 'Collection UUID' })
   @ApiResponse({ status: 200, description: 'Products removed successfully' })

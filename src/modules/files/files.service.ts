@@ -90,8 +90,11 @@ export class FilesService {
     height?: number;
   }> {
     try {
-      // Validate file type
-      if (file.mimetype && !file.mimetype.startsWith('image/')) {
+      const resourceType = options?.resourceType || 'image';
+
+      // Validate file type — only when uploading as an image; callers asking for
+      // 'raw'/'auto' (e.g. CV attachments) bring their own allow-list.
+      if (resourceType === 'image' && file.mimetype && !file.mimetype.startsWith('image/')) {
         throw new Error('Only image files are allowed');
       }
 
@@ -102,7 +105,6 @@ export class FilesService {
       }
 
       this.logger.log(`Uploading file: ${file.originalname}`);
-      const resourceType = options?.resourceType || 'image';
       const defaultFolder = this.configService.get<string>('CLOUDINARY_UPLOAD_FOLDER') || 'lume_ecom_uploads';
       const uploadFolder = options?.folder || defaultFolder;
 

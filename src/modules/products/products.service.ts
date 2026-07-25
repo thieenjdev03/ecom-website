@@ -74,6 +74,15 @@ export class ProductsService {
       dimensions: product.dimensions,
       created_at: product.created_at,
       updated_at: product.updated_at,
+      // Brand names are not localized (they're proper nouns), so no getLocalizedValue here.
+      brand: product.brand
+        ? {
+            id: product.brand.id,
+            name: product.brand.name,
+            slug: product.brand.slug,
+            logo_url: product.brand.logo_url ?? null,
+          }
+        : null,
     };
 
     // Transform category if exists
