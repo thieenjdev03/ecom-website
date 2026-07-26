@@ -19,15 +19,19 @@ export class User {
   @Column({ unique: true })
   email: string;
 
+  @ApiPropertyOptional({ description: 'User first name', example: 'John' })
   @Column({ unique: false, nullable: true })
   firstName: string;
 
+  @ApiPropertyOptional({ description: 'User last name', example: 'Doe' })
   @Column({ unique: false, nullable: true })
   lastName: string;
 
+  @ApiPropertyOptional({ description: 'User country', example: 'Vietnam' })
   @Column({ unique: false, nullable: true })
   country: string;
 
+  @ApiPropertyOptional({ description: 'User phone number', example: '0909090909' })
   @Column({ unique: false, nullable: true })
   phoneNumber: string;
 

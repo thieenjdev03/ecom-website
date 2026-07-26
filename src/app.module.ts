@@ -22,6 +22,10 @@ import { ShippingModule } from './modules/shipping/shipping.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
 import { CollectionsModule } from './modules/collections/collections.module';
 import { CareersModule } from './modules/careers/careers.module';
+import { BrandsModule } from './modules/brands/brands.module';
+import { HomepageModule } from './modules/homepage/homepage.module';
+import { DistributorsModule } from './modules/distributors/distributors.module';
+import { PoliciesModule } from './modules/policies/policies.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -58,6 +62,10 @@ import { CareersModule } from './modules/careers/careers.module';
     MarketingModule,
     CollectionsModule,
     CareersModule,
+    BrandsModule,
+    HomepageModule,
+    DistributorsModule,
+    PoliciesModule,
   ],
 })
 export class AppModule {}

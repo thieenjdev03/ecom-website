@@ -104,7 +104,15 @@ export class CategoriesService {
   }
 
   async remove(id: string): Promise<void> {
-    const category = await this.findOne(id);
-    await this.categoriesRepository.remove(category);
+    await this.findOne(id);
+    // Orphan references before delete (matches the intended ON DELETE SET NULL).
+    // The live DB FKs are NO ACTION, so nulling here prevents a 500 on subcategories,
+    // products, or sizes that point at this category. distributor_categories cascades.
+    await this.categoriesRepository.manager.transaction(async (manager) => {
+      await manager.query('UPDATE categories SET parent_id = NULL WHERE parent_id = $1', [id]);
+      await manager.query('UPDATE products SET category_id = NULL WHERE category_id = $1', [id]);
+      await manager.query('UPDATE sizes SET "categoryId" = NULL WHERE "categoryId" = $1', [id]);
+      await manager.delete(Category, { id });
+    });
   }
 }

@@ -7,7 +7,7 @@ export type LangObject = Record<string, string | null>;
 
 export interface ProductVariant {
   name: LangObject;
-  color_id: string;
+  color_id?: string;
   size_id: string;
   sku: string;
   price: number;

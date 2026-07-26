@@ -199,9 +199,9 @@ export class OrdersService {
       }
 
       // Validate payment method if provided
-      if (updateOrderDto.paymentMethod && !['PAYPAL', 'STRIPE', 'COD'].includes(updateOrderDto.paymentMethod)) {
+      if (updateOrderDto.paymentMethod && !['PAYPAL', 'STRIPE', 'COD', 'VIETQR'].includes(updateOrderDto.paymentMethod)) {
         throw new BadRequestException(
-          `Invalid payment method "${updateOrderDto.paymentMethod}". Valid options are: PAYPAL, STRIPE, COD.`
+          `Invalid payment method "${updateOrderDto.paymentMethod}". Valid options are: PAYPAL, STRIPE, COD, VIETQR.`
         );
       }
 

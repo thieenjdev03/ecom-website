@@ -15,12 +15,29 @@ export class QueryCollectionDto {
   @Max(100)
   limit?: number = 20;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     example: 'eyJpZCI6IjEyMyIsImNyZWF0ZWRfYXQiOiIyMDI0LTAxLTAxVDAwOjAwOjAwLjAwMFoifQ==',
     description: 'Cursor token for pagination'
   })
   @IsOptional()
   @IsString()
   cursor?: string;
+
+  @ApiPropertyOptional({
+    example: 'must_try',
+    description: 'Filter collections by their homepage section marker',
+  })
+  @IsOptional()
+  @IsString()
+  homepage_section?: string;
+
+  @ApiPropertyOptional({
+    example: 'en',
+    description: 'Locale used to resolve product name/slug/description when fetching a collection\'s products (default: en)',
+    enum: ['en', 'vi'],
+  })
+  @IsOptional()
+  @IsString()
+  locale?: string = 'en';
 }
 

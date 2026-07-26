@@ -66,8 +66,14 @@ export class OrdersController {
   })
   @ApiResponse({ status: 400, description: 'Invalid order data' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async create(@Body() createOrderDto: CreateOrderDto) {
-    return await this.ordersService.create(createOrderDto);
+  async create(@Body() createOrderDto: CreateOrderDto, @Request() req) {
+    // Never trust a client-supplied userId — always the authenticated caller's own ID,
+    // otherwise any user could place orders under someone else's account.
+    const userId = req.user?.sub || req.user?.userId;
+    if (!userId) {
+      throw new UnauthorizedException('Unauthorized');
+    }
+    return await this.ordersService.create({ ...createOrderDto, userId });
   }
 
   @Get()

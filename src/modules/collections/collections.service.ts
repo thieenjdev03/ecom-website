@@ -75,13 +75,17 @@ export class CollectionsService {
    */
   async findAll(query: QueryCollectionDto): Promise<CursorPaginatedResponse<Collection>> {
     try {
-      const { limit = 20, cursor } = query;
-      
+      const { limit = 20, cursor, homepage_section } = query;
+
       const queryBuilder = this.collectionsRepository
         .createQueryBuilder('collection')
         .orderBy('collection.created_at', 'DESC')
         .addOrderBy('collection.id', 'DESC')
         .take(limit + 1); // Fetch one extra to check if there's a next page
+
+      if (homepage_section) {
+        queryBuilder.andWhere('collection.homepage_section = :homepage_section', { homepage_section });
+      }
 
       // Apply cursor pagination if cursor is provided
       if (cursor) {
@@ -92,7 +96,7 @@ export class CollectionsService {
         }
 
         // Use tuple comparison: (created_at, id) < (cursor.created_at, cursor.id)
-        queryBuilder.where(
+        queryBuilder.andWhere(
           `(collection.created_at, collection.id) < (:created_at, :id)`,
           {
             created_at: decodedCursor.created_at,
@@ -275,15 +279,47 @@ export class CollectionsService {
   }
 
   /**
-   * Get products in a collection with cursor-based pagination
+   * Resolve a { vi, en } JSONB field to a plain string for the given locale.
+   * Mirrors ProductsService's private getLocalizedValue — this endpoint queries
+   * Product directly (not through ProductsService), so it needs its own copy.
+   */
+  private getLocalizedValue(field: any, locale: string = 'en'): string {
+    if (!field) return '';
+    if (typeof field === 'string') return field;
+    // || (không phải ??) để bỏ qua chuỗi rỗng: locale -> en -> giá trị non-empty bất kỳ.
+    const firstNonEmpty = Object.values(field).find((v) => typeof v === 'string' && v.trim() !== '');
+    return field[locale] || field['en'] || (firstNonEmpty as string) || '';
+  }
+
+  private resolveProductLocale(product: Product, locale: string): any {
+    return {
+      ...product,
+      name: this.getLocalizedValue(product.name, locale),
+      slug: this.getLocalizedValue(product.slug, locale),
+      description: this.getLocalizedValue(product.description, locale),
+      short_description: this.getLocalizedValue(product.short_description, locale),
+      meta_title: product.meta_title ? this.getLocalizedValue(product.meta_title, locale) : null,
+      meta_description: product.meta_description ? this.getLocalizedValue(product.meta_description, locale) : null,
+      category: product.category
+        ? {
+            id: product.category.id,
+            name: this.getLocalizedValue(product.category.name as any, locale),
+            slug: this.getLocalizedValue(product.category.slug as any, locale),
+          }
+        : null,
+    };
+  }
+
+  /**
+   * Get products in a collection with cursor-based pagination, locale-resolved.
    */
   async getProducts(
     id: string,
     query: QueryCollectionDto
-  ): Promise<CursorPaginatedResponse<Product>> {
+  ): Promise<CursorPaginatedResponse<any>> {
     try {
       const collection = await this.findOne(id);
-      const { limit = 20, cursor } = query;
+      const { limit = 20, cursor, locale = 'en' } = query;
 
       const queryBuilder = this.productsRepository
         .createQueryBuilder('product')
@@ -318,9 +354,10 @@ export class CollectionsService {
       }
 
       const products = await queryBuilder.getMany();
+      const localizedProducts = products.map((p) => this.resolveProductLocale(p, locale));
 
       return buildCursorResponse(
-        products,
+        localizedProducts,
         limit,
         (item) => ({
           id: item.id,

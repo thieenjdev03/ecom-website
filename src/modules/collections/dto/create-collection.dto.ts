@@ -53,7 +53,7 @@ export class CreateCollectionDto {
   @IsString()
   seo_description?: string;
 
-  @ApiPropertyOptional({ 
+  @ApiPropertyOptional({
     example: true,
     description: 'Is collection active',
     default: true
@@ -61,5 +61,14 @@ export class CreateCollectionDto {
   @IsOptional()
   @IsBoolean()
   is_active?: boolean;
+
+  @ApiPropertyOptional({
+    example: 'must_try',
+    description: 'Marks this collection as the source for a homepage section (e.g. "must_try"). At most one active collection should claim a given section.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  homepage_section?: string;
 }
 

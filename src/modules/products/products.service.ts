@@ -40,9 +40,12 @@ export class ProductsService {
     if (typeof field === 'string') {
       return field;
     }
-    // If it's an object (multi-language), get the localized value
+    // If it's an object (multi-language), get the localized value.
+    // Dùng ?? -> || để bỏ qua chuỗi RỖNG (sản phẩm chỉ nhập 1 ngôn ngữ vẫn hiển thị được):
+    // locale yêu cầu -> en -> giá trị non-empty bất kỳ.
     if (typeof field === 'object') {
-      return field[locale] ?? field['en'] ?? '';
+      const firstNonEmpty = Object.values(field).find((v) => typeof v === 'string' && v.trim() !== '');
+      return field[locale] || field['en'] || firstNonEmpty || '';
     }
     return '';
   }

@@ -2,7 +2,7 @@ import { IsString, IsEmail, IsOptional, IsArray, ValidateNested, IsNumber, IsIn 
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class OrderItemDto {
+export class MailOrderItemDto {
   @ApiProperty({
     description: 'Product name',
     example: 'Premium Cotton T-Shirt',
@@ -71,7 +71,7 @@ export class SendOrderConfirmationDto {
 
   @ApiProperty({
     description: 'Order items',
-    type: [OrderItemDto],
+    type: [MailOrderItemDto],
     example: [
       {
         name: 'Premium Cotton T-Shirt',
@@ -82,8 +82,8 @@ export class SendOrderConfirmationDto {
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => OrderItemDto)
-  items: OrderItemDto[];
+  @Type(() => MailOrderItemDto)
+  items: MailOrderItemDto[];
 }
 
 export class SendPasswordResetDto {

@@ -21,7 +21,14 @@ export class SizesService {
       category = await this.categoryRepo.findOne({ where: { id: dto.categoryId } });
       if (!category) throw new NotFoundException('Category not found');
     }
-    const entity = this.sizeRepo.create({ name: dto.name, category, sortOrder: dto.sortOrder ?? 0 });
+    const entity = this.sizeRepo.create({
+      name: dto.name,
+      category,
+      unit: dto.unit ?? null,
+      packQty: dto.packQty ?? null,
+      volumeMl: dto.volumeMl ?? null,
+      sortOrder: dto.sortOrder ?? 0,
+    });
     return await this.sizeRepo.save(entity);
   }
 
@@ -47,6 +54,9 @@ export class SizesService {
       size.category = category;
     }
     if (dto.name !== undefined) size.name = dto.name;
+    if (dto.unit !== undefined) size.unit = dto.unit ?? null;
+    if (dto.packQty !== undefined) size.packQty = dto.packQty ?? null;
+    if (dto.volumeMl !== undefined) size.volumeMl = dto.volumeMl ?? null;
     if (dto.sortOrder !== undefined) size.sortOrder = dto.sortOrder;
     return await this.sizeRepo.save(size);
   }

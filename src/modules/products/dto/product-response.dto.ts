@@ -43,8 +43,17 @@ export class ProductVariantSizeDto {
   @ApiProperty({ format: 'uuid' })
   id: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '24 cây / thùng' })
   name: string;
+
+  @ApiPropertyOptional({ nullable: true, example: 'cây' })
+  unit?: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 24, description: 'Số lượng / thùng' })
+  packQty?: number | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 250, description: 'Dung tích (ml)' })
+  volumeMl?: number | null;
 }
 
 export class ProductVariantResponseDto {
@@ -63,8 +72,8 @@ export class ProductVariantResponseDto {
   @ApiPropertyOptional({ nullable: true })
   barcode?: string;
 
-  @ApiProperty({ format: 'uuid' })
-  color_id: string;
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  color_id?: string;
 
   @ApiProperty({ format: 'uuid' })
   size_id: string;

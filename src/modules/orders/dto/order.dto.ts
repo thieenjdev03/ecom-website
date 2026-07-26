@@ -167,10 +167,10 @@ export class CreateOrderDto {
   @Type(() => OrderSummaryDto)
   summary: OrderSummaryDto;
 
-  @ApiPropertyOptional({ description: 'Payment method', enum: ['PAYPAL', 'STRIPE', 'COD'], example: 'PAYPAL' })
+  @ApiPropertyOptional({ description: 'Payment method', enum: ['PAYPAL', 'STRIPE', 'COD', 'VIETQR'], example: 'VIETQR' })
   @IsOptional()
-  @IsEnum(['PAYPAL', 'STRIPE', 'COD'])
-  paymentMethod?: 'PAYPAL' | 'STRIPE' | 'COD';
+  @IsEnum(['PAYPAL', 'STRIPE', 'COD', 'VIETQR'])
+  paymentMethod?: 'PAYPAL' | 'STRIPE' | 'COD' | 'VIETQR';
 
   @ApiPropertyOptional({ description: 'Shipping address ID', example: 'uuid-string' })
   @IsOptional()
@@ -203,10 +203,10 @@ export class UpdateOrderDto {
   @IsEnum(OrderStatus)
   status?: OrderStatus;
 
-  @ApiPropertyOptional({ description: 'Payment method', enum: ['PAYPAL', 'STRIPE', 'COD'], example: 'PAYPAL' })
+  @ApiPropertyOptional({ description: 'Payment method', enum: ['PAYPAL', 'STRIPE', 'COD', 'VIETQR'], example: 'VIETQR' })
   @IsOptional()
-  @IsEnum(['PAYPAL', 'STRIPE', 'COD'])
-  paymentMethod?: 'PAYPAL' | 'STRIPE' | 'COD';
+  @IsEnum(['PAYPAL', 'STRIPE', 'COD', 'VIETQR'])
+  paymentMethod?: 'PAYPAL' | 'STRIPE' | 'COD' | 'VIETQR';
 
   @ApiPropertyOptional({ description: 'PayPal order ID', example: '6S5011234B5562345' })
   @IsOptional()

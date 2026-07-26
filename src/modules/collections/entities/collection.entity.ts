@@ -27,6 +27,9 @@ export class Collection {
   @Column({ default: true })
   is_active: boolean;
 
+  @Column({ length: 50, nullable: true })
+  homepage_section: string;
+
   @OneToMany(() => ProductCollection, (productCollection) => productCollection.collection)
   productCollections: ProductCollection[];
 

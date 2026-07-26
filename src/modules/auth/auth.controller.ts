@@ -3,6 +3,7 @@ import { ApiBadRequestResponse, ApiCreatedResponse, ApiOkResponse, ApiOperation,
 import { AuthService } from './auth.service';
 import { RegisterDto } from '../../auth/dto/register.dto';
 import { LoginDto } from '../../auth/dto/login.dto';
+import { LoginResponseDto, LoginUserDto } from '../../auth/dto/login-response.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -12,7 +13,7 @@ export class AuthController {
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register new user' })
-  @ApiCreatedResponse({ description: 'User registered successfully' })
+  @ApiCreatedResponse({ description: 'User registered successfully', type: LoginUserDto })
   @ApiBadRequestResponse({ description: 'Invalid input' })
   async register(@Body() dto: RegisterDto) {
     return this.authService.register(
@@ -29,7 +30,7 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login to get access token' })
-  @ApiOkResponse({ description: 'Login successful' })
+  @ApiOkResponse({ description: 'Login successful', type: LoginResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid input' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password);

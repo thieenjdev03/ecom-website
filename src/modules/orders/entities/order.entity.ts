@@ -72,7 +72,7 @@ export class Order {
   tracking_history: TrackingHistoryItem[];
 
   @Column({ length: 20, nullable: true })
-  paymentMethod: 'PAYPAL' | 'STRIPE' | 'COD';
+  paymentMethod: 'PAYPAL' | 'STRIPE' | 'COD' | 'VIETQR';
 
   // PayPal integration
   @Column({ length: 100, nullable: true })
