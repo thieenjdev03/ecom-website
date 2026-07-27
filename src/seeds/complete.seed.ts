@@ -79,11 +79,11 @@ export async function completeSeeder(dataSource: DataSource) {
   if (existingSizes.length === 0) {
     const tshirtCategory = categories.find((c) => c.slug === 't-shirts') || categories[0];
     const sizes = await sizeRepo.save([
-      sizeRepo.create({ name: 'S', category: tshirtCategory, sortOrder: 1 }),
-      sizeRepo.create({ name: 'M', category: tshirtCategory, sortOrder: 2 }),
-      sizeRepo.create({ name: 'L', category: tshirtCategory, sortOrder: 3 }),
-      sizeRepo.create({ name: 'XL', category: tshirtCategory, sortOrder: 4 }),
-      sizeRepo.create({ name: 'XXL', category: tshirtCategory, sortOrder: 5 }),
+      sizeRepo.create({ name: 'S', categories: [tshirtCategory], sortOrder: 1 }),
+      sizeRepo.create({ name: 'M', categories: [tshirtCategory], sortOrder: 2 }),
+      sizeRepo.create({ name: 'L', categories: [tshirtCategory], sortOrder: 3 }),
+      sizeRepo.create({ name: 'XL', categories: [tshirtCategory], sortOrder: 4 }),
+      sizeRepo.create({ name: 'XXL', categories: [tshirtCategory], sortOrder: 5 }),
     ]);
     console.log(`✅ Created ${sizes.length} sizes`);
   } else {

@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, Index } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToMany, JoinTable } from 'typeorm';
 import { Category } from '../../products/entities/category.entity';
 
 @Entity('sizes')
@@ -10,9 +10,13 @@ export class Size {
   @Column({ length: 100 })
   name: string;
 
-  @ManyToOne(() => Category, { nullable: true })
-  @Index()
-  category: Category;
+  @ManyToMany(() => Category)
+  @JoinTable({
+    name: 'size_categories',
+    joinColumn: { name: 'size_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'category_id', referencedColumnName: 'id' },
+  })
+  categories: Category[];
 
   // Đơn vị lẻ: 'cây', 'hộp', 'lít', ... (packaging). Null for clothing sizes.
   @Column({ length: 20, nullable: true })

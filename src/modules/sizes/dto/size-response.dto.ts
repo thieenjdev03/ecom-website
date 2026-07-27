@@ -27,8 +27,8 @@ export class SizeDto {
   @ApiProperty()
   sortOrder: number;
 
-  @ApiPropertyOptional({ type: SizeCategoryDto, nullable: true })
-  category?: SizeCategoryDto | null;
+  @ApiProperty({ type: [SizeCategoryDto] })
+  categories: SizeCategoryDto[];
 
   @ApiProperty({ format: 'date-time' })
   createdAt: Date;

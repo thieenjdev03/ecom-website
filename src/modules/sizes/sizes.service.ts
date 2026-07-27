@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Size } from './entities/size.entity';
 import { CreateSizeDto } from './dto/create-size.dto';
 import { UpdateSizeDto } from './dto/update-size.dto';
@@ -15,15 +15,23 @@ export class SizesService {
     private readonly categoryRepo: Repository<Category>,
   ) {}
 
-  async create(dto: CreateSizeDto): Promise<Size> {
-    let category: Category | undefined = undefined;
-    if (dto.categoryId) {
-      category = await this.categoryRepo.findOne({ where: { id: dto.categoryId } });
-      if (!category) throw new NotFoundException('Category not found');
+  private async resolveCategories(categoryIds: string[] | undefined): Promise<Category[]> {
+    if (!categoryIds?.length) return [];
+
+    const categories = await this.categoryRepo.findBy({ id: In(categoryIds) });
+    if (categories.length !== categoryIds.length) {
+      const foundIds = new Set(categories.map((category) => category.id));
+      const missingIds = categoryIds.filter((id) => !foundIds.has(id));
+      throw new NotFoundException(`Categories not found: ${missingIds.join(', ')}`);
     }
+    return categories;
+  }
+
+  async create(dto: CreateSizeDto): Promise<Size> {
+    const categories = await this.resolveCategories(dto.categoryIds);
     const entity = this.sizeRepo.create({
       name: dto.name,
-      category,
+      categories,
       unit: dto.unit ?? null,
       packQty: dto.packQty ?? null,
       volumeMl: dto.volumeMl ?? null,
@@ -33,25 +41,29 @@ export class SizesService {
   }
 
   async findAll(categoryId?: string): Promise<Size[]> {
-    const qb = this.sizeRepo.createQueryBuilder('size').leftJoinAndSelect('size.category', 'category');
+    const qb = this.sizeRepo.createQueryBuilder('size').leftJoinAndSelect('size.categories', 'categories');
     if (categoryId) {
-      qb.where('category.id = :categoryId', { categoryId });
+      qb
+        .leftJoin('size.categories', 'filterCategory')
+        .andWhere(
+          '(filterCategory.id = :categoryId OR NOT EXISTS ' +
+            '(SELECT 1 FROM size_categories global_scope WHERE global_scope.size_id = size.id))',
+          { categoryId },
+        );
     }
-    return await qb.orderBy('size.sortOrder', 'ASC').getMany();
+    return await qb.distinct(true).orderBy('size.sortOrder', 'ASC').getMany();
   }
 
   async findOne(id: string): Promise<Size> {
-    const size = await this.sizeRepo.findOne({ where: { id }, relations: ['category'] });
+    const size = await this.sizeRepo.findOne({ where: { id }, relations: ['categories'] });
     if (!size) throw new NotFoundException('Size not found');
     return size;
   }
 
   async update(id: string, dto: UpdateSizeDto): Promise<Size> {
     const size = await this.findOne(id);
-    if (dto.categoryId) {
-      const category = await this.categoryRepo.findOne({ where: { id: dto.categoryId } });
-      if (!category) throw new NotFoundException('Category not found');
-      size.category = category;
+    if (dto.categoryIds !== undefined) {
+      size.categories = await this.resolveCategories(dto.categoryIds);
     }
     if (dto.name !== undefined) size.name = dto.name;
     if (dto.unit !== undefined) size.unit = dto.unit ?? null;

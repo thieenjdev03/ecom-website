@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUUID, IsInt, Min, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsInt, Min, MaxLength, IsArray, ArrayUnique } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -8,10 +8,16 @@ export class CreateSizeDto {
   @MaxLength(100)
   name: string;
 
-  @ApiPropertyOptional({ format: 'uuid', description: 'Category scope (optional)' })
+  @ApiPropertyOptional({
+    type: [String],
+    format: 'uuid',
+    description: 'Các category có thể dùng quy cách này; mảng rỗng = dùng chung toàn hệ thống',
+  })
   @IsOptional()
-  @IsUUID()
-  categoryId?: string;
+  @IsArray()
+  @ArrayUnique()
+  @IsUUID('4', { each: true })
+  categoryIds?: string[];
 
   @ApiPropertyOptional({ example: 'cây', description: "Đơn vị lẻ: 'cây', 'hộp', 'lít'..." })
   @IsOptional()

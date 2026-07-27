@@ -28,8 +28,8 @@ async function run() {
     const blue = await colorRepo.save(colorRepo.create({ name: 'Blue', hexCode: '#0000FF' }));
 
     // Seed sizes
-    const sizeM = await sizeRepo.save(sizeRepo.create({ name: 'M', category: tshirts, sortOrder: 1 }));
-    const sizeL = await sizeRepo.save(sizeRepo.create({ name: 'L', category: tshirts, sortOrder: 2 }));
+    const sizeM = await sizeRepo.save(sizeRepo.create({ name: 'M', categories: [tshirts], sortOrder: 1 }));
+    const sizeL = await sizeRepo.save(sizeRepo.create({ name: 'L', categories: [tshirts], sortOrder: 2 }));
 
     // Seed product
     const product = await productRepo.save(
