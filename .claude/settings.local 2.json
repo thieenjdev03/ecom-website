@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npm test *)",
+      "Bash(timeout 120 npm run openapi:export)",
+      "Bash(npm run *)"
+    ]
+  }
+}

@@ -35,7 +35,12 @@ export class User {
   @Column({ unique: false, nullable: true })
   phoneNumber: string;
 
-  @Column()
+  /**
+   * `select: false` — KHÔNG BỎ. Thiếu nó thì mọi query load relation `user`
+   * (orders, carts…) đều trả bcrypt hash ra response. Nơi cần đọc phải xin
+   * tường minh: `.addSelect('u.passwordHash')` hoặc `select: { passwordHash: true }`.
+   */
+  @Column({ select: false })
   passwordHash: string;
 
   @ApiProperty({
@@ -50,7 +55,8 @@ export class User {
   })
   role: Role;
 
-  @Column({ nullable: true })
+  /** `select: false` — xem ghi chú ở `passwordHash`. */
+  @Column({ nullable: true, select: false })
   refreshTokenHash: string;
 
   @ApiPropertyOptional({

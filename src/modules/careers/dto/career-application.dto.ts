@@ -1,4 +1,16 @@
-import { IsString, IsOptional, IsEmail, IsIn, MaxLength, MinLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEmail,
+  IsIn,
+  IsInt,
+  IsUUID,
+  MaxLength,
+  MinLength,
+  Min,
+  Max,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export const CAREER_APPLICATION_STATUSES = ['new', 'reviewing', 'rejected', 'hired'] as const;
@@ -68,4 +80,51 @@ export class CareerApplicationDto {
 
   @ApiProperty({ format: 'date-time' })
   created_at: Date;
+}
+
+/** Cross-job listing — carries the job it belongs to so admin can show one table. */
+export class CareerApplicationListItemDto extends CareerApplicationDto {
+  @ApiProperty({ description: 'Title of the job applied for' })
+  career_title: string;
+
+  @ApiProperty({ description: 'Slug of the job applied for' })
+  career_slug: string;
+}
+
+export class CareerApplicationListDto {
+  @ApiProperty({ type: [CareerApplicationListItemDto] })
+  items: CareerApplicationListItemDto[];
+
+  @ApiProperty({ nullable: true, description: 'Cursor token for the next page' })
+  nextCursor: string | null;
+}
+
+export class QueryCareerApplicationDto {
+  @ApiPropertyOptional({ enum: CAREER_APPLICATION_STATUSES })
+  @IsOptional()
+  @IsIn(CAREER_APPLICATION_STATUSES as unknown as string[])
+  status?: (typeof CAREER_APPLICATION_STATUSES)[number];
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Filter by job' })
+  @IsOptional()
+  @IsUUID()
+  career_id?: string;
+
+  @ApiPropertyOptional({ description: 'Search in applicant name or email' })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional({ default: 20 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number = 20;
+
+  @ApiPropertyOptional({ description: 'Cursor token for pagination' })
+  @IsOptional()
+  @IsString()
+  cursor?: string;
 }

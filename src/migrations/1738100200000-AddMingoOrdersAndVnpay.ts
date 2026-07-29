@@ -13,7 +13,7 @@ export class AddMingoOrdersAndVnpay1738100200000 implements MigrationInterface {
     await queryRunner.query(`
       ALTER TABLE orders
       ADD CONSTRAINT fk_orders_user
-      FOREIGN KEY ("userId") REFERENCES "User"(id) ON DELETE SET NULL;
+      FOREIGN KEY ("userId") REFERENCES "user"(id) ON DELETE SET NULL;
     `);
     await queryRunner.query(`
       ALTER TABLE orders
@@ -71,7 +71,7 @@ export class AddMingoOrdersAndVnpay1738100200000 implements MigrationInterface {
     await queryRunner.query(`
       ALTER TABLE orders
       ADD CONSTRAINT fk_orders_user
-      FOREIGN KEY ("userId") REFERENCES "User"(id) ON DELETE CASCADE;
+      FOREIGN KEY ("userId") REFERENCES "user"(id) ON DELETE CASCADE;
     `);
     await queryRunner.query(`ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_status_check;`);
     await queryRunner.query(`

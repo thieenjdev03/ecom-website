@@ -147,4 +147,72 @@ describe('CareersService', () => {
       ).rejects.toBeInstanceOf(BadRequestException);
     });
   });
+
+  describe('findAllApplications', () => {
+    let qb: any;
+
+    const application = (over: any = {}) => ({
+      id: 'a1',
+      career_id: 'c1',
+      full_name: 'Nguyen Van A',
+      email: 'a@b.c',
+      phone: '090',
+      cover_letter: null,
+      cv_url: 'https://cdn/cv.pdf',
+      status: 'new',
+      created_at: new Date('2026-01-01'),
+      career: { title: 'Frontend Dev', slug: 'frontend-dev' },
+      ...over,
+    });
+
+    beforeEach(() => {
+      qb = {
+        innerJoinAndSelect: jest.fn().mockReturnThis(),
+        withDeleted: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([application()]),
+      };
+      applicationsRepo.createQueryBuilder = jest.fn(() => qb);
+    });
+
+    it('flattens the joined career onto each item', async () => {
+      const res = await service.findAllApplications({});
+      expect(res.items[0].career_title).toBe('Frontend Dev');
+      expect(res.items[0].career_slug).toBe('frontend-dev');
+      expect(res.nextCursor).toBeNull();
+    });
+
+    // A soft-deleted job must not make its applications vanish from the inbox.
+    it('includes soft-deleted careers in the join', async () => {
+      await service.findAllApplications({});
+      expect(qb.withDeleted).toHaveBeenCalled();
+    });
+
+    it('applies status, career and search filters', async () => {
+      await service.findAllApplications({ status: 'new', career_id: 'c1', search: 'nguyen' });
+      const clauses = qb.andWhere.mock.calls.map((c: any[]) => c[0]).join(' | ');
+      expect(clauses).toContain('app.status = :status');
+      expect(clauses).toContain('app.career_id = :career_id');
+      expect(clauses).toContain('ILIKE :search');
+    });
+
+    it('rejects a malformed cursor', async () => {
+      await expect(
+        service.findAllApplications({ cursor: 'not-base64-json' }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('returns a nextCursor when there are more rows than the limit', async () => {
+      qb.getMany.mockResolvedValue([
+        application({ id: 'a1' }),
+        application({ id: 'a2' }),
+      ]);
+      const res = await service.findAllApplications({ limit: 1 });
+      expect(res.items).toHaveLength(1);
+      expect(res.nextCursor).not.toBeNull();
+    });
+  });
 });

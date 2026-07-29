@@ -12,7 +12,7 @@ export class CreateMingoCarts1738100150000 implements MigrationInterface {
         created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
         CONSTRAINT fk_carts_user
-          FOREIGN KEY (user_id) REFERENCES "User"(id) ON DELETE CASCADE
+          FOREIGN KEY (user_id) REFERENCES "user"(id) ON DELETE CASCADE
       );
     `);
     await queryRunner.query(`

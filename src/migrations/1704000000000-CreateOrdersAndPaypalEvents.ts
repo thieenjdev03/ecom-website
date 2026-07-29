@@ -67,7 +67,7 @@ export class CreateOrdersAndPaypalEvents1704000000000 implements MigrationInterf
           "updatedAt" TIMESTAMP DEFAULT NOW(),
           
           -- Foreign key constraints
-          CONSTRAINT fk_orders_user FOREIGN KEY ("userId") REFERENCES "User"(id) ON DELETE CASCADE,
+          CONSTRAINT fk_orders_user FOREIGN KEY ("userId") REFERENCES "user"(id) ON DELETE CASCADE,
           CONSTRAINT fk_orders_shipping_address FOREIGN KEY ("shippingAddressId") REFERENCES addresses(id) ON DELETE SET NULL,
           CONSTRAINT fk_orders_billing_address FOREIGN KEY ("billingAddressId") REFERENCES addresses(id) ON DELETE SET NULL
         );

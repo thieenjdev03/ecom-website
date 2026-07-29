@@ -13,7 +13,12 @@ import { CareerApplication } from './entities/career-application.entity';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
 import { QueryCareerDto } from './dto/query-career.dto';
-import { ApplyCareerDto, UpdateCareerApplicationDto } from './dto/career-application.dto';
+import {
+  ApplyCareerDto,
+  UpdateCareerApplicationDto,
+  QueryCareerApplicationDto,
+  CareerApplicationListItemDto,
+} from './dto/career-application.dto';
 import { FilesService } from '../files/files.service';
 import {
   decodeCursor,
@@ -235,6 +240,60 @@ export class CareersService {
       where: { career_id: careerId },
       order: { created_at: 'DESC' },
     });
+  }
+
+  /** Cross-job application inbox for admin, newest first. */
+  async findAllApplications(
+    query: QueryCareerApplicationDto,
+  ): Promise<CursorPaginatedResponse<CareerApplicationListItemDto>> {
+    const { limit = 20, cursor, status, career_id, search } = query;
+
+    const qb = this.applicationsRepository
+      .createQueryBuilder('app')
+      .innerJoinAndSelect('app.career', 'career')
+      // Careers are soft-deleted; without this an application would silently
+      // disappear from the admin inbox the moment its job posting is removed.
+      .withDeleted()
+      .orderBy('app.created_at', 'DESC')
+      .addOrderBy('app.id', 'DESC')
+      .take(limit + 1);
+
+    if (status) qb.andWhere('app.status = :status', { status });
+    if (career_id) qb.andWhere('app.career_id = :career_id', { career_id });
+    if (search) {
+      qb.andWhere('(app.full_name ILIKE :search OR app.email ILIKE :search)', {
+        search: `%${search}%`,
+      });
+    }
+
+    if (cursor) {
+      const decoded = decodeCursor(cursor);
+      if (!decoded) throw new BadRequestException('Invalid cursor token');
+      qb.andWhere('(app.created_at, app.id) < (:created_at, :id)', {
+        created_at: decoded.created_at,
+        id: decoded.id,
+      });
+    }
+
+    const applications = await qb.getMany();
+    const items = applications.map((app) => ({
+      id: app.id,
+      career_id: app.career_id,
+      full_name: app.full_name,
+      email: app.email,
+      phone: app.phone,
+      cover_letter: app.cover_letter ?? null,
+      cv_url: app.cv_url,
+      status: app.status,
+      created_at: app.created_at,
+      career_title: app.career.title,
+      career_slug: app.career.slug,
+    }));
+
+    return buildCursorResponse(items, limit, (item) => ({
+      id: item.id,
+      created_at: item.created_at,
+    }));
   }
 
   async updateApplication(
