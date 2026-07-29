@@ -20,7 +20,10 @@ export default registerAs('shipping', () => {
     supportedMethods:
       configuredMethods.length > 0 ? configuredMethods : defaultMethods,
     credentialsJson: process.env.GOOGLE_SHEETS_SECRET_KEY,
+    mingoHomeProvinceCode: process.env.MINGO_HOME_PROVINCE_CODE ?? '',
+    mingoInnerDistrictCodes: process.env.MINGO_INNER_DISTRICT_CODES ?? '',
+    mingoInnerCityFee: Number(process.env.MINGO_INNER_CITY_FEE ?? 25000),
+    mingoOuterCityFee: Number(process.env.MINGO_OUTER_CITY_FEE ?? 35000),
   };
 });
-
 

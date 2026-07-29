@@ -172,6 +172,33 @@ export class OrdersService {
     return order;
   }
 
+  async findOneForUser(id: string, userId: string): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: { id, userId },
+      relations: ['shippingAddress', 'billingAddress'],
+    });
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+    await this.populateProductThumbnails(order);
+    return order;
+  }
+
+  async findByOrderNumberForUser(
+    orderNumber: string,
+    userId: string,
+  ): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: { orderNumber, userId },
+      relations: ['shippingAddress', 'billingAddress'],
+    });
+    if (!order) {
+      throw new NotFoundException(`Order with number ${orderNumber} not found`);
+    }
+    await this.populateProductThumbnails(order);
+    return order;
+  }
+
   async findByPaypalOrderId(paypalOrderId: string): Promise<Order> {
     const order = await this.orderRepository.findOne({
       where: { paypalOrderId },
@@ -340,19 +367,14 @@ export class OrdersService {
 
   // Order status transition map according to business rules
   private readonly ORDER_STATUS_FLOW: Record<OrderStatus, OrderStatus[]> = {
-    [OrderStatus.PENDING_PAYMENT]: [OrderStatus.PAID, OrderStatus.CANCELLED],
-    [OrderStatus.PAID]: [OrderStatus.PROCESSING, OrderStatus.REFUNDED],
-    [OrderStatus.PROCESSING]: [OrderStatus.PACKED, OrderStatus.CANCELLED],
-    [OrderStatus.PACKED]: [OrderStatus.READY_TO_GO],
-    [OrderStatus.READY_TO_GO]: [OrderStatus.AT_CARRIER_FACILITY],
-    [OrderStatus.AT_CARRIER_FACILITY]: [OrderStatus.IN_TRANSIT],
-    [OrderStatus.IN_TRANSIT]: [OrderStatus.ARRIVED_IN_COUNTRY],
-    [OrderStatus.ARRIVED_IN_COUNTRY]: [OrderStatus.AT_LOCAL_FACILITY],
-    [OrderStatus.AT_LOCAL_FACILITY]: [OrderStatus.OUT_FOR_DELIVERY],
-    [OrderStatus.OUT_FOR_DELIVERY]: [OrderStatus.DELIVERED, OrderStatus.FAILED],
-    [OrderStatus.DELIVERED]: [],
-    [OrderStatus.FAILED]: [OrderStatus.PROCESSING, OrderStatus.REFUNDED],
+    [OrderStatus.PENDING_PAYMENT]: [OrderStatus.PAID, OrderStatus.CANCELLED, OrderStatus.FAILED],
+    [OrderStatus.PAID]: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED, OrderStatus.REFUNDED],
+    [OrderStatus.CONFIRMED]: [OrderStatus.PACKED, OrderStatus.CANCELLED],
+    [OrderStatus.PACKED]: [OrderStatus.IN_TRANSIT, OrderStatus.CANCELLED],
+    [OrderStatus.IN_TRANSIT]: [OrderStatus.DELIVERED, OrderStatus.FAILED],
+    [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED],
     [OrderStatus.CANCELLED]: [OrderStatus.REFUNDED],
+    [OrderStatus.FAILED]: [OrderStatus.CONFIRMED, OrderStatus.REFUNDED],
     [OrderStatus.REFUNDED]: [],
   };
 

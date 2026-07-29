@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from './config/app.config';
 import dbConfig from './config/db.config';
 import shippingConfig from './config/shipping.config';
+import vnpayConfig from './config/vnpay.config';
 
 // Modules
 import { AuthModule } from './modules/auth/auth.module';
@@ -26,11 +27,14 @@ import { BrandsModule } from './modules/brands/brands.module';
 import { HomepageModule } from './modules/homepage/homepage.module';
 import { DistributorsModule } from './modules/distributors/distributors.module';
 import { PoliciesModule } from './modules/policies/policies.module';
+import { CartModule } from './modules/cart/cart.module';
+import { VnpayModule } from './modules/vnpay/vnpay.module';
+import { CheckoutModule } from './modules/checkout/checkout.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, dbConfig, shippingConfig],
+      load: [appConfig, dbConfig, shippingConfig, vnpayConfig],
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -66,6 +70,9 @@ import { PoliciesModule } from './modules/policies/policies.module';
     HomepageModule,
     DistributorsModule,
     PoliciesModule,
+    CartModule,
+    VnpayModule,
+    CheckoutModule,
   ],
 })
 export class AppModule {}

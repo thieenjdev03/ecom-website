@@ -293,13 +293,31 @@ export class CollectionsService {
 
   private resolveProductLocale(product: Product, locale: string): any {
     return {
-      ...product,
+      id: product.id,
       name: this.getLocalizedValue(product.name, locale),
       slug: this.getLocalizedValue(product.slug, locale),
       description: this.getLocalizedValue(product.description, locale),
       short_description: this.getLocalizedValue(product.short_description, locale),
-      meta_title: product.meta_title ? this.getLocalizedValue(product.meta_title, locale) : null,
-      meta_description: product.meta_description ? this.getLocalizedValue(product.meta_description, locale) : null,
+      price: Number(product.price),
+      sale_price: product.sale_price == null ? null : Number(product.sale_price),
+      compare_at_price:
+        product.compare_at_price == null ? null : Number(product.compare_at_price),
+      compareAtPrice:
+        product.compare_at_price == null ? null : Number(product.compare_at_price),
+      images: product.images ?? [],
+      stock_quantity: product.stock_quantity,
+      stock: product.stock_quantity,
+      availability:
+        product.status === 'active' && product.stock_quantity > 0
+          ? 'IN_STOCK'
+          : 'OUT_OF_STOCK',
+      status: product.status,
+      weight_grams:
+        product.weight_grams ??
+        (product.weight ? Math.round(Number(product.weight) * 1000) : null),
+      allergens: product.allergens ?? [],
+      nutrition: product.nutrition ?? null,
+      barcode: product.barcode ?? null,
       category: product.category
         ? {
             id: product.category.id,
@@ -307,6 +325,67 @@ export class CollectionsService {
             slug: this.getLocalizedValue(product.category.slug as any, locale),
           }
         : null,
+    };
+  }
+
+  async getStorefrontHome(locale = 'vi') {
+    const collections = await this.collectionsRepository.find({
+      where: { is_active: true },
+      order: { sort_order: 'ASC', created_at: 'ASC' },
+    });
+
+    const homepageCollections = collections.filter(
+      (collection) =>
+        collection.placement === 'HERO' ||
+        collection.placement === 'HOME_SECTION',
+    );
+
+    const sections = await Promise.all(
+      homepageCollections.map(async (collection) => {
+        const products = await this.productsRepository
+          .createQueryBuilder('product')
+          .innerJoin(
+            'product_collections',
+            'pc',
+            'pc.product_id = product.id AND pc.collection_id = :collectionId',
+            { collectionId: collection.id },
+          )
+          .leftJoinAndSelect('product.category', 'category')
+          .where('product.deleted_at IS NULL')
+          .andWhere('product.status = :status', { status: 'active' })
+          .orderBy('pc.created_at', 'ASC')
+          .take(12)
+          .getMany();
+
+        return {
+          id: collection.id,
+          slug: collection.slug,
+          name: collection.name,
+          description: collection.description ?? null,
+          bannerImageUrl: collection.banner_image_url ?? null,
+          mobileBannerImageUrl: collection.mobile_banner_image_url ?? null,
+          ctaLabel: collection.cta_label ?? null,
+          sortOrder: collection.sort_order,
+          homepageSection: collection.homepage_section ?? null,
+          products: products.map((product) =>
+            this.resolveProductLocale(product, locale),
+          ),
+          placement: collection.placement,
+        };
+      }),
+    );
+
+    return {
+      heroCollections: sections
+        .filter((section) => section.placement === 'HERO')
+        .map(({ placement, ...section }) => section),
+      homeSections: sections
+        .filter(
+          (section) =>
+            section.placement === 'HOME_SECTION' &&
+            section.products.length > 0,
+        )
+        .map(({ placement, ...section }) => section),
     };
   }
 
@@ -331,6 +410,7 @@ export class CollectionsService {
         )
         .leftJoinAndSelect('product.category', 'category')
         .where('product.deleted_at IS NULL')
+        .andWhere('product.status = :status', { status: 'active' })
         .orderBy('product.created_at', 'DESC')
         .addOrderBy('product.id', 'DESC')
         .take(limit + 1); // Fetch one extra to check if there's a next page
@@ -384,4 +464,3 @@ export class CollectionsService {
     });
   }
 }
-

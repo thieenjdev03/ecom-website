@@ -18,6 +18,18 @@ export class Collection {
   @Column({ length: 500, nullable: true })
   banner_image_url: string;
 
+  @Column({ length: 500, nullable: true })
+  mobile_banner_image_url: string;
+
+  @Column({ length: 100, nullable: true })
+  cta_label: string;
+
+  @Column({ length: 20, default: 'NORMAL' })
+  placement: 'HERO' | 'HOME_SECTION' | 'NORMAL';
+
+  @Column({ type: 'int', default: 0 })
+  sort_order: number;
+
   @Column({ length: 255, nullable: true })
   seo_title: string;
 
@@ -39,4 +51,3 @@ export class Collection {
   @UpdateDateColumn()
   updated_at: Date;
 }
-

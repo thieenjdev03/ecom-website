@@ -62,9 +62,15 @@ export class ProductsService {
       short_description: this.getLocalizedValue(product.short_description, locale),
       price: product.price,
       sale_price: product.sale_price,
-      cost_price: product.cost_price,
+      compare_at_price: product.compare_at_price,
+      compareAtPrice: product.compare_at_price,
       images: product.images,
       stock_quantity: product.stock_quantity,
+      stock: product.stock_quantity,
+      availability:
+        product.status === 'active' && product.stock_quantity > 0
+          ? 'IN_STOCK'
+          : 'OUT_OF_STOCK',
       sku: product.sku,
       barcode: product.barcode,
       tags: product.tags,
@@ -74,7 +80,14 @@ export class ProductsService {
       meta_title: product.meta_title ? this.getLocalizedValue(product.meta_title, locale) : null,
       meta_description: product.meta_description ? this.getLocalizedValue(product.meta_description, locale) : null,
       weight: product.weight,
+      weight_grams:
+        product.weight_grams ??
+        (product.weight ? Math.round(Number(product.weight) * 1000) : null),
+      allergens: product.allergens ?? [],
+      nutrition: product.nutrition ?? null,
       dimensions: product.dimensions,
+      packaging_type: product.packaging_type ?? null,
+      packaging_quantity: product.packaging_quantity ?? null,
       created_at: product.created_at,
       updated_at: product.updated_at,
       // Brand names are not localized (they're proper nouns), so no getLocalizedValue here.
@@ -86,6 +99,14 @@ export class ProductsService {
             logo_url: product.brand.logo_url ?? null,
           }
         : null,
+      collections:
+        product.productCollections
+          ?.filter((assignment) => assignment.collection?.is_active)
+          .map((assignment) => ({
+            id: assignment.collection.id,
+            name: assignment.collection.name,
+            slug: assignment.collection.slug,
+          })) ?? [],
     };
 
     // Transform category if exists
@@ -181,7 +202,7 @@ export class ProductsService {
 
   async findAll(query: QueryProductDto): Promise<{ data: any[]; meta: any }> {
     try {
-      const { page = 1, limit = 20, category_id, collection_id, status, is_featured, search, sort_by = 'created_at', sort_order = 'DESC', locale = 'en' } = query;
+      const { page = 1, limit = 20, category_id, collection_id, brand_id, status = 'active', is_featured, search, sort_by = 'created_at', sort_order = 'DESC', locale = 'en' } = query;
 
       const skip = (page - 1) * limit;
 
@@ -193,6 +214,9 @@ export class ProductsService {
       const queryBuilder = this.productsRepository
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.category', 'category')
+        .leftJoinAndSelect('product.brand', 'brand')
+        .leftJoinAndSelect('product.productCollections', 'productCollections')
+        .leftJoinAndSelect('productCollections.collection', 'collection')
         .where('product.deleted_at IS NULL');
 
       // Filter by collection if collection_id is provided
@@ -203,12 +227,14 @@ export class ProductsService {
       }
 
       // Filters
-      if (status) {
-        queryBuilder.andWhere('product.status = :status', { status });
-      }
+      queryBuilder.andWhere('product.status = :status', { status });
 
       if (category_id) {
         queryBuilder.andWhere('product.category_id = :category_id', { category_id });
+      }
+
+      if (brand_id) {
+        queryBuilder.andWhere('product.brand_id = :brand_id', { brand_id });
       }
 
       if (is_featured !== undefined) {
@@ -257,14 +283,26 @@ export class ProductsService {
 
   async findOne(id: string, locale: string = 'en'): Promise<any> {
     const product = await this.productsRepository.findOne({
-      where: { id },
-      relations: ['category'],
+      where: { id, status: 'active' },
+      relations: ['category', 'brand', 'productCollections', 'productCollections.collection'],
     });
 
     if (!product) {
       throw new NotFoundException(`Product #${id} not found`);
     }
 
+    const enrichedProduct = await this.enrichProductVariants(product);
+    return this.transformProductForLocale(enrichedProduct, locale);
+  }
+
+  async findOneAdmin(id: string, locale: string = 'en'): Promise<any> {
+    const product = await this.productsRepository.findOne({
+      where: { id },
+      relations: ['category', 'brand', 'productCollections', 'productCollections.collection'],
+    });
+    if (!product) {
+      throw new NotFoundException(`Product #${id} not found`);
+    }
     const enrichedProduct = await this.enrichProductVariants(product);
     return this.transformProductForLocale(enrichedProduct, locale);
   }
@@ -281,7 +319,10 @@ export class ProductsService {
     let product = await this.productsRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.productCollections', 'productCollections')
+      .leftJoinAndSelect('productCollections.collection', 'collection')
       .where('product.deleted_at IS NULL')
+      .andWhere('product.status = :status', { status: 'active' })
       .andWhere(`product.slug->>'${locale}' = :slug`, { slug })
       .getOne();
 
@@ -290,7 +331,10 @@ export class ProductsService {
       product = await this.productsRepository
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.category', 'category')
+        .leftJoinAndSelect('product.productCollections', 'productCollections')
+        .leftJoinAndSelect('productCollections.collection', 'collection')
         .where('product.deleted_at IS NULL')
+        .andWhere('product.status = :status', { status: 'active' })
         .andWhere(`product.slug->>'en' = :slug`, { slug })
         .getOne();
     }

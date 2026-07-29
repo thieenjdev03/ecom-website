@@ -11,6 +11,7 @@ import {
 import { User } from '../../users/user.entity';
 import { Address } from '../../addresses/address.entity';
 import { OrderStatus } from '../enums/order-status.enum';
+import { PaymentStatus } from '../enums/order-status.enum';
 
 export { OrderStatus };
 
@@ -25,6 +26,7 @@ export interface OrderItem {
   totalPrice: string; // Formatted as string with two decimals (e.g., "59.98")
   sku?: string;
   productThumbnailUrl?: string; // Added when fetching order detail, first image from product.images array
+  weightGrams?: number | null;
 }
 
 export interface TrackingHistoryItem {
@@ -53,10 +55,10 @@ export class Order {
   id: string;
 
   // User relationship
-  @Column('uuid')
-  userId: string;
+  @Column('uuid', { nullable: true })
+  userId: string | null;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn({ name: 'userId' })
   user: User;
 
@@ -72,7 +74,16 @@ export class Order {
   tracking_history: TrackingHistoryItem[];
 
   @Column({ length: 20, nullable: true })
-  paymentMethod: 'PAYPAL' | 'STRIPE' | 'COD' | 'VIETQR';
+  paymentMethod: 'PAYPAL' | 'STRIPE' | 'COD' | 'VIETQR' | 'VNPAY';
+
+  @Column({ name: 'payment_status', length: 20, default: PaymentStatus.PENDING })
+  paymentStatus: PaymentStatus;
+
+  @Column({ name: 'vnpay_txn_ref', length: 64, unique: true, nullable: true })
+  vnpayTxnRef: string | null;
+
+  @Column({ name: 'vnpay_transaction_no', length: 64, nullable: true })
+  vnpayTransactionNo: string | null;
 
   // PayPal integration
   @Column({ length: 100, nullable: true })
@@ -89,6 +100,12 @@ export class Order {
 
   @Column({ type: 'timestamp', nullable: true })
   paidAt: Date;
+
+  @Column({ name: 'reservation_expires_at', type: 'timestamp', nullable: true })
+  reservationExpiresAt: Date | null;
+
+  @Column({ name: 'stock_reserved', default: false })
+  stockReserved: boolean;
 
   // Order items and pricing
   @Column({ type: 'jsonb' })
@@ -111,6 +128,32 @@ export class Order {
   @ManyToOne(() => Address, { nullable: true })
   @JoinColumn({ name: 'billingAddressId' })
   billingAddress: Address;
+
+  @Column({ name: 'shipping_zone', length: 20, nullable: true })
+  shippingZone: 'INNER_CITY' | 'OUTER_CITY' | null;
+
+  @Column({ name: 'fulfillment_type', length: 20, nullable: true })
+  fulfillmentType: 'DIRECT' | 'DEALER' | null;
+
+  @Column({ name: 'distributor_id', type: 'uuid', nullable: true })
+  distributorId: string | null;
+
+  @Column({ name: 'shipping_snapshot', type: 'jsonb', nullable: true })
+  shippingSnapshot: {
+    receiver_name: string;
+    phone: string;
+    email?: string;
+    province_code: string;
+    district_code: string;
+    ward_code?: string;
+    address_line: string;
+    province_name?: string;
+    district_name?: string;
+    ward_name?: string;
+  } | null;
+
+  @Column({ name: 'cart_id', type: 'uuid', nullable: true })
+  cartId: string | null;
 
   // Additional information
   @Column({ type: 'text', nullable: true })

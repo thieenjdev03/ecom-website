@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, Min, Max, ValidateNested, IsEnum, MaxLength, IsUUID, IsObject } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, Min, Max, ValidateNested, IsEnum, MaxLength, IsUUID, IsObject, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductVariantDto } from './product-variant.dto';
@@ -54,6 +54,12 @@ export class CreateProductDto {
   @IsNumber()
   @Min(0)
   sale_price?: number;
+
+  @ApiPropertyOptional({ example: 45000, description: 'Original/list price displayed before a discount' })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  compare_at_price?: number;
 
   @ApiPropertyOptional({ example: 200000 })
   @IsOptional()
@@ -144,6 +150,23 @@ export class CreateProductDto {
   @Min(0)
   weight?: number;
 
+  @ApiPropertyOptional({ example: 90, description: 'Canonical product weight in grams' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  weight_grams?: number;
+
+  @ApiPropertyOptional({ example: ['milk', 'soy'], description: 'Known food allergens' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  allergens?: string[];
+
+  @ApiPropertyOptional({ example: { calories: 180, protein_g: 4, sugar_g: 16 } })
+  @IsOptional()
+  @IsObject()
+  nutrition?: Record<string, string | number>;
+
   @ApiPropertyOptional({ 
     type: DimensionsDto,
     example: { length: 28, width: 20, height: 2 },
@@ -154,4 +177,16 @@ export class CreateProductDto {
   @ValidateNested()
   @Type(() => DimensionsDto)
   dimensions?: DimensionsDto;
+
+  @ApiPropertyOptional({ example: 'Hộp giấy', description: 'Quy cách: loại đóng gói' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  packaging_type?: string;
+
+  @ApiPropertyOptional({ example: 12, description: 'Quy cách: số lượng trong một đóng gói' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  packaging_quantity?: number;
 }

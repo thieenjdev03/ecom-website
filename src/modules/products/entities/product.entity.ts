@@ -45,6 +45,10 @@ export class Product {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   sale_price: number;
 
+  /** Original/list price shown next to a reduced selling price. */
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  compare_at_price: number;
+
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   cost_price: number;
 
@@ -101,8 +105,28 @@ export class Product {
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   weight: number;
 
+  /** Canonical storefront weight. The legacy `weight` column remains for compatibility. */
+  @Column({ type: 'int', nullable: true })
+  weight_grams: number | null;
+
+  /** Ingredient allergens, for example ["milk", "soy"]. */
+  @Column({ type: 'jsonb', default: [] })
+  allergens: string[];
+
+  /** Structured nutritional information supplied by the product team. */
+  @Column({ type: 'jsonb', nullable: true })
+  nutrition: Record<string, string | number> | null;
+
   @Column({ type: 'jsonb', nullable: true })
   dimensions: ProductDimensions;
+
+  /** Quy cách đóng gói: loại đóng gói, ví dụ "Hộp giấy", "Thùng carton". */
+  @Column({ length: 100, nullable: true })
+  packaging_type: string | null;
+
+  /** Quy cách đóng gói: số lượng đơn vị trong một quy cách. */
+  @Column({ type: 'int', nullable: true })
+  packaging_quantity: number | null;
 
   @CreateDateColumn()
   created_at: Date;

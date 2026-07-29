@@ -17,6 +17,11 @@ export class QueryProductDto {
   @IsUUID()
   collection_id?: string;
 
+  @ApiPropertyOptional({ example: 'd6d6e19f-8047-614d-df4e-h1chg0dgddc7', description: 'Filter by brand ID' })
+  @IsOptional()
+  @IsUUID()
+  brand_id?: string;
+
   @ApiPropertyOptional({ enum: ['active', 'draft', 'out_of_stock', 'discontinued'] })
   @IsOptional()
   @IsEnum(['active', 'draft', 'out_of_stock', 'discontinued'])

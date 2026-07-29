@@ -11,6 +11,17 @@ export class ProductCategorySummaryDto {
   slug: string;
 }
 
+export class ProductCollectionSummaryDto {
+  @ApiProperty({ format: 'uuid' })
+  id: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  slug: string;
+}
+
 export class ProductBrandSummaryDto {
   @ApiProperty({ format: 'uuid' })
   id: string;
@@ -116,6 +127,9 @@ export class ProductResponseDto {
   @ApiPropertyOptional({ nullable: true })
   sale_price: number | null;
 
+  @ApiPropertyOptional({ nullable: true, description: 'Original/list price before a discount' })
+  compare_at_price: number | null;
+
   @ApiPropertyOptional({ nullable: true })
   cost_price: number | null;
 
@@ -152,8 +166,23 @@ export class ProductResponseDto {
   @ApiPropertyOptional({ nullable: true })
   weight: number | null;
 
+  @ApiPropertyOptional({ nullable: true, example: 90 })
+  weight_grams: number | null;
+
+  @ApiProperty({ type: [String], example: ['milk', 'soy'] })
+  allergens: string[];
+
+  @ApiPropertyOptional({ nullable: true, example: { calories: 180, sugar_g: 16 } })
+  nutrition: Record<string, string | number> | null;
+
   @ApiPropertyOptional({ type: () => ProductDimensionsResponseDto, nullable: true })
   dimensions: ProductDimensionsResponseDto | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 'Hộp giấy', description: 'Quy cách: loại đóng gói' })
+  packaging_type: string | null;
+
+  @ApiPropertyOptional({ nullable: true, example: 12, description: 'Quy cách: số lượng trong một đóng gói' })
+  packaging_quantity: number | null;
 
   @ApiProperty({ format: 'date-time' })
   created_at: Date;
@@ -161,9 +190,11 @@ export class ProductResponseDto {
   @ApiProperty({ format: 'date-time' })
   updated_at: Date;
 
-  // collections omitted: transformProductForLocale() doesn't populate productCollections yet — see follow-up
   @ApiPropertyOptional({ type: () => ProductCategorySummaryDto, nullable: true })
   category?: ProductCategorySummaryDto;
+
+  @ApiProperty({ type: () => [ProductCollectionSummaryDto] })
+  collections: ProductCollectionSummaryDto[];
 
   @ApiProperty({ type: () => ProductBrandSummaryDto, nullable: true })
   brand: ProductBrandSummaryDto | null;

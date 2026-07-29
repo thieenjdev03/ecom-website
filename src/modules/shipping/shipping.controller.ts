@@ -1,5 +1,6 @@
 import {
   Controller,
+  Body,
   Get,
   HttpCode,
   NotFoundException,
@@ -8,12 +9,20 @@ import {
 } from '@nestjs/common';
 import { ShippingConfigService } from './shipping-config.service';
 import { GetShippingPriceDto } from './dto/get-shipping-price.dto';
+import { ShippingQuoteDto } from './dto/shipping-quote.dto';
+import { MingoShippingService } from './mingo-shipping.service';
 
 @Controller('shipping')
 export class ShippingController {
   constructor(
     private readonly shippingConfigService: ShippingConfigService,
+    private readonly mingoShippingService: MingoShippingService,
   ) {}
+
+  @Post('quote')
+  async quote(@Body() dto: ShippingQuoteDto) {
+    return this.mingoShippingService.quote(dto);
+  }
 
   @Get('price')
   async getPrice(@Query() query: GetShippingPriceDto) {
@@ -79,5 +88,3 @@ export class ShippingController {
     await this.shippingConfigService.loadFromSheet();
   }
 }
-
-

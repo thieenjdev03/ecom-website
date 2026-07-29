@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, MaxLength, IsEnum, IsInt } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateCollectionDto {
@@ -36,6 +36,28 @@ export class CreateCollectionDto {
   @MaxLength(500)
   banner_image_url?: string;
 
+  @ApiPropertyOptional({ example: 'https://example.com/banner-mobile.jpg' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  mobile_banner_image_url?: string;
+
+  @ApiPropertyOptional({ example: 'Khám phá ngay' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  cta_label?: string;
+
+  @ApiPropertyOptional({ enum: ['HERO', 'HOME_SECTION', 'NORMAL'], default: 'NORMAL' })
+  @IsOptional()
+  @IsEnum(['HERO', 'HOME_SECTION', 'NORMAL'])
+  placement?: 'HERO' | 'HOME_SECTION' | 'NORMAL';
+
+  @ApiPropertyOptional({ example: 10, default: 0 })
+  @IsOptional()
+  @IsInt()
+  sort_order?: number;
+
   @ApiPropertyOptional({ 
     example: 'Summer Collection 2024 - Fashion Store',
     description: 'SEO title'
@@ -71,4 +93,3 @@ export class CreateCollectionDto {
   @MaxLength(50)
   homepage_section?: string;
 }
-

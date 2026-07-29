@@ -327,7 +327,7 @@ export async function completeSeeder(dataSource: DataSource) {
       const orderData = orderRepo.create({
         userId: user.id,
         orderNumber,
-        status: i === 0 ? OrderStatus.PAID : i === 1 ? OrderStatus.PROCESSING : OrderStatus.PENDING_PAYMENT,
+        status: i === 0 ? OrderStatus.PAID : i === 1 ? OrderStatus.CONFIRMED : OrderStatus.PENDING_PAYMENT,
         paymentMethod: i === 0 ? 'PAYPAL' : i === 1 ? 'PAYPAL' : 'COD',
         paypalOrderId: i < 2 ? `PAYPAL-${Date.now()}-${i}` : null,
         paypalTransactionId: i < 2 ? `TXN-${Date.now()}-${i}` : null,

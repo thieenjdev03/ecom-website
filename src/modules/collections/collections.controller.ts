@@ -133,4 +133,3 @@ export class CollectionsController {
     return this.collectionsService.removeProducts(id, assignProductsDto);
   }
 }
-

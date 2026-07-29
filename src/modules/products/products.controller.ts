@@ -29,7 +29,9 @@ export class ProductsController {
   @ApiOperation({ summary: 'Get all products with filters' })
   @ApiOkResponse({ type: ProductListDto })
   findAll(@Query() query: QueryProductDto) {
-    return this.productsService.findAll(query);
+    // The public catalog never exposes draft, inactive, or discontinued items,
+    // even when a caller manually supplies a different status query.
+    return this.productsService.findAll({ ...query, status: 'active' });
   }
 
   @Get('search')
@@ -45,6 +47,26 @@ export class ProductsController {
   @ApiResponse({ status: 404, description: 'Product not found' })
   findBySlug(@Param('slug') slug: string, @Query('locale') locale?: string) {
     return this.productsService.findBySlug(slug, locale || 'en');
+  }
+
+  @Get('admin')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get products with any status for administration' })
+  @ApiOkResponse({ type: ProductListDto })
+  findAllAdmin(@Query() query: QueryProductDto) {
+    return this.productsService.findAll(query);
+  }
+
+  @Get('admin/:id')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get any product by ID for administration' })
+  @ApiOkResponse({ type: ProductResponseDto })
+  findOneAdmin(@Param('id') id: string, @Query('locale') locale?: string) {
+    return this.productsService.findOneAdmin(id, locale || 'en');
   }
 
   @Get(':id')

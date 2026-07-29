@@ -5,14 +5,14 @@ import { CollectionsController } from './collections.controller';
 import { Collection } from './entities/collection.entity';
 import { ProductCollection } from './entities/product-collection.entity';
 import { Product } from '../products/entities/product.entity';
+import { StorefrontController } from './storefront.controller';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Collection, ProductCollection, Product]),
   ],
-  controllers: [CollectionsController],
+  controllers: [CollectionsController, StorefrontController],
   providers: [CollectionsService],
   exports: [CollectionsService],
 })
 export class CollectionsModule {}
-

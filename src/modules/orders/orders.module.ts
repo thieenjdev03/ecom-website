@@ -8,6 +8,7 @@ import { Address } from '../addresses/address.entity';
 import { Product } from '../products/entities/product.entity';
 import { MailModule } from '../mail/mail.module';
 import { AddressesModule } from '../addresses/addresses.module';
+import { MeOrdersController } from './me-orders.controller';
 
 @Module({
   imports: [
@@ -15,7 +16,7 @@ import { AddressesModule } from '../addresses/addresses.module';
     MailModule,
     AddressesModule,
   ],
-  controllers: [OrdersController],
+  controllers: [OrdersController, MeOrdersController],
   providers: [OrdersService],
   exports: [OrdersService],
 })

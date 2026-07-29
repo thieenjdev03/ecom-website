@@ -127,7 +127,6 @@ export class OrdersController {
   @ApiOperation({ summary: 'Get current user orders' })
   @ApiResponse({ status: 200, description: 'User orders retrieved successfully' })
   async getMyOrders(@Request() req) {
-    console.log('req.user check getMyOrders', req.user);
     const userId = req.user?.sub || req.user?.userId;
     if (!userId) {
       throw new UnauthorizedException('Unauthorized');
@@ -161,16 +160,24 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: 'Order not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async findOne(@Param('id') id: string) {
-    return await this.ordersService.findOne(id);
+  async findOne(@Param('id') id: string, @Request() req) {
+    const userId = req.user?.sub || req.user?.userId;
+    if (!userId) throw new UnauthorizedException('Unauthorized');
+    return req.user?.role === Role.ADMIN
+      ? this.ordersService.findOne(id)
+      : this.ordersService.findOneForUser(id, userId);
   }
 
   @Get('number/:orderNumber')
   @ApiOperation({ summary: 'Get order by order number' })
   @ApiResponse({ status: 200, description: 'Order retrieved successfully' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  async findByOrderNumber(@Param('orderNumber') orderNumber: string) {
-    return await this.ordersService.findByOrderNumber(orderNumber);
+  async findByOrderNumber(@Param('orderNumber') orderNumber: string, @Request() req) {
+    const userId = req.user?.sub || req.user?.userId;
+    if (!userId) throw new UnauthorizedException('Unauthorized');
+    return req.user?.role === Role.ADMIN
+      ? this.ordersService.findByOrderNumber(orderNumber)
+      : this.ordersService.findByOrderNumberForUser(orderNumber, userId);
   }
 
   @Patch(':id')
@@ -253,7 +260,12 @@ export class OrdersController {
   })
   @ApiResponse({ status: 404, description: 'Order not found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getStatusHistory(@Param('id') id: string): Promise<StatusHistoryItemDto[]> {
+  async getStatusHistory(@Param('id') id: string, @Request() req): Promise<StatusHistoryItemDto[]> {
+    const userId = req.user?.sub || req.user?.userId;
+    if (!userId) throw new UnauthorizedException('Unauthorized');
+    if (req.user?.role !== Role.ADMIN) {
+      await this.ordersService.findOneForUser(id, userId);
+    }
     return await this.ordersService.getStatusHistory(id);
   }
 
