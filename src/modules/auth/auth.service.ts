@@ -69,7 +69,12 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    // passwordHash is select:false on the entity — opt in explicitly here.
+    const user = await this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.passwordHash')
+      .where('user.email = :email', { email })
+      .getOne();
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }

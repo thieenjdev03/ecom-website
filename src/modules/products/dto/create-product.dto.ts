@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, Min, Max, ValidateNested, IsEnum, MaxLength, IsUUID, IsObject } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, Min, Max, ValidateNested, ValidateIf, IsEnum, MaxLength, IsUUID, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductVariantDto } from './product-variant.dto';
@@ -96,6 +96,16 @@ export class CreateProductDto {
   @IsOptional()
   @IsUUID()
   category_id?: string;
+
+  @ApiPropertyOptional({
+    example: 'b4b2b07f-6825-402b-bd2c-f9aef8cfbba5',
+    nullable: true,
+    description: 'Brand UUID. Pass null to clear the brand on update.',
+  })
+  @IsOptional()
+  @ValidateIf((o) => o.brand_id !== null)
+  @IsUUID()
+  brand_id?: string | null;
 
   @ApiPropertyOptional({ example: ['polo', 'men', 'premium'] })
   @IsOptional()

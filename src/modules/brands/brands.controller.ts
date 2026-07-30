@@ -59,6 +59,15 @@ export class BrandsController {
     return this.brandsService.findBySlug(slug);
   }
 
+  @Get(':id')
+  @ApiOperation({ summary: 'Get a brand by ID' })
+  @ApiParam({ name: 'id', description: 'Brand UUID' })
+  @ApiOkResponse({ type: BrandDto })
+  @ApiResponse({ status: 404, description: 'Brand not found' })
+  findOne(@Param('id') id: string) {
+    return this.brandsService.findOne(id);
+  }
+
   @Patch(':id')
   @UseGuards(JwtGuard, RolesGuard)
   @Roles(Role.ADMIN)

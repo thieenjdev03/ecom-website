@@ -1,8 +1,9 @@
-import { Controller, Body, Patch, Param, UseGuards } from '@nestjs/common';
+import { Controller, Body, Get, Patch, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiOkResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { CareersService } from './careers.service';
 import {
   CareerApplicationDto,
+  QueryCareerApplicationsDto,
   UpdateCareerApplicationDto,
 } from './dto/career-application.dto';
 import { JwtGuard } from '../../auth/jwt.guard';
@@ -12,8 +13,18 @@ import { Role } from '../../auth/enums/role.enum';
 
 @ApiTags('careers')
 @Controller('career-applications')
+@UseGuards(JwtGuard, RolesGuard)
+@Roles(Role.ADMIN)
+@ApiBearerAuth()
 export class CareerApplicationsController {
   constructor(private readonly careersService: CareersService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'List all applications across careers (admin)' })
+  @ApiOkResponse({ type: [CareerApplicationDto] })
+  findAll(@Query() query: QueryCareerApplicationsDto) {
+    return this.careersService.findAllApplications(query);
+  }
 
   @Patch(':id')
   @UseGuards(JwtGuard, RolesGuard)

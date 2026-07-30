@@ -1,7 +1,40 @@
-import { IsString, IsOptional, IsEmail, IsIn, MaxLength, MinLength } from 'class-validator';
+import { IsString, IsOptional, IsEmail, IsIn, IsInt, IsUUID, Min, Max, MaxLength, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export const CAREER_APPLICATION_STATUSES = ['new', 'reviewing', 'rejected', 'hired'] as const;
+
+export class QueryCareerApplicationsDto {
+  @ApiPropertyOptional({ default: 1, minimum: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 20, minimum: 1, maximum: 100 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number = 20;
+
+  @ApiPropertyOptional({ enum: CAREER_APPLICATION_STATUSES })
+  @IsOptional()
+  @IsIn(CAREER_APPLICATION_STATUSES as unknown as string[])
+  status?: (typeof CAREER_APPLICATION_STATUSES)[number];
+
+  @ApiPropertyOptional({ format: 'uuid', description: 'Filter by career' })
+  @IsOptional()
+  @IsUUID()
+  career_id?: string;
+
+  @ApiPropertyOptional({ description: 'Search by applicant name or email' })
+  @IsOptional()
+  @IsString()
+  search?: string;
+}
 
 export class ApplyCareerDto {
   @ApiProperty({ example: 'Nguyen Van A' })

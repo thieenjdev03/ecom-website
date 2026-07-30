@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { Role } from '../../auth/enums/role.enum';
 import { Address } from '../addresses/address.entity';
 import { UserWishlist } from './entities/user-wishlist.entity';
@@ -35,7 +36,10 @@ export class User {
   @Column({ unique: false, nullable: true })
   phoneNumber: string;
 
-  @Column()
+  // Sensitive: never load or serialize by default. Auth flows must opt in
+  // explicitly via QueryBuilder.addSelect('user.passwordHash').
+  @Exclude()
+  @Column({ select: false })
   passwordHash: string;
 
   @ApiProperty({
@@ -50,7 +54,10 @@ export class User {
   })
   role: Role;
 
-  @Column({ nullable: true })
+  // Sensitive: never load or serialize by default. Refresh flow opts in
+  // explicitly via QueryBuilder.addSelect('user.refreshTokenHash').
+  @Exclude()
+  @Column({ nullable: true, select: false })
   refreshTokenHash: string;
 
   @ApiPropertyOptional({

@@ -9,6 +9,7 @@ import { ColorsService } from '../colors/colors.service';
 import { SizesService } from '../sizes/sizes.service';
 import { Color } from '../colors/entities/color.entity';
 import { Size } from '../sizes/entities/size.entity';
+import { Brand } from '../brands/entities/brand.entity';
 
 @Injectable()
 export class ProductsService {
@@ -16,9 +17,20 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
+    @InjectRepository(Brand)
+    private brandsRepository: Repository<Brand>,
     private colorsService: ColorsService,
     private sizesService: SizesService,
   ) {}
+
+  /** Ensure a brand exists before linking it to a product (null/undefined = no brand). */
+  private async assertBrandExists(brandId: string | null | undefined): Promise<void> {
+    if (!brandId) return;
+    const exists = await this.brandsRepository.exist({ where: { id: brandId } });
+    if (!exists) {
+      throw new BadRequestException(`Brand with ID "${brandId}" not found`);
+    }
+  }
 
   /**
    * Validate language code to prevent SQL injection
@@ -169,9 +181,17 @@ export class ProductsService {
         }
       }
 
+      // Validate brand exists before linking
+      await this.assertBrandExists(createProductDto.brand_id);
+
       const product = this.productsRepository.create(createProductDto);
       const savedProduct = await this.productsRepository.save(product);
-      const enrichedProduct = await this.enrichProductVariants(savedProduct);
+      // Reload with category + brand relations so the response includes the brand summary.
+      const reloaded = await this.productsRepository.findOne({
+        where: { id: savedProduct.id },
+        relations: ['category', 'brand'],
+      });
+      const enrichedProduct = await this.enrichProductVariants(reloaded ?? savedProduct);
       return this.transformProductForLocale(enrichedProduct, locale);
     } catch (err) {
       // Map unexpected errors to meaningful HTTP responses
@@ -181,7 +201,7 @@ export class ProductsService {
 
   async findAll(query: QueryProductDto): Promise<{ data: any[]; meta: any }> {
     try {
-      const { page = 1, limit = 20, category_id, collection_id, status, is_featured, search, sort_by = 'created_at', sort_order = 'DESC', locale = 'en' } = query;
+      const { page = 1, limit = 20, category_id, collection_id, brand_id, status, is_featured, search, sort_by = 'created_at', sort_order = 'DESC', locale = 'en' } = query;
 
       const skip = (page - 1) * limit;
 
@@ -193,6 +213,7 @@ export class ProductsService {
       const queryBuilder = this.productsRepository
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.category', 'category')
+        .leftJoinAndSelect('product.brand', 'brand')
         .where('product.deleted_at IS NULL');
 
       // Filter by collection if collection_id is provided
@@ -209,6 +230,10 @@ export class ProductsService {
 
       if (category_id) {
         queryBuilder.andWhere('product.category_id = :category_id', { category_id });
+      }
+
+      if (brand_id) {
+        queryBuilder.andWhere('product.brand_id = :brand_id', { brand_id });
       }
 
       if (is_featured !== undefined) {
@@ -258,7 +283,7 @@ export class ProductsService {
   async findOne(id: string, locale: string = 'en'): Promise<any> {
     const product = await this.productsRepository.findOne({
       where: { id },
-      relations: ['category'],
+      relations: ['category', 'brand'],
     });
 
     if (!product) {
@@ -281,6 +306,7 @@ export class ProductsService {
     let product = await this.productsRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('product.brand', 'brand')
       .where('product.deleted_at IS NULL')
       .andWhere(`product.slug->>'${locale}' = :slug`, { slug })
       .getOne();
@@ -308,11 +334,16 @@ export class ProductsService {
       // Get product without transformation first
       const product = await this.productsRepository.findOne({
         where: { id },
-        relations: ['category'],
+        relations: ['category', 'brand'],
       });
 
       if (!product) {
         throw new NotFoundException(`Product #${id} not found`);
+      }
+
+      // Validate brand exists before linking (skip when key not sent)
+      if (updateProductDto.brand_id !== undefined) {
+        await this.assertBrandExists(updateProductDto.brand_id);
       }
 
       // Validate business rules
@@ -350,8 +381,21 @@ export class ProductsService {
       }
 
       Object.assign(product, updateProductDto);
+      // The product was loaded WITH its brand relation. Assigning only brand_id leaves the
+      // stale relation object in place, and TypeORM would persist that over the new FK.
+      // Sync the relation explicitly so the column change actually sticks.
+      if (updateProductDto.brand_id !== undefined) {
+        product.brand = updateProductDto.brand_id
+          ? ({ id: updateProductDto.brand_id } as Brand)
+          : null;
+      }
       const savedProduct = await this.productsRepository.save(product);
-      const enrichedProduct = await this.enrichProductVariants(savedProduct);
+      // Reload so a changed brand_id reflects a fresh brand summary (not the stale relation).
+      const reloaded = await this.productsRepository.findOne({
+        where: { id: savedProduct.id },
+        relations: ['category', 'brand'],
+      });
+      const enrichedProduct = await this.enrichProductVariants(reloaded ?? savedProduct);
       return this.transformProductForLocale(enrichedProduct, locale);
     } catch (err) {
       this.handleError(err, 'Unable to update product');

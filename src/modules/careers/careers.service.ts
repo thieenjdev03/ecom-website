@@ -13,7 +13,11 @@ import { CareerApplication } from './entities/career-application.entity';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { UpdateCareerDto } from './dto/update-career.dto';
 import { QueryCareerDto } from './dto/query-career.dto';
-import { ApplyCareerDto, UpdateCareerApplicationDto } from './dto/career-application.dto';
+import {
+  ApplyCareerDto,
+  UpdateCareerApplicationDto,
+  QueryCareerApplicationsDto as QueryAllApplicationsDto,
+} from './dto/career-application.dto';
 import { FilesService } from '../files/files.service';
 import {
   decodeCursor,
@@ -235,6 +239,33 @@ export class CareersService {
       where: { career_id: careerId },
       order: { created_at: 'DESC' },
     });
+  }
+
+  /** Admin: list all applications across careers, with filters + offset pagination. */
+  async findAllApplications(
+    query: QueryAllApplicationsDto,
+  ): Promise<{ data: CareerApplication[]; total: number; page: number; limit: number }> {
+    const { page = 1, limit = 20, status, career_id, search } = query;
+
+    const qb = this.applicationsRepository
+      .createQueryBuilder('app')
+      // Only pull the career title for display — avoids shipping the full job content HTML.
+      .leftJoin('app.career', 'career')
+      .addSelect(['career.id', 'career.title', 'career.slug'])
+      .orderBy('app.created_at', 'DESC')
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    if (status) qb.andWhere('app.status = :status', { status });
+    if (career_id) qb.andWhere('app.career_id = :career_id', { career_id });
+    if (search) {
+      qb.andWhere('(app.full_name ILIKE :search OR app.email ILIKE :search)', {
+        search: `%${search}%`,
+      });
+    }
+
+    const [data, total] = await qb.getManyAndCount();
+    return { data, total, page, limit };
   }
 
   async updateApplication(

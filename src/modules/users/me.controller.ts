@@ -3,7 +3,7 @@ import { Request } from 'express';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from '../auth/jwt/jwt.guard';
 import { UsersService } from './users.service';
-import { User } from './user.entity';
+import { UserResponseDto } from './dto';
 
 @ApiTags('Me')
 @ApiBearerAuth('bearer')
@@ -14,11 +14,12 @@ export class MeController {
 
   @Get()
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiOkResponse({ description: 'Current user profile', type: User })
-  async getMe(@Req() req: Request): Promise<User> {
+  @ApiOkResponse({ description: 'Current user profile', type: UserResponseDto })
+  async getMe(@Req() req: Request): Promise<UserResponseDto> {
     const payload: any = (req as any).user; // payload contains sub
     const userId: string = payload?.sub;
-    return this.usersService.findFullEntity(userId);
+    // findOne maps through the whitelist DTO — never exposes password/refresh hashes.
+    return this.usersService.findOne(userId);
   }
 }
 
