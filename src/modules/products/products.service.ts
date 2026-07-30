@@ -10,6 +10,20 @@ import { SizesService } from '../sizes/sizes.service';
 import { Color } from '../colors/entities/color.entity';
 import { Size } from '../sizes/entities/size.entity';
 import { Brand } from '../brands/entities/brand.entity';
+import * as sanitizeHtml from 'sanitize-html';
+
+const PRODUCT_HTML_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: [
+    'h1', 'h2', 'h3', 'h4', 'p', 'ul', 'ol', 'li', 'strong', 'em', 'u', 's',
+    'a', 'br', 'hr', 'blockquote', 'table', 'thead', 'tbody', 'tr', 'th', 'td',
+    'span', 'div',
+  ],
+  allowedAttributes: {
+    a: ['href', 'target', 'rel'],
+    '*': ['style'],
+  },
+  allowedSchemes: ['http', 'https', 'mailto', 'tel'],
+};
 
 @Injectable()
 export class ProductsService {
@@ -62,6 +76,23 @@ export class ProductsService {
     return '';
   }
 
+  /** Chỉ cho phép HTML trình bày an toàn trong các field nội dung sản phẩm. */
+  private sanitizeLocalizedHtml(field: LangObject | null | undefined): LangObject | undefined {
+    if (!field) return undefined;
+    return Object.fromEntries(
+      Object.entries(field).map(([locale, value]) => [
+        locale,
+        typeof value === 'string'
+          ? sanitizeHtml(value, PRODUCT_HTML_SANITIZE_OPTIONS)
+          : value,
+      ]),
+    );
+  }
+
+  private sanitizeHtmlOutput(html: string): string {
+    return sanitizeHtml(html, PRODUCT_HTML_SANITIZE_OPTIONS);
+  }
+
   /**
    * Transform product from multi-language to single language based on locale
    */
@@ -71,7 +102,12 @@ export class ProductsService {
       name: this.getLocalizedValue(product.name, locale),
       slug: this.getLocalizedValue(product.slug, locale),
       description: this.getLocalizedValue(product.description, locale),
-      short_description: this.getLocalizedValue(product.short_description, locale),
+      short_description: this.sanitizeHtmlOutput(
+        this.getLocalizedValue(product.short_description, locale),
+      ),
+      nutrition_information: this.sanitizeHtmlOutput(
+        this.getLocalizedValue(product.nutrition_information, locale),
+      ),
       price: product.price,
       sale_price: product.sale_price,
       cost_price: product.cost_price,
@@ -184,7 +220,12 @@ export class ProductsService {
       // Validate brand exists before linking
       await this.assertBrandExists(createProductDto.brand_id);
 
-      const product = this.productsRepository.create(createProductDto);
+      const sanitizedDto = {
+        ...createProductDto,
+        short_description: this.sanitizeLocalizedHtml(createProductDto.short_description),
+        nutrition_information: this.sanitizeLocalizedHtml(createProductDto.nutrition_information),
+      };
+      const product = this.productsRepository.create(sanitizedDto);
       const savedProduct = await this.productsRepository.save(product);
       // Reload with category + brand relations so the response includes the brand summary.
       const reloaded = await this.productsRepository.findOne({
@@ -316,6 +357,7 @@ export class ProductsService {
       product = await this.productsRepository
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.category', 'category')
+        .leftJoinAndSelect('product.brand', 'brand')
         .where('product.deleted_at IS NULL')
         .andWhere(`product.slug->>'en' = :slug`, { slug })
         .getOne();
@@ -380,7 +422,16 @@ export class ProductsService {
         }
       }
 
-      Object.assign(product, updateProductDto);
+      const sanitizedDto = {
+        ...updateProductDto,
+        ...(updateProductDto.short_description !== undefined
+          ? { short_description: this.sanitizeLocalizedHtml(updateProductDto.short_description) }
+          : {}),
+        ...(updateProductDto.nutrition_information !== undefined
+          ? { nutrition_information: this.sanitizeLocalizedHtml(updateProductDto.nutrition_information) }
+          : {}),
+      };
+      Object.assign(product, sanitizedDto);
       // The product was loaded WITH its brand relation. Assigning only brand_id leaves the
       // stale relation object in place, and TypeORM would persist that over the new FK.
       // Sync the relation explicitly so the column change actually sticks.

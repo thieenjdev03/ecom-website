@@ -47,7 +47,8 @@
     "seed:collections": "ts-node -r tsconfig-paths/register ./scripts/seed-collections.ts",
     "seed:complete": "ts-node -r tsconfig-paths/register ./scripts/seed-complete.ts",
     "seed:careers": "ts-node -r tsconfig-paths/register ./scripts/seed-careers.ts",
-    "seed:policies": "ts-node -r tsconfig-paths/register ./scripts/seed-policies.ts"
+    "seed:policies": "ts-node -r tsconfig-paths/register ./scripts/seed-policies.ts",
+    "seed:brands-specs": "ts-node -r tsconfig-paths/register ./scripts/seed-brands-and-specs.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.6",

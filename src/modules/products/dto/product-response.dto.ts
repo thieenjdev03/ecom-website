@@ -110,6 +110,12 @@ export class ProductResponseDto {
   @ApiPropertyOptional({ nullable: true })
   short_description: string | null;
 
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Sanitized nutrition information HTML resolved for the requested locale',
+  })
+  nutrition_information: string | null;
+
   @ApiProperty()
   price: number;
 

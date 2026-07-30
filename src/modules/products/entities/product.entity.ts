@@ -39,6 +39,9 @@ export class Product {
   @Column({ type: 'jsonb', nullable: true })
   short_description: LangObject;
 
+  @Column({ type: 'jsonb', nullable: true })
+  nutrition_information: LangObject;
+
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 

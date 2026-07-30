@@ -44,6 +44,19 @@ export class CreateProductDto {
   @Type(() => LocalizedStringDto)
   short_description?: LocalizedStringDto;
 
+  @ApiPropertyOptional({
+    type: () => LocalizedStringDto,
+    example: {
+      en: '<p>Energy: 210 kcal per serving</p>',
+      vi: '<p>Năng lượng: 210 kcal mỗi khẩu phần</p>',
+    },
+    description: 'Sanitized nutrition information HTML in multiple languages',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => LocalizedStringDto)
+  nutrition_information?: LocalizedStringDto;
+
   @ApiProperty({ example: 399000 })
   @IsNumber()
   @Min(0)
