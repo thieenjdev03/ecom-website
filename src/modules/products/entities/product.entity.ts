@@ -39,8 +39,15 @@ export class Product {
   @Column({ type: 'jsonb', nullable: true })
   short_description: LangObject;
 
+  /**
+   * Legacy column name retained for API/database compatibility.
+   * The admin/storefront now use this HTML field for usage instructions.
+   */
   @Column({ type: 'jsonb', nullable: true })
   nutrition_information: LangObject;
+
+  @Column({ type: 'jsonb', nullable: true })
+  notes: LangObject;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;

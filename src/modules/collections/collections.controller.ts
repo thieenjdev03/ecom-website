@@ -17,6 +17,7 @@ import { CreateCollectionDto } from './dto/create-collection.dto';
 import { UpdateCollectionDto } from './dto/update-collection.dto';
 import { AssignProductsDto } from './dto/assign-products.dto';
 import { QueryCollectionDto } from './dto/query-collection.dto';
+import { HomepageQueryDto, HomepageSectionDto } from './dto/homepage-section.dto';
 import { JwtGuard } from '../../auth/jwt.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
@@ -44,6 +45,15 @@ export class CollectionsController {
   @ApiResponse({ status: 200, description: 'Collections retrieved successfully' })
   findAll(@Query() query: QueryCollectionDto) {
     return this.collectionsService.findAll(query);
+  }
+
+  @Get('homepage')
+  @ApiOperation({
+    summary: 'Get homepage sections (active collections with a homepage_section) each with product tiles',
+  })
+  @ApiResponse({ status: 200, description: 'Homepage sections retrieved successfully', type: [HomepageSectionDto] })
+  getHomepageSections(@Query() query: HomepageQueryDto) {
+    return this.collectionsService.getHomepageSections(query);
   }
 
   @Get(':id')

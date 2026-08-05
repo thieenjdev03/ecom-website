@@ -10,6 +10,28 @@ Base path: `/products`
 - **Unique**: `slug` là bắt buộc và unique. `sku` cấp sản phẩm là unique (nếu dùng chế độ không-variant).
 - **Soft delete**: Xoá sản phẩm dùng soft delete, trường `deleted_at` được đặt, bản ghi không bị mất vĩnh viễn.
 
+### Quy ước nội dung HTML và trạng thái
+
+Các field nội dung của sản phẩm nhận object đa ngôn ngữ `{ "vi": "...", "en": "..." }`. Giá trị được lưu ở dạng HTML để frontend hiển thị đúng bố cục:
+
+| Field | Mục đích | HTML nên dùng |
+| --- | --- | --- |
+| `description` | Mô tả sản phẩm | `<p>`, `<strong>`, `<ul>`, `<li>`, `<br>` |
+| `short_description` | Thành phần và chất gây dị ứng | `<p>`, `<strong>`, `<ul>`, `<li>` |
+| `usage_instructions` | Hướng dẫn sử dụng | `<p>`, `<ol>`, `<ul>`, `<li>`, `<strong>` |
+| `nutrition_information` | Alias cũ của `usage_instructions` để tương thích API | `<p>`, `<ol>`, `<ul>`, `<li>`, `<strong>` |
+| `notes` | Chú ý, bảo quản, cảnh báo | `<p>`, `<ul>`, `<li>`, `<strong>` |
+
+Backend sẽ sanitize lúc **create/update** và một lần nữa lúc trả response. Dữ liệu vẫn được lưu trong cột database `nutrition_information` để tương thích migration cũ, còn API mới dùng key `usage_instructions`. Các thẻ nguy hiểm (script, iframe, event handler...) bị loại bỏ; chỉ nên gửi HTML trình bày, không gửi JavaScript. Frontend admin có nút **Xem trước** để kiểm tra ảnh, giá, biến thể, trạng thái và bốn khối HTML trước khi bấm **Lưu**.
+
+Trạng thái mới dùng trong form quản trị gồm:
+
+- `active` — Đăng bán
+- `draft` — Nháp
+- `inactive` — Ẩn
+
+Hai giá trị cũ `out_of_stock` và `discontinued` vẫn được backend đọc và hiển thị nhãn “dữ liệu cũ” để không làm mất dữ liệu lịch sử, nhưng không còn xuất hiện trong form/filter tạo mới.
+
 ---
 
 ### 1) Tạo sản phẩm (Create)
@@ -20,8 +42,11 @@ Base path: `/products`
 Các trường chính (chỉ hiển thị trường quan trọng):
 - `name` (string, required, ≤255)
 - `slug` (string, required, ≤255, unique)
-- `description` (string, optional)
-- `short_description` (string, optional, ≤500)
+- `description` (LocalizedStringDto HTML, optional)
+- `short_description` (LocalizedStringDto HTML, optional)
+- `usage_instructions` (LocalizedStringDto HTML, optional)
+- `nutrition_information` (LocalizedStringDto HTML, optional; alias cũ của `usage_instructions`)
+- `notes` (LocalizedStringDto HTML, optional)
 - `price` (number, required, ≥0)
 - `sale_price` (number, optional, ≥0, phải ≤ `price` nếu gửi)
 - `cost_price` (number, optional, ≥0)
@@ -33,7 +58,7 @@ Các trường chính (chỉ hiển thị trường quan trọng):
 - `barcode` (string, optional, ≤100)
 - `category_id` (number, optional)
 - `tags` (string[], optional)
-- `status` (enum: `active|draft|out_of_stock|discontinued`, optional; mặc định `active`)
+- `status` (enum: `active|draft|inactive`, optional; mặc định `active`)
 - `is_featured` (boolean, optional; mặc định `false`)
 - `meta_title` (string, optional, ≤255)
 - `meta_description` (string, optional, ≤500)
@@ -64,6 +89,30 @@ curl -X POST 'http://localhost:3000/products' \
     "status": "active",
     "is_featured": false
   }'
+```
+
+#### Ví dụ nội dung HTML song ngữ
+```json
+{
+  "name": { "vi": "Kem vani Mingo", "en": "Mingo Vanilla Ice Cream" },
+  "slug": { "vi": "kem-vani-mingo", "en": "mingo-vanilla-ice-cream" },
+  "description": {
+    "vi": "<p>Kem tươi vị vani, <strong>mềm mịn</strong> và thơm.</p>",
+    "en": "<p>Fresh vanilla ice cream with a <strong>smooth</strong> texture.</p>"
+  },
+  "short_description": {
+    "vi": "<p>Có chứa <strong>sữa, đậu nành</strong>.</p>",
+    "en": "<p>Contains <strong>milk and soy</strong>.</p>"
+  },
+  "usage_instructions": {
+    "vi": "<ol><li>Để kem mềm 5 phút trước khi dùng.</li><li>Dùng ngay sau khi mở hộp.</li></ol>",
+    "en": "<ol><li>Soften for 5 minutes before serving.</li><li>Consume immediately after opening.</li></ol>"
+  },
+  "notes": {
+    "vi": "<p>Bảo quản đông lạnh. Không cấp đông lại sau khi rã đông.</p>",
+    "en": "<p>Keep frozen. Do not refreeze after thawing.</p>"
+  }
+}
 ```
 
 #### Ví dụ request (dùng variants)

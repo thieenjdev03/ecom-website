@@ -101,13 +101,19 @@ export class ProductsService {
       id: product.id,
       name: this.getLocalizedValue(product.name, locale),
       slug: this.getLocalizedValue(product.slug, locale),
-      description: this.getLocalizedValue(product.description, locale),
+      description: this.sanitizeHtmlOutput(
+        this.getLocalizedValue(product.description, locale),
+      ),
       short_description: this.sanitizeHtmlOutput(
         this.getLocalizedValue(product.short_description, locale),
       ),
       nutrition_information: this.sanitizeHtmlOutput(
         this.getLocalizedValue(product.nutrition_information, locale),
       ),
+      usage_instructions: this.sanitizeHtmlOutput(
+        this.getLocalizedValue(product.nutrition_information, locale),
+      ),
+      notes: this.sanitizeHtmlOutput(this.getLocalizedValue(product.notes, locale)),
       price: product.price,
       sale_price: product.sale_price,
       cost_price: product.cost_price,
@@ -125,6 +131,13 @@ export class ProductsService {
       dimensions: product.dimensions,
       created_at: product.created_at,
       updated_at: product.updated_at,
+      collections: (product.productCollections ?? [])
+        .filter((productCollection) => productCollection.collection)
+        .map((productCollection) => ({
+          id: productCollection.collection.id,
+          name: productCollection.collection.name,
+          slug: productCollection.collection.slug,
+        })),
       // Brand names are not localized (they're proper nouns), so no getLocalizedValue here.
       brand: product.brand
         ? {
@@ -220,10 +233,15 @@ export class ProductsService {
       // Validate brand exists before linking
       await this.assertBrandExists(createProductDto.brand_id);
 
+      const { usage_instructions, ...createDtoWithoutUsageAlias } = createProductDto;
       const sanitizedDto = {
-        ...createProductDto,
+        ...createDtoWithoutUsageAlias,
+        description: this.sanitizeLocalizedHtml(createProductDto.description),
         short_description: this.sanitizeLocalizedHtml(createProductDto.short_description),
-        nutrition_information: this.sanitizeLocalizedHtml(createProductDto.nutrition_information),
+        nutrition_information: this.sanitizeLocalizedHtml(
+          usage_instructions ?? createProductDto.nutrition_information,
+        ),
+        notes: this.sanitizeLocalizedHtml(createProductDto.notes),
       };
       const product = this.productsRepository.create(sanitizedDto);
       const savedProduct = await this.productsRepository.save(product);
@@ -324,7 +342,7 @@ export class ProductsService {
   async findOne(id: string, locale: string = 'en'): Promise<any> {
     const product = await this.productsRepository.findOne({
       where: { id },
-      relations: ['category', 'brand'],
+      relations: ['category', 'brand', 'productCollections', 'productCollections.collection'],
     });
 
     if (!product) {
@@ -348,6 +366,8 @@ export class ProductsService {
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('product.brand', 'brand')
+      .leftJoinAndSelect('product.productCollections', 'productCollection')
+      .leftJoinAndSelect('productCollection.collection', 'collection')
       .where('product.deleted_at IS NULL')
       .andWhere(`product.slug->>'${locale}' = :slug`, { slug })
       .getOne();
@@ -358,6 +378,8 @@ export class ProductsService {
         .createQueryBuilder('product')
         .leftJoinAndSelect('product.category', 'category')
         .leftJoinAndSelect('product.brand', 'brand')
+        .leftJoinAndSelect('product.productCollections', 'productCollection')
+        .leftJoinAndSelect('productCollection.collection', 'collection')
         .where('product.deleted_at IS NULL')
         .andWhere(`product.slug->>'en' = :slug`, { slug })
         .getOne();
@@ -422,13 +444,24 @@ export class ProductsService {
         }
       }
 
+      const { usage_instructions, ...updateDtoWithoutUsageAlias } = updateProductDto;
       const sanitizedDto = {
-        ...updateProductDto,
+        ...updateDtoWithoutUsageAlias,
+        ...(updateProductDto.description !== undefined
+          ? { description: this.sanitizeLocalizedHtml(updateProductDto.description) }
+          : {}),
         ...(updateProductDto.short_description !== undefined
           ? { short_description: this.sanitizeLocalizedHtml(updateProductDto.short_description) }
           : {}),
-        ...(updateProductDto.nutrition_information !== undefined
-          ? { nutrition_information: this.sanitizeLocalizedHtml(updateProductDto.nutrition_information) }
+        ...(usage_instructions !== undefined || updateProductDto.nutrition_information !== undefined
+          ? {
+              nutrition_information: this.sanitizeLocalizedHtml(
+                usage_instructions ?? updateProductDto.nutrition_information,
+              ),
+            }
+          : {}),
+        ...(updateProductDto.notes !== undefined
+          ? { notes: this.sanitizeLocalizedHtml(updateProductDto.notes) }
           : {}),
       };
       Object.assign(product, sanitizedDto);

@@ -8,6 +8,11 @@ import { CreateCollectionDto } from './dto/create-collection.dto';
 import { UpdateCollectionDto } from './dto/update-collection.dto';
 import { AssignProductsDto } from './dto/assign-products.dto';
 import { QueryCollectionDto } from './dto/query-collection.dto';
+import {
+  HomepageQueryDto,
+  HomepageSectionDto,
+  HomepageProductTileDto,
+} from './dto/homepage-section.dto';
 import { 
   decodeCursor, 
   buildCursorResponse, 
@@ -308,6 +313,98 @@ export class CollectionsService {
           }
         : null,
     };
+  }
+
+  /**
+   * Project a Product into the lean tile shape a homepage card renders,
+   * resolving localized fields to plain strings for the given locale.
+   */
+  private resolveProductTile(product: Product, locale: string): HomepageProductTileDto {
+    const images = Array.isArray(product.images) ? product.images : [];
+    return {
+      id: product.id,
+      name: this.getLocalizedValue(product.name, locale),
+      slug: this.getLocalizedValue(product.slug, locale),
+      short_description: product.short_description
+        ? this.getLocalizedValue(product.short_description, locale)
+        : null,
+      price: Number(product.price),
+      sale_price: product.sale_price !== null && product.sale_price !== undefined
+        ? Number(product.sale_price)
+        : null,
+      image: images.length > 0 ? images[0] : null,
+      images,
+      stock_quantity: product.stock_quantity,
+      status: product.status,
+      is_featured: product.is_featured,
+      enable_sale_tag: product.enable_sale_tag,
+    };
+  }
+
+  /**
+   * Build the homepage payload: every active collection that claims a
+   * homepage_section, each with a preview of its product tiles.
+   *
+   * Homepage sections are few, so a query per section is acceptable and keeps
+   * "top-N products per collection" simple and index-friendly.
+   */
+  async getHomepageSections(query: HomepageQueryDto): Promise<HomepageSectionDto[]> {
+    try {
+      const { limit = 8, locale = 'en', homepage_section } = query;
+
+      const collectionsQuery = this.collectionsRepository
+        .createQueryBuilder('collection')
+        .where('collection.is_active = :isActive', { isActive: true })
+        .andWhere('collection.homepage_section IS NOT NULL')
+        .orderBy('collection.created_at', 'DESC')
+        .addOrderBy('collection.id', 'DESC');
+
+      if (homepage_section) {
+        collectionsQuery.andWhere('collection.homepage_section = :homepage_section', {
+          homepage_section,
+        });
+      }
+
+      const collections = await collectionsQuery.getMany();
+
+      const sections = await Promise.all(
+        collections.map(async (collection) => {
+          const products = await this.productsRepository
+            .createQueryBuilder('product')
+            .innerJoin(
+              'product_collections',
+              'pc',
+              'pc.product_id = product.id AND pc.collection_id = :collectionId',
+              { collectionId: collection.id },
+            )
+            .where('product.deleted_at IS NULL')
+            .andWhere('product.status = :status', { status: 'active' })
+            .orderBy('product.created_at', 'DESC')
+            .addOrderBy('product.id', 'DESC')
+            .take(limit)
+            .getMany();
+
+          const product_count = await this.productCollectionsRepository.count({
+            where: { collection_id: collection.id },
+          });
+
+          return {
+            id: collection.id,
+            name: collection.name,
+            slug: collection.slug,
+            description: collection.description ?? null,
+            homepage_section: collection.homepage_section,
+            product_count,
+            products: products.map((p) => this.resolveProductTile(p, locale)),
+          };
+        }),
+      );
+
+      return sections;
+    } catch (error) {
+      this.logger.error(`Failed to build homepage sections: ${error.message}`, error.stack);
+      throw new BadRequestException('Failed to build homepage sections');
+    }
   }
 
   /**

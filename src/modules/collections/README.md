@@ -164,6 +164,60 @@ Response:
 GET /collections/:id/products/count
 ```
 
+### Homepage Sections
+
+Returns every **active** collection that has a `homepage_section` marker, each
+with a preview of its product tiles — so the homepage can render section-by-section
+in a single request. The collection itself needs no image; each section is
+represented by its product tiles.
+
+```http
+GET /collections/homepage?limit=8&locale=en
+GET /collections/homepage?homepage_section=must_try   # single section only
+```
+
+Query params:
+- `limit` — number of product tiles previewed per section (default 8, max 24)
+- `locale` — `en` or `vi`, used to resolve product name/slug/short_description (default `en`)
+- `homepage_section` — optional; restrict to one section marker
+
+Response:
+```json
+[
+  {
+    "id": "col-uuid",
+    "name": "Must Try",
+    "slug": "must-try",
+    "description": "Editor picks",
+    "homepage_section": "must_try",
+    "product_count": 12,
+    "products": [
+      {
+        "id": "prod-uuid",
+        "name": "Green Tea",
+        "slug": "green-tea",
+        "short_description": "Fresh brew",
+        "price": 10,
+        "sale_price": 8.5,
+        "image": "https://.../a.jpg",
+        "images": ["https://.../a.jpg", "https://.../b.jpg"],
+        "stock_quantity": 5,
+        "status": "active",
+        "is_featured": true,
+        "enable_sale_tag": true
+      }
+    ]
+  }
+]
+```
+
+Notes:
+- Only products with `status = 'active'` and not soft-deleted appear as tiles.
+- `product_count` is the collection's full product total, not the previewed count.
+- Assign a section to a collection by setting `homepage_section` on create/update
+  (e.g. `"homepage_section": "must_try"`). At most one active collection should
+  claim a given section.
+
 ## Cursor-Based Pagination
 
 ### How It Works

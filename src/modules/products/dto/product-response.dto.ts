@@ -11,6 +11,17 @@ export class ProductCategorySummaryDto {
   slug: string;
 }
 
+export class ProductCollectionSummaryDto {
+  @ApiProperty({ format: 'uuid' })
+  id: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  slug: string;
+}
+
 export class ProductBrandSummaryDto {
   @ApiProperty({ format: 'uuid' })
   id: string;
@@ -104,17 +115,35 @@ export class ProductResponseDto {
   @ApiProperty()
   slug: string;
 
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Sanitized product description HTML resolved for the requested locale',
+  })
   description: string | null;
 
-  @ApiPropertyOptional({ nullable: true })
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Sanitized ingredients and allergen information HTML resolved for the requested locale',
+  })
   short_description: string | null;
 
   @ApiPropertyOptional({
     nullable: true,
-    description: 'Sanitized nutrition information HTML resolved for the requested locale',
+    description: 'Deprecated compatibility alias for usage instructions HTML. New clients should use usage_instructions.',
   })
   nutrition_information: string | null;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Usage instructions HTML resolved for the requested locale. Preferred key for new clients.',
+  })
+  usage_instructions: string | null;
+
+  @ApiPropertyOptional({
+    nullable: true,
+    description: 'Sanitized notes / cautions HTML resolved for the requested locale',
+  })
+  notes: string | null;
 
   @ApiProperty()
   price: number;
@@ -167,7 +196,9 @@ export class ProductResponseDto {
   @ApiProperty({ format: 'date-time' })
   updated_at: Date;
 
-  // collections omitted: transformProductForLocale() doesn't populate productCollections yet — see follow-up
+  @ApiPropertyOptional({ type: () => [ProductCollectionSummaryDto] })
+  collections?: ProductCollectionSummaryDto[];
+
   @ApiPropertyOptional({ type: () => ProductCategorySummaryDto, nullable: true })
   category?: ProductCategorySummaryDto;
 

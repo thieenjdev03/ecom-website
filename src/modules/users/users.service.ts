@@ -107,7 +107,7 @@ export class UsersService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    const { email, password, role, profile } = updateUserDto;
+    const { email, password, role, profile, firstName, lastName, country, phoneNumber } = updateUserDto;
     
     // Check if email is being changed and if it already exists
     if (email && email !== user.email) {
@@ -119,6 +119,10 @@ export class UsersService {
 
     const updateData: any = {};
     if (email) updateData.email = email;
+    if (firstName !== undefined) updateData.firstName = firstName;
+    if (lastName !== undefined) updateData.lastName = lastName;
+    if (country !== undefined) updateData.country = country;
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
     if (role) updateData.role = role;
     if (profile !== undefined) updateData.profile = profile;
     
@@ -129,6 +133,12 @@ export class UsersService {
     await this.usersRepository.update(id, updateData);
     const updatedUser = await this.usersRepository.findOne({ where: { id } });
     return this.toResponseDto(updatedUser);
+  }
+
+  /** Update only the authenticated user's safe profile fields. */
+  async updateSelf(id: string, updateUserDto: UpdateUserDto): Promise<UserResponseDto> {
+    const { role: _role, password: _password, ...profileDto } = updateUserDto;
+    return this.update(id, profileDto);
   }
 
   async remove(id: string): Promise<void> {

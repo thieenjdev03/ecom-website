@@ -181,6 +181,94 @@ describe('CollectionsService', () => {
     });
   });
 
+  describe('getHomepageSections', () => {
+    it('should return active sections with locale-resolved product tiles and total count', async () => {
+      const mockCollection = {
+        id: 'col1',
+        name: 'Must Try',
+        slug: 'must-try',
+        description: 'Editor picks',
+        homepage_section: 'must_try',
+        is_active: true,
+        created_at: new Date(),
+      };
+
+      const mockProduct = {
+        id: 'prod1',
+        name: { en: 'Green Tea', vi: 'Trà Xanh' },
+        slug: { en: 'green-tea', vi: 'tra-xanh' },
+        short_description: { en: 'Fresh', vi: 'Tươi' },
+        price: '10.00',
+        sale_price: '8.50',
+        images: ['a.jpg', 'b.jpg'],
+        stock_quantity: 5,
+        status: 'active',
+        is_featured: true,
+        enable_sale_tag: true,
+        created_at: new Date(),
+      };
+
+      const collectionsQb = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([mockCollection]),
+      };
+      const productsQb = {
+        innerJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([mockProduct]),
+      };
+
+      mockCollectionsRepository.createQueryBuilder.mockReturnValue(collectionsQb);
+      mockProductsRepository.createQueryBuilder.mockReturnValue(productsQb);
+      mockProductCollectionsRepository.count.mockResolvedValue(12);
+
+      const result = await service.getHomepageSections({ limit: 8, locale: 'vi' });
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toMatchObject({
+        id: 'col1',
+        homepage_section: 'must_try',
+        product_count: 12,
+      });
+      expect(result[0].products[0]).toEqual({
+        id: 'prod1',
+        name: 'Trà Xanh',
+        slug: 'tra-xanh',
+        short_description: 'Tươi',
+        price: 10,
+        sale_price: 8.5,
+        image: 'a.jpg',
+        images: ['a.jpg', 'b.jpg'],
+        stock_quantity: 5,
+        status: 'active',
+        is_featured: true,
+        enable_sale_tag: true,
+      });
+    });
+
+    it('should return an empty array when no active sections exist', async () => {
+      const collectionsQb = {
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        addOrderBy: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([]),
+      };
+      mockCollectionsRepository.createQueryBuilder.mockReturnValue(collectionsQb);
+
+      const result = await service.getHomepageSections({});
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('getProductCount', () => {
     it('should return product count for collection', async () => {
       const collectionId = '123';

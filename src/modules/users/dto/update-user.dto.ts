@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MinLength, IsEnum, IsEmail } from 'class-validator';
+import { IsOptional, IsString, MinLength, IsEnum, IsEmail, MaxLength } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Role } from '../../../auth/enums/role.enum';
 
@@ -10,6 +10,30 @@ export class UpdateUserDto {
   @IsOptional()
   @IsEmail()
   email?: string;
+
+  @ApiPropertyOptional({ description: 'User first name', example: 'John' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  firstName?: string;
+
+  @ApiPropertyOptional({ description: 'User last name', example: 'Doe' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  lastName?: string;
+
+  @ApiPropertyOptional({ description: 'User country', example: 'Vietnam' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  country?: string;
+
+  @ApiPropertyOptional({ description: 'User phone number', example: '0909090909' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(30)
+  phoneNumber?: string;
 
   @ApiPropertyOptional({
     description: 'User password (minimum 6 characters)',

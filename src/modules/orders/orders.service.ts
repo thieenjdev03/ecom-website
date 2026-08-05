@@ -189,12 +189,11 @@ export class OrdersService {
     try {
       const order = await this.findOne(id);
 
-      // Validate status transitions
+      // Không chặn chuyển trạng thái theo flow — admin toàn quyền chỉnh sửa (xem changeOrderStatus).
       if (updateOrderDto.status && !this.isValidStatusTransition(order.status, updateOrderDto.status)) {
-        const validTransitions = this.getValidStatusTransitions(order.status);
-        throw new BadRequestException(
-          `Invalid status transition from "${order.status}" to "${updateOrderDto.status}". ` +
-          `Valid transitions from "${order.status}" are: ${validTransitions.join(', ')}.`
+        this.logger.warn(
+          `Non-standard status change (update) for order ${order.orderNumber}: ` +
+          `"${order.status}" -> "${updateOrderDto.status}" (admin override).`
         );
       }
 
@@ -338,7 +337,8 @@ export class OrdersService {
     }
   }
 
-  // Order status transition map according to business rules
+  // Flow chuẩn (happy path) của đơn hàng. LƯU Ý: chỉ mang tính KHUYẾN NGHỊ để log/audit —
+  // KHÔNG còn dùng để chặn thao tác đổi trạng thái của admin (xem changeOrderStatus/update).
   private readonly ORDER_STATUS_FLOW: Record<OrderStatus, OrderStatus[]> = {
     [OrderStatus.PENDING_PAYMENT]: [OrderStatus.PAID, OrderStatus.CANCELLED],
     [OrderStatus.PAID]: [OrderStatus.PROCESSING, OrderStatus.REFUNDED],
@@ -466,12 +466,12 @@ export class OrdersService {
     try {
       const order = await this.findOne(id);
 
-      // Validate transition
+      // Admin toàn quyền: cho phép chuyển sang BẤT KỲ trạng thái nào — KHÔNG chặn theo flow (relations).
+      // Vẫn ghi cảnh báo cho các bước ngoài flow chuẩn để tiện audit, nhưng luôn cho phép thực hiện.
       if (!this.isValidStatusTransition(order.status, changeOrderStatusDto.toStatus)) {
-        const validTransitions = this.getValidStatusTransitions(order.status);
-        throw new BadRequestException(
-          `Invalid status transition from "${order.status}" to "${changeOrderStatusDto.toStatus}". ` +
-          `Valid transitions from "${order.status}" are: ${validTransitions.join(', ')}.`
+        this.logger.warn(
+          `Non-standard status change for order ${order.orderNumber}: ` +
+          `"${order.status}" -> "${changeOrderStatusDto.toStatus}" (admin override).`
         );
       }
 

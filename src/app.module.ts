@@ -26,6 +26,7 @@ import { BrandsModule } from './modules/brands/brands.module';
 import { HomepageModule } from './modules/homepage/homepage.module';
 import { DistributorsModule } from './modules/distributors/distributors.module';
 import { PoliciesModule } from './modules/policies/policies.module';
+import { CartModule } from './modules/cart/cart.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -66,6 +67,7 @@ import { PoliciesModule } from './modules/policies/policies.module';
     HomepageModule,
     DistributorsModule,
     PoliciesModule,
+    CartModule,
   ],
 })
 export class AppModule {}

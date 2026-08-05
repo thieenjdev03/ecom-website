@@ -26,8 +26,8 @@ export class CreateProductDto {
 
   @ApiPropertyOptional({
     type: () => LocalizedStringDto,
-    example: { en: 'High quality cotton polo shirt...', vi: 'Áo polo cotton chất lượng cao...' },
-    description: 'Product description in multiple languages'
+    example: { en: '<p>High quality vanilla ice cream.</p>', vi: '<p>Kem vani chất lượng cao.</p>' },
+    description: 'Product description HTML in multiple languages. Unsafe tags and attributes are removed before storage.'
   })
   @IsOptional()
   @ValidateNested()
@@ -36,8 +36,8 @@ export class CreateProductDto {
 
   @ApiPropertyOptional({
     type: () => LocalizedStringDto,
-    example: { en: 'Premium cotton polo', vi: 'Áo polo cotton cao cấp' },
-    description: 'Short description in multiple languages'
+    example: { en: '<p>Contains <strong>milk and soy</strong>.</p>', vi: '<p>Có chứa <strong>sữa và đậu nành</strong>.</p>' },
+    description: 'Ingredients and allergen information HTML in multiple languages. Unsafe tags and attributes are removed before storage.'
   })
   @IsOptional()
   @ValidateNested()
@@ -47,15 +47,38 @@ export class CreateProductDto {
   @ApiPropertyOptional({
     type: () => LocalizedStringDto,
     example: {
-      en: '<p>Energy: 210 kcal per serving</p>',
-      vi: '<p>Năng lượng: 210 kcal mỗi khẩu phần</p>',
+      en: '<ol><li>Soften for 5 minutes before serving.</li><li>Consume immediately after opening.</li></ol>',
+      vi: '<ol><li>Để kem mềm 5 phút trước khi dùng.</li><li>Dùng ngay sau khi mở hộp.</li></ol>',
     },
-    description: 'Sanitized nutrition information HTML in multiple languages',
+    description: 'Deprecated compatibility alias for usage instructions HTML. New clients should send usage_instructions.',
   })
   @IsOptional()
   @ValidateNested()
   @Type(() => LocalizedStringDto)
   nutrition_information?: LocalizedStringDto;
+
+  @ApiPropertyOptional({
+    type: () => LocalizedStringDto,
+    example: {
+      en: '<ol><li>Soften for 5 minutes before serving.</li><li>Consume immediately after opening.</li></ol>',
+      vi: '<ol><li>Để kem mềm 5 phút trước khi dùng.</li><li>Dùng ngay sau khi mở hộp.</li></ol>',
+    },
+    description: 'Usage instructions HTML in multiple languages. Stored in the existing nutrition_information column.',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => LocalizedStringDto)
+  usage_instructions?: LocalizedStringDto;
+
+  @ApiPropertyOptional({
+    type: () => LocalizedStringDto,
+    example: { en: '<p>Keep frozen. Do not refreeze after thawing.</p>', vi: '<p>Bảo quản đông lạnh.</p>' },
+    description: 'Sanitized notes / cautions HTML in multiple languages',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => LocalizedStringDto)
+  notes?: LocalizedStringDto;
 
   @ApiProperty({ example: 399000 })
   @IsNumber()
@@ -126,10 +149,10 @@ export class CreateProductDto {
   @IsString({ each: true })
   tags?: string[];
 
-  @ApiPropertyOptional({ enum: ['active', 'inactive', 'draft', 'out_of_stock', 'discontinued'] })
+  @ApiPropertyOptional({ enum: ['active', 'inactive', 'draft'] })
   @IsOptional()
-  @IsEnum(['active', 'inactive', 'draft', 'out_of_stock', 'discontinued'])
-  status?: 'active' | 'inactive' | 'draft' | 'out_of_stock' | 'discontinued';
+  @IsEnum(['active', 'inactive', 'draft'])
+  status?: 'active' | 'inactive' | 'draft';
 
   @ApiPropertyOptional({ example: false })
   @IsOptional()
