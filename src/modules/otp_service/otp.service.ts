@@ -27,35 +27,59 @@ export class OtpService {
     : null
 
   private async sendEmail(to: string, subject: string, html: string): Promise<void> {
+    let lastError: Error | null = null
+
+    // 1) Try Resend SDK first (if configured). On failure, fall through to the
+    //    other transports instead of aborting — e.g. an unverified sender domain.
     if (this.resend) {
-      const from = process.env.MAIL_FROM || 'noreply@talktodoc.online'
-      const result = await this.resend.emails.send({ from, to, subject, html })
-      if ((result as any).error) {
-        throw new Error((result as any).error.message || 'Resend send failed')
+      try {
+        const from = process.env.MAIL_FROM || 'noreply@talktodoc.online'
+        const result = await this.resend.emails.send({ from, to, subject, html })
+        if ((result as any).error) {
+          throw new Error((result as any).error.message || 'Resend send failed')
+        }
+        return
+      } catch (error) {
+        lastError = error as Error
+        console.warn('Resend gửi thất bại, thử phương thức dự phòng:', lastError.message)
       }
-      return
     }
+
+    // 2) Fall back to SMTP/Gmail via nodemailer (if configured).
     if (this.transporter) {
-      const from = process.env.MAIL_FROM || process.env.MAIL_USER as string
-      await this.transporter.sendMail({ from, to, subject, html })
-      return
-    }
-    // Fallback to axios if no SDK/transport available
-    if (process.env.RESEND_API_KEY) {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ from: process.env.MAIL_FROM || 'noreply@talktodoc.online', to, subject, html }),
-      })
-      if (!res.ok) {
-        const body = await res.text()
-        throw new Error(`Resend HTTP error ${res.status}: ${body}`)
+      try {
+        const from = process.env.MAIL_FROM || (process.env.MAIL_USER as string)
+        await this.transporter.sendMail({ from, to, subject, html })
+        return
+      } catch (error) {
+        lastError = error as Error
+        console.warn('Nodemailer gửi thất bại:', lastError.message)
       }
-      return
     }
+
+    // 3) Last resort: call the Resend HTTP API directly (covers SDK-less setups).
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const res = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ from: process.env.MAIL_FROM || 'noreply@talktodoc.online', to, subject, html }),
+        })
+        if (!res.ok) {
+          const body = await res.text()
+          throw new Error(`Resend HTTP error ${res.status}: ${body}`)
+        }
+        return
+      } catch (error) {
+        lastError = error as Error
+        console.warn('Resend HTTP API gửi thất bại:', lastError.message)
+      }
+    }
+
+    if (lastError) throw lastError
     throw new InternalServerErrorException('Email service is not configured')
   }
 
