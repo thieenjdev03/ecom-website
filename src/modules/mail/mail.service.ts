@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import { renderMingoEmail, type MingoEmailBrand } from '../../common/email/mingo-email';
 
 type MailOrderItemInput = {
   name?: string;
@@ -43,21 +44,21 @@ export class MailService {
 
     // Get from address from env or use Resend test domain for development
     // Resend test domain: onboarding@resend.dev (works without domain verification)
-    this.defaultFromAddress = 
-      this.configService.get<string>('MAIL_FROM') || 
-      'E-commerce Store <noreply@talktodoc.online>';
+    this.defaultFromAddress =
+      this.configService.get<string>('MAIL_FROM') ||
+      'Mingo <onboarding@resend.dev>';
     
     if (!this.configService.get<string>('MAIL_FROM')) {
       this.logger.warn('MAIL_FROM not configured, using Resend test domain: onboarding@resend.dev');
       this.logger.warn('For production, please set MAIL_FROM to a verified domain in Resend dashboard');
     }
 
-    this.brandName = this.configService.get<string>('MAIL_BRAND_NAME') || 'LUMÉ';
+    this.brandName = this.configService.get<string>('MAIL_BRAND_NAME') || 'Mingo';
 
     const configuredBrandUrl =
       this.configService.get<string>('MAIL_BRAND_URL') ||
       this.configService.get<string>('FRONTEND_URL') ||
-      'https://example.com';
+      'https://mingo-store.vercel.app';
     const normalizedBrandUrl = configuredBrandUrl.replace(/\/+$/, '');
 
     this.brandUrl = normalizedBrandUrl;
@@ -340,14 +341,14 @@ export class MailService {
     const totalDisplay = this.formatMoneyFromUnknown(data.orderTotal, data.currency) ?? '-';
 
     const content = `
-      <h1 style="color: #2c3e50; margin: 0 0 16px;">Order Confirmation</h1>
+      <h1 style="color: #563e2b; margin: 0 0 16px;">Order Confirmation</h1>
       <p style="margin: 0 0 16px;">Dear ${data.customerName},</p>
       <p style="margin: 0 0 24px;">Thank you for your order! Your order #${data.orderId} has been confirmed.</p>
 
-      <h2 style="margin: 24px 0 12px; font-size: 18px; color: #111;">Order Details</h2>
+      <h2 style="margin: 24px 0 12px; font-size: 18px; color: #563e2b;">Order Details</h2>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
         <thead>
-          <tr style="background-color: #f8f9fa;">
+          <tr style="background-color: #fdf2f2;">
             <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Item</th>
             <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Quantity</th>
             <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Price</th>
@@ -358,7 +359,7 @@ export class MailService {
         </tbody>
       </table>
 
-      <div style="margin: 0 0 24px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+      <div style="margin: 0 0 24px; padding: 15px; background-color: #fdf2f2; border-radius: 5px;">
         <h3 style="margin: 0; font-size: 18px;">Total: ${totalDisplay}</h3>
       </div>
 
@@ -407,17 +408,17 @@ export class MailService {
       this.formatMoneyFromUnknown(data.summary?.total ?? data.amount, data.currency) ?? '-';
 
     const content = `
-      <h1 style="color: #2c3e50; margin: 0 0 16px;">Payment Confirmed</h1>
+      <h1 style="color: #563e2b; margin: 0 0 16px;">Payment Confirmed</h1>
       <p style="margin: 0 0 16px;">Dear ${data.customerName},</p>
       <p style="margin: 0 0 24px;">We have received your payment for order <strong>#${data.orderNumber}</strong>.</p>
 
-      <h2 style="margin: 24px 0 8px; font-size: 18px; color: #111;">Payment Summary</h2>
+      <h2 style="margin: 24px 0 8px; font-size: 18px; color: #563e2b;">Payment Summary</h2>
       <p style="margin: 0 0 24px;"><strong>Amount:</strong> ${data.amount} ${data.currency}</p>
 
-      <h2 style="margin: 24px 0 12px; font-size: 18px; color: #111;">Order Items</h2>
+      <h2 style="margin: 24px 0 12px; font-size: 18px; color: #563e2b;">Order Items</h2>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
         <thead>
-          <tr style="background-color: #f8f9fa;">
+          <tr style="background-color: #fdf2f2;">
             <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Item</th>
             <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Quantity</th>
             <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Price</th>
@@ -428,7 +429,7 @@ export class MailService {
         </tbody>
       </table>
 
-      <div style="margin: 0 0 24px; padding: 15px; background-color: #f8f9fa; border-radius: 5px;">
+      <div style="margin: 0 0 24px; padding: 15px; background-color: #fdf2f2; border-radius: 5px;">
         <h3 style="margin: 0;">Total: ${totalDisplay}</h3>
       </div>
 
@@ -443,11 +444,11 @@ export class MailService {
    */
   private generatePasswordResetHTML(resetUrl: string): string {
     const content = `
-      <h1 style="color: #2c3e50; margin: 0 0 16px;">Password Reset Request</h1>
+      <h1 style="color: #563e2b; margin: 0 0 16px;">Password Reset Request</h1>
       <p style="margin: 0 0 16px;">You requested a password reset for your account.</p>
       <p style="margin: 0 0 24px;">Click the button below to reset your password:</p>
       <div style="text-align: center; margin-bottom: 24px;">
-        <a href="${resetUrl}" style="display: inline-block; padding: 14px 32px; background-color: #2c3e50; color: #ffffff; text-decoration: none; border-radius: 999px; font-weight: bold;">Reset Password</a>
+        <a href="${resetUrl}" style="display: inline-block; padding: 14px 32px; background-color: #fe5000; color: #ffffff; text-decoration: none; border-radius: 999px; font-weight: bold;">Reset Password</a>
       </div>
       <p style="margin: 0 0 8px;">This link will expire in 1 hour.</p>
       <p style="margin: 0;">If you didn't request this, please ignore this email.</p>
@@ -466,14 +467,14 @@ export class MailService {
     const hostLabel = this.brandUrl ? `go to ${this.getHostnameFromUrl(this.brandUrl)}` : 'visit our store';
 
     const content = `
-      <p style="font-size: 14px; letter-spacing: 4px; color: #a07a62; text-transform: uppercase; margin: 0 0 12px; text-align: center;">
+      <p style="font-size: 14px; letter-spacing: 4px; color: #fe5000; text-transform: uppercase; margin: 0 0 12px; text-align: center;">
         WELCOME TO ${brandUpper}!
       </p>
-      <h1 style="font-size: 26px; margin: 0 0 20px; color: #3d332c; text-align: center;">We're glad you're here</h1>
+      <h1 style="font-size: 26px; margin: 0 0 20px; color: #563e2b; text-align: center;">We're glad you're here</h1>
       <p style="margin: 0 0 12px;">Hi ${safeName}, you've activated your customer account.</p>
       <p style="margin: 0 0 24px;">Log in to view past orders, update your addresses and check-out faster.</p>
       <div style="text-align: center; margin-bottom: 24px;">
-        <a href="${buttonUrl}" style="display: inline-block; padding: 14px 40px; background-color: #c8a585; color: #ffffff; text-decoration: none; border-radius: 999px; font-weight: 600; text-transform: lowercase;">
+        <a href="${buttonUrl}" style="display: inline-block; padding: 14px 40px; background-color: #fe5000; color: #ffffff; text-decoration: none; border-radius: 999px; font-weight: 600; text-transform: lowercase;">
           ${hostLabel}
         </a>
       </div>
@@ -490,7 +491,7 @@ export class MailService {
    */
   private generatePaymentFailureHTML(orderId: string, reason: string): string {
     const content = `
-      <h1 style="color: #e74c3c; margin: 0 0 16px;">Payment Failed</h1>
+      <h1 style="color: #ba1a1a; margin: 0 0 16px;">Payment Failed</h1>
       <p style="margin: 0 0 12px;">We're sorry, but your payment for order #${orderId} could not be processed.</p>
       <p style="margin: 0 0 24px;"><strong>Reason:</strong> ${reason}</p>
       <p style="margin: 0 0 12px;">Please try again or contact our support team if the problem persists.</p>
@@ -603,17 +604,17 @@ export class MailService {
         : this.brandUrl || '#';
 
     const content = `
-      <p style="font-size: 14px; letter-spacing: 4px; color: #a07a62; text-transform: uppercase; margin: 0 0 12px;">
+      <p style="font-size: 14px; letter-spacing: 4px; color: #fe5000; text-transform: uppercase; margin: 0 0 12px;">
         PAYMENT RECEIVED
       </p>
-      <h1 style="font-size: 26px; margin: 0 0 12px; color: #3d332c;">Thank you, ${data.customerName ?? 'there'}!</h1>
+      <h1 style="font-size: 26px; margin: 0 0 12px; color: #563e2b;">Thank you, ${data.customerName ?? 'there'}!</h1>
       <p style="margin: 0 0 24px;">Your payment is confirmed and your order is officially on its way.</p>
 
-      <div style="padding: 20px; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 24px; background-color: #faf9f8;">
+      <div style="padding: 20px; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 24px; background-color: #fff6ec;">
         ${detailRows}
       </div>
 
-      <h2 style="margin: 0 0 12px; font-size: 18px; color: #3d332c;">Order Summary</h2>
+      <h2 style="margin: 0 0 12px; font-size: 18px; color: #563e2b;">Order Summary</h2>
       <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
         <thead>
           <tr style="text-align: left; font-size: 13px; text-transform: uppercase; color: #9a8c82;">
@@ -635,13 +636,13 @@ export class MailService {
         </div>
       </div>
 
-      <h2 style="margin: 0 0 12px; font-size: 18px; color: #3d332c;">Shipping to</h2>
+      <h2 style="margin: 0 0 12px; font-size: 18px; color: #563e2b;">Shipping to</h2>
       <div style="border: 1px solid #f0f0f0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
         ${shippingLines}
       </div>
 
       <div style="text-align: center; margin-bottom: 24px;">
-        <a href="${viewOrderUrl}" style="display: inline-block; padding: 14px 36px; background-color: #3d332c; color: #ffffff; text-decoration: none; border-radius: 999px; font-weight: 600;">
+        <a href="${viewOrderUrl}" style="display: inline-block; padding: 14px 36px; background-color: #fe5000; color: #ffffff; text-decoration: none; border-radius: 999px; font-weight: 600;">
           View your order
         </a>
       </div>
@@ -766,62 +767,22 @@ export class MailService {
       : '<p style="margin: 0;">Shipping address not available.</p>';
   }
 
+  private get mingoBrand(): MingoEmailBrand {
+    return {
+      brandName: this.brandName,
+      brandUrl: this.brandUrl,
+      supportEmail: this.supportEmail,
+      privacyUrl: this.privacyUrl,
+      termsUrl: this.termsUrl,
+    };
+  }
+
+  /** Bọc nội dung trong layout email Mingo dùng chung (header/footer/brand đồng bộ). */
   private wrapWithLayout(content: string): string {
-    return `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>${this.brandName}</title>
-      </head>
-      <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background-color: #f7f7f7; margin: 0; padding: 0;">
-        <div style="max-width: 600px; margin: 0 auto; padding: 32px 16px;">
-          <div style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);">
-            ${this.renderHeader()}
-            <div style="padding: 32px 28px;">
-              ${content}
-            </div>
-            ${this.renderFooter()}
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-  }
-
-  private renderHeader(): string {
-    return `
-      <div style="padding: 32px 28px 0; text-align: center;">
-        <a href="${this.brandUrl}" style="text-decoration: none; color: #1f1f1f;">
-          <span style="display: inline-block; font-size: 28px; letter-spacing: 6px; font-weight: 600;">
-            ${this.brandName.toUpperCase()}
-          </span>
-        </a>
-      </div>
-      <div style="margin-top: 24px; height: 1px; background-color: #f0f0f0;"></div>
-    `;
-  }
-
-  private renderFooter(): string {
-    const currentYear = new Date().getFullYear();
-    const privacyLink = this.privacyUrl
-      ? `<a href="${this.privacyUrl}" style="color: #9a8c82; text-decoration: none; margin: 0 8px;">Privacy policy</a>`
-      : '';
-    const termsLink = this.termsUrl
-      ? `<a href="${this.termsUrl}" style="color: #9a8c82; text-decoration: none; margin: 0 8px;">Terms of service</a>`
-      : '';
-
-    return `
-      <div style="margin-top: 8px; height: 1px; background-color: #f0f0f0;"></div>
-      <div style="text-align: center; padding: 24px 16px 32px;">
-        <p style="margin: 0 0 8px; color: #9a8c82; font-size: 13px;">&copy; ${currentYear} ${this.brandName}</p>
-        <p style="margin: 0 0 12px; color: #b0a397; font-size: 12px;">Need help? Contact us at <a href="mailto:${this.supportEmail}" style="color: #9a8c82; text-decoration: none;">${this.supportEmail}</a></p>
-        <div style="font-size: 12px;">
-          ${privacyLink}
-          ${termsLink}
-        </div>
-      </div>
-    `;
+    return renderMingoEmail(this.mingoBrand, {
+      title: this.brandName,
+      content,
+    });
   }
 
   private getHostnameFromUrl(url: string): string {

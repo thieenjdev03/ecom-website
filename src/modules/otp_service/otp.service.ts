@@ -8,6 +8,13 @@ import { EmailOtp } from './entities/email-otp.entity'
 import { User } from '../users/user.entity'
 import * as bcrypt from 'bcrypt'
 import { Role } from '../../auth/enums/role.enum'
+import {
+  renderMingoEmail,
+  mingoOtpBlock,
+  mingoBrandFromEnv,
+  MINGO,
+  MINGO_FONT,
+} from '../../common/email/mingo-email'
 
 @Injectable()
 export class OtpService {
@@ -17,6 +24,25 @@ export class OtpService {
   ) {}
 
   private resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
+
+  private brand = mingoBrandFromEnv()
+
+  /** Dựng email OTP theo layout Mingo dùng chung. Hết hạn 5 phút (khớp logic). */
+  private buildOtpEmail(opts: { label: string; heading: string; intro: string; otp: string }): string {
+    const content = `
+      <p style="margin:0 0 8px;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:${MINGO.orange};font-weight:700;text-align:center;">${opts.label}</p>
+      <h1 style="margin:0 0 14px;font-family:${MINGO_FONT};font-size:26px;font-weight:800;color:${MINGO.brown};text-align:center;">${opts.heading}</h1>
+      <p style="margin:0;color:${MINGO.brown};text-align:center;">${opts.intro}</p>
+      ${mingoOtpBlock(opts.otp)}
+      <p style="margin:0;color:${MINGO.muted};font-size:14px;text-align:center;">Mã có hiệu lực trong <strong>5 phút</strong> và chỉ dùng được một lần.</p>
+      <p style="margin:18px 0 0;color:${MINGO.muted};font-size:13px;text-align:center;">Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email.</p>
+    `
+    return renderMingoEmail(this.brand, {
+      title: `${opts.heading} - ${this.brand.brandName}`,
+      preheader: `Mã xác thực của bạn: ${opts.otp}`,
+      content,
+    })
+  }
 
   private transporter = process.env.MAIL_USER && process.env.MAIL_PASS
     ? nodemailer.createTransport({
@@ -121,34 +147,13 @@ export class OtpService {
     try {
       await this.sendEmail(
         email,
-        'Mã xác thực OTP - Ecom Server',
-        `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; text-align: center; background-color: #ffffff;">
-            <!-- Logo -->
-            <div style="margin-bottom: 30px;">
-              <h1 style="font-family: 'Brush Script MT', cursive; font-size: 36px; color: #000; margin: 0; letter-spacing: 2px;">
-                LUMÉ
-                <span style="font-size: 20px; color: #666;">✦</span>
-              </h1>
-            </div>
-            
-            <!-- OTP Code -->
-            <div style="margin: 30px 0;">
-              <p style="font-size: 16px; color: #333; margin-bottom: 10px;">Your verification code:</p>
-              <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #000; margin: 20px 0;">${otp}</div>
-              <p style="font-size: 14px; color: #666;">This code can only be used once. It expires in 15 minutes.</p>
-            </div>
-            
-            <!-- Footer -->
-            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
-              <p style="font-size: 12px; color: #999; margin: 0;">© LUMÉ</p>
-              <div style="margin-top: 10px;">
-                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Privacy policy</a>
-                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Terms of service</a>
-              </div>
-            </div>
-          </div>
-        `,
+        `Mã xác thực tài khoản - ${this.brand.brandName}`,
+        this.buildOtpEmail({
+          label: 'Xác thực email',
+          heading: 'Chào mừng đến với Mingo!',
+          intro: 'Dùng mã bên dưới để hoàn tất xác thực email và kích hoạt tài khoản của bạn.',
+          otp,
+        }),
       )
     } catch (error) {
       console.error('Gửi email OTP thất bại:', (error as Error).message)
@@ -186,34 +191,13 @@ export class OtpService {
     try {
       await this.sendEmail(
         email,
-        'Mã xác thực đặt lại mật khẩu - Ecom Server',
-        `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; text-align: center; background-color: #ffffff;">
-            <!-- Logo -->
-            <div style="margin-bottom: 30px;">
-              <h1 style="font-family: 'Brush Script MT', cursive; font-size: 36px; color: #000; margin: 0; letter-spacing: 2px;">
-                LUMÉ
-                <span style="font-size: 20px; color: #666;">✦</span>
-              </h1>
-            </div>
-            
-            <!-- OTP Code -->
-            <div style="margin: 30px 0;">
-              <p style="font-size: 16px; color: #333; margin-bottom: 10px;">Your verification code:</p>
-              <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #000; margin: 20px 0;">${otp}</div>
-              <p style="font-size: 14px; color: #666;">This code can only be used once. It expires in 15 minutes.</p>
-            </div>
-            
-            <!-- Footer -->
-            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
-              <p style="font-size: 12px; color: #999; margin: 0;">© LUMÉ</p>
-              <div style="margin-top: 10px;">
-                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Privacy policy</a>
-                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Terms of service</a>
-              </div>
-            </div>
-          </div>
-        `,
+        `Mã đặt lại mật khẩu - ${this.brand.brandName}`,
+        this.buildOtpEmail({
+          label: 'Đặt lại mật khẩu',
+          heading: 'Yêu cầu đặt lại mật khẩu',
+          intro: 'Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Nhập mã bên dưới để tiếp tục.',
+          otp,
+        }),
       )
     } catch (error) {
       console.error('Gửi email OTP thất bại:', (error as Error).message)
@@ -250,34 +234,13 @@ export class OtpService {
     try {
       await this.sendEmail(
         email,
-        'Verification code - LUMÉ',
-        `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; text-align: center; background-color: #ffffff;">
-            <!-- Logo -->
-            <div style="margin-bottom: 30px;">
-              <h1 style="font-family: 'Brush Script MT', cursive; font-size: 36px; color: #000; margin: 0; letter-spacing: 2px;">
-                LUMÉ
-                <span style="font-size: 20px; color: #666;">✦</span>
-              </h1>
-            </div>
-            
-            <!-- OTP Code -->
-            <div style="margin: 30px 0;">
-              <p style="font-size: 16px; color: #333; margin-bottom: 10px;">Your verification code:</p>
-              <div style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #000; margin: 20px 0;">${otp}</div>
-              <p style="font-size: 14px; color: #666;">This code can only be used once. It expires in 15 minutes.</p>
-            </div>
-            
-            <!-- Footer -->
-            <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
-              <p style="font-size: 12px; color: #999; margin: 0;">© LUMÉ</p>
-              <div style="margin-top: 10px;">
-                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Privacy policy</a>
-                <a href="#" style="color: #007bff; text-decoration: none; font-size: 12px; margin: 0 10px;">Terms of service</a>
-              </div>
-            </div>
-          </div>
-        `,
+        `Mã đăng nhập - ${this.brand.brandName}`,
+        this.buildOtpEmail({
+          label: 'Đăng nhập',
+          heading: 'Mã đăng nhập của bạn',
+          intro: 'Dùng mã bên dưới để đăng nhập vào tài khoản Mingo của bạn.',
+          otp,
+        }),
       )
     } catch (error) {
       console.error('Gửi email OTP thất bại:', (error as Error).message)
