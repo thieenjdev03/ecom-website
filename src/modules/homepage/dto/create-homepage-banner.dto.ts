@@ -10,6 +10,15 @@ export class CreateHomepageBannerDto {
   @MaxLength(500)
   image_url: string;
 
+  @ApiPropertyOptional({
+    example: 'https://res.cloudinary.com/.../hero-loop.mp4',
+    description: 'Optional background video (mp4). When set, storefront autoplays it (muted/loop) with image_url as poster/fallback.',
+  })
+  @IsOptional()
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true })
+  @MaxLength(500)
+  video_url?: string;
+
   @ApiPropertyOptional({ example: 'Captain Hopper for Kids ice cream' })
   @IsOptional()
   @IsString()

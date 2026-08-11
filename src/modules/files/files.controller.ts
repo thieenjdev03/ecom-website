@@ -46,9 +46,9 @@ export class FilesController {
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @UseInterceptors(FileInterceptor('file', {
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    limits: { fileSize: 50 * 1024 * 1024 }, // 50MB — cho phép video nền hero (mp4); ảnh thực tế nhỏ hơn nhiều
   }))
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Upload file to Cloudinary',
     description: 'Uploads a single file to Cloudinary with optional transformations and folder organization.'
   })
