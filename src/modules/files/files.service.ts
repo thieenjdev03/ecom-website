@@ -98,10 +98,17 @@ export class FilesService {
         throw new Error('Only image files are allowed');
       }
 
-      // Validate file size (max 5MB)
-      const maxSize = 5 * 1024 * 1024; // 5MB
+      // Video uploads (e.g. hero background clips) must actually be videos.
+      if (resourceType === 'video' && file.mimetype && !file.mimetype.startsWith('video/')) {
+        throw new Error('Only video files are allowed');
+      }
+
+      // Validate file size — videos (hero background) get a larger budget than
+      // images. Keep these aligned with the multer limits in files.controller.ts.
+      const maxSize = resourceType === 'video' ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
       if (file.size > maxSize) {
-        throw new Error('File size exceeds 5MB limit');
+        const maxMb = Math.round(maxSize / (1024 * 1024));
+        throw new Error(`File size exceeds ${maxMb}MB limit`);
       }
 
       this.logger.log(`Uploading file: ${file.originalname}`);
