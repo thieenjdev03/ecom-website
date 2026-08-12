@@ -5,7 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Not } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { createHash } from 'crypto';
 import { Cart } from './entities/cart.entity';
 import { CartItem } from './entities/cart-item.entity';
@@ -84,19 +84,31 @@ export class CartService {
 
     const items = (cart.items ?? []).map((item) => {
       const product = item.product ?? null;
+      const hasVariants = Boolean(product?.variants?.length);
+      const variant = item.variant_sku
+        ? product?.variants?.find((candidate) => candidate.sku === item.variant_sku)
+        : undefined;
       // A soft-deleted / detached product comes back null via the relation.
-      const stock = product ? Number(product.stock_quantity) : 0;
+      const stock = variant
+        ? Number(variant.stock)
+        : product && !hasVariants
+          ? Number(product.stock_quantity)
+          : 0;
       const available = Boolean(
-        product && product.status === 'active' && stock > 0,
+        product && product.status === 'active' && stock > 0 && (!hasVariants || variant),
       );
-      const unitPrice = product
-        ? Number(product.sale_price ?? product.price)
-        : 0;
+      const unitPrice = variant
+        ? Number(variant.price)
+        : product && !hasVariants
+          ? Number(product.sale_price ?? product.price)
+          : 0;
       const images = Array.isArray(product?.images) ? product!.images : [];
 
       return {
         id: item.id,
         quantity: item.quantity,
+        variantSku: variant?.sku ?? null,
+        variantName: variant ? this.getLocalizedValue(variant.name, locale) : null,
         unitPrice,
         lineTotal: unitPrice * item.quantity,
         product: {
@@ -145,12 +157,34 @@ export class CartService {
       throw new BadRequestException('Product is not available for purchase');
     }
 
+    const variants = product.variants ?? [];
+    const variant = dto.variantSku
+      ? variants.find((candidate) => candidate.sku === dto.variantSku)
+      : undefined;
+    if (variants.length > 0 && !variant) {
+      throw new BadRequestException('A valid packaging variant is required');
+    }
+    if (variants.length === 0 && dto.variantSku) {
+      throw new BadRequestException('This product does not have packaging variants');
+    }
+    const stock = variant ? Number(variant.stock) : Number(product.stock_quantity);
+    if (stock <= 0) {
+      throw new BadRequestException('Selected product variant is out of stock');
+    }
+
     const cart = await this.findOrCreateCart(tk);
     const existing = await this.cartItemsRepository.findOne({
-      where: { cart_id: cart.id, product_id: dto.productId },
+      where: {
+        cart_id: cart.id,
+        product_id: dto.productId,
+        variant_sku: dto.variantSku ?? IsNull(),
+      },
     });
 
     if (existing) {
+      if (existing.quantity + dto.quantity > stock) {
+        throw new BadRequestException('Requested quantity exceeds available stock');
+      }
       existing.quantity += dto.quantity;
       await this.cartItemsRepository.save(existing);
     } else {
@@ -158,6 +192,7 @@ export class CartService {
         this.cartItemsRepository.create({
           cart_id: cart.id,
           product_id: dto.productId,
+          variant_sku: dto.variantSku ?? null,
           quantity: dto.quantity,
         }),
       );
@@ -238,11 +273,16 @@ export class CartService {
       const currentItems = await this.cartItemsRepository.find({
         where: { cart_id: cart.id },
       });
-      const byProduct = new Map(currentItems.map((i) => [i.product_id, i]));
+      const itemKey = (productId: string, variantSku: string | null) =>
+        `${productId}:${variantSku ?? ''}`;
+      const byProduct = new Map(
+        currentItems.map((i) => [itemKey(i.product_id, i.variant_sku), i]),
+      );
 
       for (const other of otherCarts) {
         for (const item of other.items ?? []) {
-          const existing = byProduct.get(item.product_id);
+          const key = itemKey(item.product_id, item.variant_sku);
+          const existing = byProduct.get(key);
           if (existing) {
             existing.quantity += item.quantity;
             await this.cartItemsRepository.save(existing);
@@ -250,10 +290,11 @@ export class CartService {
             const moved = this.cartItemsRepository.create({
               cart_id: cart.id,
               product_id: item.product_id,
+              variant_sku: item.variant_sku,
               quantity: item.quantity,
             });
             await this.cartItemsRepository.save(moved);
-            byProduct.set(item.product_id, moved);
+            byProduct.set(key, moved);
           }
         }
       }

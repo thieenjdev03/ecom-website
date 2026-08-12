@@ -27,6 +27,12 @@ export class CartItemResponseDto {
   @ApiProperty()
   quantity: number;
 
+  @ApiPropertyOptional({ nullable: true, description: 'Selected packaging variant SKU' })
+  variantSku: string | null;
+
+  @ApiPropertyOptional({ nullable: true, description: 'Selected packaging variant label' })
+  variantName: string | null;
+
   @ApiProperty({ description: 'Effective unit price (sale_price ?? price)' })
   unitPrice: number;
 

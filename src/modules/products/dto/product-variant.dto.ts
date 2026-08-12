@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, Min, IsUUID, IsUrl, ValidateNested } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, IsUUID, IsUrl, ValidateNested, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { LocalizedStringDto } from './localized-string.dto';
@@ -18,12 +18,14 @@ export class ProductVariantDto {
   sku: string;
 
   @ApiProperty({ example: 399000 })
+  @Type(() => Number)
   @IsNumber()
   @Min(0)
   price: number;
 
   @ApiProperty({ example: 10 })
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
   @Min(0)
   stock: number;
 
@@ -37,9 +39,13 @@ export class ProductVariantDto {
   @IsUUID()
   color_id?: string;
 
-  @ApiProperty({ example: '07bdcefc-da8a-4b29-9945-602abb4adc02' })
+  @ApiPropertyOptional({
+    example: '07bdcefc-da8a-4b29-9945-602abb4adc02',
+    description: 'Optional packaging size reference; variant name remains the fallback label',
+  })
+  @IsOptional()
   @IsUUID()
-  size_id: string;
+  size_id?: string;
 
   @ApiPropertyOptional({ example: 'https://res.cloudinary.com/.../red.jpg' })
   @IsOptional()

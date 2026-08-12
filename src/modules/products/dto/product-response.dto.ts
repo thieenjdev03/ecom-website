@@ -86,8 +86,8 @@ export class ProductVariantResponseDto {
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   color_id?: string;
 
-  @ApiProperty({ format: 'uuid' })
-  size_id: string;
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  size_id?: string;
 
   @ApiPropertyOptional({ nullable: true })
   image_url?: string;
