@@ -38,6 +38,7 @@ describe('CheckoutService', () => {
           },
         ],
       }),
+      getCartRecord: jest.fn().mockResolvedValue({ id: 'cart-1' }),
     };
     const shippingService = {
       quote: jest.fn().mockResolvedValue({
@@ -48,14 +49,18 @@ describe('CheckoutService', () => {
         dealer: null,
       }),
     };
+    const orderRepository = {
+      findOne: jest.fn().mockResolvedValue({ id: 'order-1', orderNumber: 'MGO-TEST', cartId: 'cart-1' }),
+    };
     const service = new CheckoutService(
       {} as any,
       cartService as any,
       shippingService as any,
       {} as any,
       addressRepository as any,
+      orderRepository as any,
     );
-    return { service, cartService, shippingService, addressRepository };
+    return { service, cartService, shippingService, addressRepository, orderRepository };
   };
 
   it('uses backend product prices and shipping quote only', async () => {
@@ -98,5 +103,35 @@ describe('CheckoutService', () => {
         district_code: '001',
       }),
     ).rejects.toThrow('Khu vực chưa hỗ trợ giao hàng');
+  });
+
+  it('quotes checkout for a guest with an inline shipping address', async () => {
+    const { service, addressRepository } = createService();
+    const result = await service.quote(null, 'a'.repeat(32), {
+      shipping_address: {
+        recipient_name: 'Nguyễn Văn A',
+        recipient_phone: '0901234567',
+        province: 'TP. Hồ Chí Minh',
+        district: 'Quận 1',
+        ward: 'Bến Nghé',
+        street_line_1: '1 Nguyễn Huệ',
+      },
+      province_code: '79',
+      district_code: '760',
+    });
+
+    expect(addressRepository.findOne).not.toHaveBeenCalled();
+    expect(result.address).toMatchObject({
+      recipient_name: 'Nguyễn Văn A',
+      phone: '0901234567',
+    });
+  });
+
+  it('only returns an order belonging to the requesting cart token', async () => {
+    const { service, orderRepository } = createService();
+    await expect(service.getOrder('MGO-TEST', 'a'.repeat(32))).resolves.toMatchObject({ id: 'order-1' });
+    expect(orderRepository.findOne).toHaveBeenCalledWith({
+      where: { orderNumber: 'MGO-TEST', cartId: 'cart-1' },
+    });
   });
 });

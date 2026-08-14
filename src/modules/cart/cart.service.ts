@@ -106,6 +106,12 @@ export class CartService {
     return loaded;
   }
 
+  async getCartRecord(token: string): Promise<Cart> {
+    const cart = await this.findCartByToken(token);
+    if (!cart) throw new BadRequestException('Giỏ hàng không tồn tại hoặc đã hết hạn');
+    return cart;
+  }
+
   async mergeGuestCart(token: string, userId: string, locale = 'vi') {
     const guest = await this.findCartByToken(token);
     let userCart = await this.cartRepository.findOne({

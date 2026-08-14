@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { randomBytes } from 'crypto';
 import { DataSource, Repository } from 'typeorm';
@@ -9,7 +9,19 @@ import { OrderStatus, PaymentStatus } from '../orders/enums/order-status.enum';
 import { Product, LangObject } from '../products/entities/product.entity';
 import { MingoShippingService } from '../shipping/mingo-shipping.service';
 import { VnpayService } from '../vnpay/vnpay.service';
-import { CheckoutQuoteDto, CreateCheckoutOrderDto } from './dto/checkout.dto';
+import { CheckoutQuoteDto, CheckoutShippingAddressDto, CreateCheckoutOrderDto } from './dto/checkout.dto';
+
+type CheckoutAddress = {
+  id?: string;
+  recipientName: string;
+  recipientPhone: string;
+  email?: string;
+  province: string;
+  district: string;
+  ward?: string;
+  streetLine1: string;
+  streetLine2?: string;
+};
 
 @Injectable()
 export class CheckoutService {
@@ -19,12 +31,20 @@ export class CheckoutService {
     private readonly shippingService: MingoShippingService,
     private readonly vnpayService: VnpayService,
     @InjectRepository(Address) private readonly addresses: Repository<Address>,
+    @InjectRepository(Order) private readonly orders: Repository<Order>,
   ) {}
 
-  async quote(userId: string, cartToken: string, dto: CheckoutQuoteDto, locale = 'vi') {
+  async getOrder(orderNumber: string, cartToken: string) {
+    const cart = await this.cartService.getCartRecord(cartToken);
+    const order = await this.orders.findOne({ where: { orderNumber, cartId: cart.id } });
+    if (!order) throw new BadRequestException('Không tìm thấy đơn hàng');
+    return order;
+  }
+
+  async quote(userId: string | null, cartToken: string, dto: CheckoutQuoteDto, locale = 'vi') {
     const [cart, address, shipping] = await Promise.all([
       this.cartService.getCheckoutCart(cartToken),
-      this.getAddress(userId, dto.shipping_address_id),
+      this.getAddress(userId, dto),
       this.shippingService.quote({ province_code: dto.province_code, district_code: dto.district_code }),
     ]);
     if (!shipping.serviceable) throw new BadRequestException(shipping.reason ?? 'Khu vực hiện chưa hỗ trợ giao hàng');
@@ -45,8 +65,7 @@ export class CheckoutService {
     };
   }
 
-  async createOrder(userId: string, cartToken: string, dto: CreateCheckoutOrderDto, ipAddress: string, locale = 'vi') {
-    if (!userId) throw new UnauthorizedException('Unauthorized');
+  async createOrder(userId: string | null, cartToken: string, dto: CreateCheckoutOrderDto, ipAddress: string, locale = 'vi') {
     await this.vnpayService.releaseExpiredReservations();
     const quote = await this.quote(userId, cartToken, dto, locale);
     const cart = await this.cartService.getCheckoutCart(cartToken);
@@ -71,10 +90,11 @@ export class CheckoutService {
         vnpayTxnRef: txnRef,
         items: quote.items,
         summary: quote.summary,
-        shippingAddressId: dto.shipping_address_id,
+        shippingAddressId: dto.shipping_address_id ?? null,
         shippingSnapshot: {
           receiver_name: quote.address.recipient_name,
           phone: quote.address.phone ?? '',
+          email: quote.address.email,
           province_code: dto.province_code,
           district_code: dto.district_code,
           address_line: [quote.address.street_line_1, quote.address.street_line_2]
@@ -112,10 +132,30 @@ export class CheckoutService {
     });
   }
 
-  private async getAddress(userId: string, addressId: string) {
-    const address = await this.addresses.findOne({ where: { id: addressId, userId, isShipping: true } });
+  private async getAddress(userId: string | null, dto: CheckoutQuoteDto): Promise<CheckoutAddress> {
+    if (dto.shipping_address_id && dto.shipping_address) {
+      throw new BadRequestException('Chỉ được cung cấp một địa chỉ giao hàng');
+    }
+    if (dto.shipping_address) return this.inlineAddress(dto.shipping_address);
+    if (!userId || !dto.shipping_address_id) {
+      throw new BadRequestException('Vui lòng cung cấp địa chỉ giao hàng');
+    }
+    const address = await this.addresses.findOne({ where: { id: dto.shipping_address_id, userId, isShipping: true } });
     if (!address) throw new BadRequestException('Địa chỉ giao hàng không hợp lệ');
     return address;
+  }
+
+  private inlineAddress(address: CheckoutShippingAddressDto): CheckoutAddress {
+    return {
+      recipientName: address.recipient_name,
+      recipientPhone: address.recipient_phone,
+      email: address.email,
+      province: address.province,
+      district: address.district,
+      ward: address.ward,
+      streetLine1: address.street_line_1,
+      streetLine2: address.street_line_2,
+    };
   }
 
   private buildItems(items: Array<{ product: Product; product_id: string; quantity: number }>, locale: string): OrderItem[] {
@@ -145,7 +185,7 @@ export class CheckoutService {
     };
   }
 
-  private addressSummary(address: Address) { return { id: address.id, recipient_name: address.recipientName, phone: address.recipientPhone, province: address.province, district: address.district, ward: address.ward, street_line_1: address.streetLine1, street_line_2: address.streetLine2 }; }
+  private addressSummary(address: CheckoutAddress) { return { id: address.id ?? null, recipient_name: address.recipientName, phone: address.recipientPhone, email: address.email, province: address.province, district: address.district, ward: address.ward, street_line_1: address.streetLine1, street_line_2: address.streetLine2 }; }
   private localize(value: LangObject | string | null, locale: string) { return typeof value === 'string' ? value : value?.[locale] || value?.vi || value?.en || Object.values(value ?? {}).find(Boolean) || ''; }
   private createOrderNumber() { return `MGO-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${randomBytes(3).toString('hex').toUpperCase()}`; }
 }
