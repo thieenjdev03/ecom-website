@@ -6,8 +6,8 @@ import { CreateOrderDto, ShippingAddressDto, UpdateOrderDto, ChangeOrderStatusDt
 import { User } from '../users/user.entity';
 import { Address } from '../addresses/address.entity';
 import { Product } from '../products/entities/product.entity';
-import { AddressesService } from '../addresses/addresses.service';
-import { UpdateAddressDto } from '../addresses/dto/update-address.dto';
+import { UserAddressesService } from '../addresses/user-addresses.service';
+import { CreateUserAddressDto } from '../addresses/dto/create-user-address.dto';
 import { OrderStatus } from './enums/order-status.enum';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class OrdersService {
     private addressRepository: Repository<Address>,
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
-    private readonly addressesService: AddressesService,
+    private readonly userAddressesService: UserAddressesService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
@@ -71,19 +71,26 @@ export class OrdersService {
       // Generate unique order number
       const orderNumber = this.generateOrderNumber();
 
-      // Normalize shipping address payload by syncing user address if necessary
+      // Manually-typed checkout address: snapshot it into the order (notes) AND
+      // auto-save it to the user's address book. upsertFromCheckout never throws
+      // and never changes the user's default, so it cannot fail order creation.
       let notes = createOrderDto.notes || '';
       let shippingAddressId = createOrderDto.shippingAddressId;
       if (createOrderDto.shipping_address && !shippingAddressId) {
-        const syncedAddress = await this.addressesService.upsertByUser(
-          createOrderDto.userId,
-          this.mapShippingPayloadToAddressDto(createOrderDto.shipping_address),
-        );
-        shippingAddressId = syncedAddress.id;
-
         const addr = createOrderDto.shipping_address;
+
+        // Always snapshot the address text on the order so history survives even
+        // if the saved address is later removed from the book.
         const addressText = `Shipping Address: ${addr.full_name}, ${addr.phone}, ${addr.address_line}${addr.city ? `, ${addr.city}` : ''}${addr.district ? `, ${addr.district}` : ''}${addr.ward ? `, ${addr.ward}` : ''}`;
         notes = notes ? `${notes}\n${addressText}` : addressText;
+
+        const savedAddress = await this.userAddressesService.upsertFromCheckout(
+          createOrderDto.userId,
+          this.mapShippingPayloadToBookDto(createOrderDto.shipping_address),
+        );
+        if (savedAddress) {
+          shippingAddressId = savedAddress.id;
+        }
       }
 
       // Map DTO to Entity format
@@ -554,22 +561,23 @@ export class OrdersService {
     }
   }
 
-  private mapShippingPayloadToAddressDto(payload: ShippingAddressDto): UpdateAddressDto {
+  /**
+   * Map the checkout shipping payload onto the address-book DTO. The checkout
+   * form only carries geo *names* (not the 2-cấp ids), so provinceId/wardId are
+   * left empty — matching how legacy rows are keyed (see NOTES-address-trace.md).
+   */
+  private mapShippingPayloadToBookDto(payload: ShippingAddressDto): CreateUserAddressDto {
     return {
       recipientName: payload.full_name,
       recipientPhone: payload.phone,
-      label: payload.label ?? 'Checkout',
-      countryCode: payload.countryCode,
-      province: payload.province,
+      provinceId: '',
+      provinceName: payload.province,
+      wardId: '',
+      wardName: payload.ward ?? payload.city ?? '',
       district: payload.district,
-      ward: payload.ward ?? payload.city,
-      streetLine1: payload.address_line,
-      streetLine2: payload.address_line2,
-      postalCode: payload.postalCode,
-      note: payload.note,
-      isShipping: true,
-      isBilling: payload.isBilling ?? false,
-      isDefault: payload.isDefault ?? true,
+      addressLine: payload.address_line,
+      label: payload.label ?? 'Checkout',
+      isDefault: false,
     };
   }
 }
