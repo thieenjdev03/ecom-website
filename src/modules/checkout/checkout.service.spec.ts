@@ -40,90 +40,34 @@ describe('CheckoutService', () => {
       }),
       getCartRecord: jest.fn().mockResolvedValue({ id: 'cart-1' }),
     };
-    const shippingService = {
-      quote: jest.fn().mockResolvedValue({
-        serviceable: true,
-        shipping_fee: 25000,
-        shipping_zone: 'INNER_CITY',
-        fulfillment_type: 'DIRECT',
-        dealer: null,
-      }),
-    };
     const orderRepository = {
       findOne: jest.fn().mockResolvedValue({ id: 'order-1', orderNumber: 'MGO-TEST', cartId: 'cart-1' }),
     };
     const service = new CheckoutService(
       {} as any,
       cartService as any,
-      shippingService as any,
       {} as any,
       addressRepository as any,
       orderRepository as any,
     );
-    return { service, cartService, shippingService, addressRepository, orderRepository };
+    return { service, cartService, addressRepository, orderRepository };
   };
 
-  it('uses backend product prices and shipping quote only', async () => {
+  it('uses backend product prices and the fixed 35,000 VND shipping fee', async () => {
     const { service } = createService();
-    const result = await service.quote(
-      'user-1',
-      'a'.repeat(32),
-      {
-        shipping_address_id: '11111111-1111-4111-8111-111111111111',
-        province_code: '79',
-        district_code: '760',
-      },
-      'vi',
-    );
+    const result = await service.quote('a'.repeat(32), 'vi');
 
     expect(result).toMatchObject({
       summary: {
         subtotal: '50000.00',
-        shipping: '25000.00',
-        total: '75000.00',
+        shipping: '35000.00',
+        total: '85000.00',
         currency: 'VND',
       },
       shipping: {
-        shipping_zone: 'INNER_CITY',
+        shipping_fee: 35000,
+        serviceable: true,
       },
-    });
-  });
-
-  it('blocks checkout when the shipping area is not serviceable', async () => {
-    const { service, shippingService } = createService();
-    shippingService.quote.mockResolvedValue({
-      serviceable: false,
-      reason: 'Khu vực chưa hỗ trợ giao hàng',
-    });
-
-    await expect(
-      service.quote('user-1', 'a'.repeat(32), {
-        shipping_address_id: '11111111-1111-4111-8111-111111111111',
-        province_code: '01',
-        district_code: '001',
-      }),
-    ).rejects.toThrow('Khu vực chưa hỗ trợ giao hàng');
-  });
-
-  it('quotes checkout for a guest with an inline shipping address', async () => {
-    const { service, addressRepository } = createService();
-    const result = await service.quote(null, 'a'.repeat(32), {
-      shipping_address: {
-        recipient_name: 'Nguyễn Văn A',
-        recipient_phone: '0901234567',
-        province: 'TP. Hồ Chí Minh',
-        district: 'Quận 1',
-        ward: 'Bến Nghé',
-        street_line_1: '1 Nguyễn Huệ',
-      },
-      province_code: '79',
-      district_code: '760',
-    });
-
-    expect(addressRepository.findOne).not.toHaveBeenCalled();
-    expect(result.address).toMatchObject({
-      recipient_name: 'Nguyễn Văn A',
-      phone: '0901234567',
     });
   });
 

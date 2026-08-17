@@ -1,6 +1,6 @@
-import { Controller, Post, Get, Delete, UploadedFile, UploadedFiles, UseInterceptors, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Get, Delete, UploadedFile, UploadedFiles, UseInterceptors, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { FilesService } from './files.service';
 import {
   GenerateSignatureDto,
@@ -9,6 +9,7 @@ import {
   GetFileInfoDto,
   GenerateUrlDto
 } from './dto/file-upload.dto';
+import { ListMediaLibraryDto, MediaLibraryResponseDto } from './dto/media-library.dto';
 import { JwtGuard } from '../../auth/jwt.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
@@ -175,6 +176,16 @@ export class FilesController {
   })
   uploadMultipleFiles(@UploadedFiles() files: Express.Multer.File[], @Body() options?: UploadFileDto) {
     return this.filesService.uploadMultipleFiles(files, options);
+  }
+
+  @Get('library')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List uploaded images for the admin media library' })
+  @ApiOkResponse({ type: MediaLibraryResponseDto })
+  listMediaLibrary(@Query() query: ListMediaLibraryDto) {
+    return this.filesService.listMediaLibrary(query);
   }
 
   @Delete(':publicId')

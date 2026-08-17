@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary } from 'cloudinary';
+import { ListMediaLibraryDto, MediaLibraryResponseDto } from './dto/media-library.dto';
 
 @Injectable()
 export class FilesService {
@@ -199,6 +200,39 @@ export class FilesService {
       };
     } catch (error) {
       this.logger.error('Failed to upload multiple files:', error);
+      throw error;
+    }
+  }
+
+  async listMediaLibrary(options: ListMediaLibraryDto): Promise<MediaLibraryResponseDto> {
+    const folder = (options.folder ?? 'products').trim().replace(/^\/+|\/+$/g, '');
+    const maxResults = Math.min(Math.max(options.maxResults ?? 60, 1), 100);
+
+    try {
+      const result = await cloudinary.api.resources({
+        resource_type: 'image',
+        type: 'upload',
+        prefix: folder ? `${folder}/` : undefined,
+        max_results: maxResults,
+        next_cursor: options.nextCursor,
+        direction: 'desc',
+      });
+
+      return {
+        items: (result.resources ?? []).map((resource: any) => ({
+          public_id: resource.public_id,
+          url: resource.secure_url || resource.url,
+          thumbnail_url: this.generateThumbnailUrl(resource.public_id),
+          format: resource.format,
+          bytes: resource.bytes,
+          width: resource.width,
+          height: resource.height,
+          created_at: resource.created_at,
+        })),
+        next_cursor: result.next_cursor ?? null,
+      };
+    } catch (error) {
+      this.logger.error(`Failed to list images in folder "${folder}":`, error);
       throw error;
     }
   }

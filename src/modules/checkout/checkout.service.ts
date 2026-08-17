@@ -7,12 +7,10 @@ import { CartService } from '../cart/cart.service';
 import { Order, OrderItem, OrderSummary } from '../orders/entities/order.entity';
 import { OrderStatus, PaymentStatus } from '../orders/enums/order-status.enum';
 import { Product, LangObject } from '../products/entities/product.entity';
-import { MingoShippingService } from '../shipping/mingo-shipping.service';
 import { VnpayService } from '../vnpay/vnpay.service';
 import { CheckoutQuoteDto, CheckoutShippingAddressDto, CreateCheckoutOrderDto } from './dto/checkout.dto';
 
 type CheckoutAddress = {
-  id?: string;
   recipientName: string;
   recipientPhone: string;
   email?: string;
@@ -23,12 +21,21 @@ type CheckoutAddress = {
   streetLine2?: string;
 };
 
+const FIXED_SHIPPING_FEE = 35_000;
+const FIXED_SHIPPING = {
+  serviceable: true,
+  shipping_zone: 'OUTER_CITY' as const,
+  shipping_fee: FIXED_SHIPPING_FEE,
+  currency: 'VND' as const,
+  fulfillment_type: 'DIRECT' as const,
+  dealer: null,
+};
+
 @Injectable()
 export class CheckoutService {
   constructor(
     private readonly dataSource: DataSource,
     private readonly cartService: CartService,
-    private readonly shippingService: MingoShippingService,
     private readonly vnpayService: VnpayService,
     @InjectRepository(Address) private readonly addresses: Repository<Address>,
     @InjectRepository(Order) private readonly orders: Repository<Order>,
@@ -41,33 +48,30 @@ export class CheckoutService {
     return order;
   }
 
-  async quote(userId: string | null, cartToken: string, dto: CheckoutQuoteDto, locale = 'vi') {
-    const [cart, address, shipping] = await Promise.all([
-      this.cartService.getCheckoutCart(cartToken),
-      this.getAddress(userId, dto),
-      this.shippingService.quote({ province_code: dto.province_code, district_code: dto.district_code }),
-    ]);
-    if (!shipping.serviceable) throw new BadRequestException(shipping.reason ?? 'Khu vực hiện chưa hỗ trợ giao hàng');
+  async quote(cartToken: string, locale = 'vi') {
+    const cart = await this.cartService.getCheckoutCart(cartToken);
     const items = this.buildItems(cart.items, locale);
-    const summary = this.buildSummary(items, shipping.shipping_fee);
+    const summary = this.buildSummary(items, FIXED_SHIPPING_FEE);
     return {
       items,
       subtotal: Number(summary.subtotal),
       shippingFee: Number(summary.shipping),
       total: Number(summary.total),
-      shippingZone: shipping.shipping_zone,
-      fulfillmentType: shipping.fulfillment_type,
-      dealer: shipping.dealer,
-      serviceable: shipping.serviceable,
+      shippingZone: FIXED_SHIPPING.shipping_zone,
+      fulfillmentType: FIXED_SHIPPING.fulfillment_type,
+      dealer: null,
+      serviceable: true,
       summary,
-      shipping,
-      address: this.addressSummary(address),
+      shipping: FIXED_SHIPPING,
     };
   }
 
   async createOrder(userId: string | null, cartToken: string, dto: CreateCheckoutOrderDto, ipAddress: string, locale = 'vi') {
     await this.vnpayService.releaseExpiredReservations();
-    const quote = await this.quote(userId, cartToken, dto, locale);
+    const [quote, address] = await Promise.all([
+      this.quote(cartToken, locale),
+      this.getAddress(userId, dto),
+    ]);
     const cart = await this.cartService.getCheckoutCart(cartToken);
     const reservationExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
     const txnRef = `MGO${Date.now()}${randomBytes(3).toString('hex').toUpperCase()}`;
@@ -92,17 +96,17 @@ export class CheckoutService {
         summary: quote.summary,
         shippingAddressId: dto.shipping_address_id ?? null,
         shippingSnapshot: {
-          receiver_name: quote.address.recipient_name,
-          phone: quote.address.phone ?? '',
-          email: quote.address.email,
+          receiver_name: address.recipientName,
+          phone: address.recipientPhone,
+          email: address.email,
           province_code: dto.province_code,
           district_code: dto.district_code,
-          address_line: [quote.address.street_line_1, quote.address.street_line_2]
+          address_line: [address.streetLine1, address.streetLine2]
             .filter(Boolean)
             .join(', '),
-          province_name: quote.address.province,
-          district_name: quote.address.district,
-          ward_name: quote.address.ward ?? undefined,
+          province_name: address.province,
+          district_name: address.district,
+          ward_name: address.ward ?? undefined,
         },
         cartId: cart.id,
         notes: dto.notes ?? null,
@@ -185,7 +189,6 @@ export class CheckoutService {
     };
   }
 
-  private addressSummary(address: CheckoutAddress) { return { id: address.id ?? null, recipient_name: address.recipientName, phone: address.recipientPhone, email: address.email, province: address.province, district: address.district, ward: address.ward, street_line_1: address.streetLine1, street_line_2: address.streetLine2 }; }
   private localize(value: LangObject | string | null, locale: string) { return typeof value === 'string' ? value : value?.[locale] || value?.vi || value?.en || Object.values(value ?? {}).find(Boolean) || ''; }
   private createOrderNumber() { return `MGO-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${randomBytes(3).toString('hex').toUpperCase()}`; }
 }

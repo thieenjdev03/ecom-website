@@ -2,7 +2,7 @@ import { Body, Controller, Get, Headers, Param, Post, Query, Request, UseGuards 
 import { ApiBearerAuth, ApiHeader, ApiTags } from '@nestjs/swagger';
 import { OptionalJwtGuard } from '../../auth/optional-jwt.guard';
 import { CheckoutService } from './checkout.service';
-import { CheckoutQuoteDto, CreateCheckoutOrderDto } from './dto/checkout.dto';
+import { CreateCheckoutOrderDto } from './dto/checkout.dto';
 
 @ApiTags('checkout')
 @ApiBearerAuth()
@@ -18,9 +18,8 @@ export class CheckoutController {
   }
 
   @Post('quote')
-  quote(@Request() request: any, @Headers('x-cart-token') token: string, @Body() dto: CheckoutQuoteDto, @Query('locale') locale = 'vi') {
-    const userId = request.user?.sub || request.user?.userId;
-    return this.checkoutService.quote(userId ?? null, token, dto, locale);
+  quote(@Headers('x-cart-token') token: string, @Query('locale') locale = 'vi') {
+    return this.checkoutService.quote(token, locale);
   }
   @Post('create-order')
   createOrder(@Request() request: any, @Headers('x-cart-token') token: string, @Body() dto: CreateCheckoutOrderDto, @Query('locale') locale = 'vi') {
