@@ -1,0 +1,5283 @@
+{
+  "meta": {
+    "schema_version": 1,
+    "source": "kemmingo.com WordPress/WooCommerce crawl",
+    "generated_at": "2026-08-15T08:01:25.572Z",
+    "migration_policy": {
+      "price": "0 because the legacy website did not publish prices",
+      "stock": "0 to prevent checkout until price and inventory are reviewed",
+      "gallery": "excluded because crawled gallery images are category-wide, not product-specific",
+      "locale": "Vietnamese source is stored in vi; API falls back to vi for en until translations are supplied"
+    }
+  },
+  "brand": {
+    "name": "Mingo",
+    "slug": "mingo",
+    "description": "Thương hiệu kem Mingo.",
+    "display_order": 1,
+    "is_active": true
+  },
+  "categories": [
+    {
+      "slug": "kem-hu",
+      "name": "Kem hũ và kem hộp",
+      "description": "Kem hũ 3oz, 4oz và kem hộp 473ml.",
+      "display_order": 1
+    },
+    {
+      "slug": "kem-que",
+      "name": "Kem que",
+      "description": "Kem que sữa, kem que đá và kem que phủ chocolate.",
+      "display_order": 2
+    },
+    {
+      "slug": "kem-oc",
+      "name": "Kem ốc quế",
+      "description": "Các sản phẩm kem ốc quế.",
+      "display_order": 3
+    },
+    {
+      "slug": "kem-1-lit-kem-kep",
+      "name": "Kem hộp 1 lít",
+      "description": "Kem hộp 1 lít, khối lượng tham khảo 600g.",
+      "display_order": 4
+    },
+    {
+      "slug": "kem-ky",
+      "name": "Kem viên - kem ký",
+      "description": "Kem dùng cho nhà hàng và dịch vụ ăn uống, quy cách 6 lít hoặc 12 lít.",
+      "display_order": 5
+    }
+  ],
+  "sizes": [
+    {
+      "key": "3oz",
+      "name": "Hũ 3oz (42g)",
+      "unit": "hũ",
+      "packQty": null,
+      "volumeMl": null,
+      "sortOrder": 10,
+      "categorySlugs": [
+        "kem-hu"
+      ]
+    },
+    {
+      "key": "4oz",
+      "name": "Hũ 4oz (60g)",
+      "unit": "hũ",
+      "packQty": null,
+      "volumeMl": null,
+      "sortOrder": 11,
+      "categorySlugs": [
+        "kem-hu"
+      ]
+    },
+    {
+      "key": "500ml",
+      "name": "Hộp 473ml",
+      "unit": "hộp",
+      "packQty": null,
+      "volumeMl": 473,
+      "sortOrder": 12,
+      "categorySlugs": [
+        "kem-hu"
+      ]
+    },
+    {
+      "key": "que-sua",
+      "name": "Cây kem sữa",
+      "unit": "cây",
+      "packQty": null,
+      "volumeMl": null,
+      "sortOrder": 20,
+      "categorySlugs": [
+        "kem-que"
+      ]
+    },
+    {
+      "key": "que-da",
+      "name": "Cây kem đá",
+      "unit": "cây",
+      "packQty": null,
+      "volumeMl": null,
+      "sortOrder": 21,
+      "categorySlugs": [
+        "kem-que"
+      ]
+    },
+    {
+      "key": "que-phu-chocolate",
+      "name": "Cây phủ chocolate",
+      "unit": "cây",
+      "packQty": null,
+      "volumeMl": null,
+      "sortOrder": 22,
+      "categorySlugs": [
+        "kem-que"
+      ]
+    },
+    {
+      "key": "kem-oc",
+      "name": "Ốc quế",
+      "unit": "ốc quế",
+      "packQty": null,
+      "volumeMl": null,
+      "sortOrder": 30,
+      "categorySlugs": [
+        "kem-oc"
+      ]
+    },
+    {
+      "key": "1lit",
+      "name": "Hộp 1 lít (600g)",
+      "unit": "hộp",
+      "packQty": null,
+      "volumeMl": 1000,
+      "sortOrder": 40,
+      "categorySlugs": [
+        "kem-1-lit-kem-kep"
+      ]
+    },
+    {
+      "key": "6lit",
+      "name": "Hộp nhựa 6 lít (3kg)",
+      "unit": "hộp",
+      "packQty": null,
+      "volumeMl": 6000,
+      "sortOrder": 50,
+      "categorySlugs": [
+        "kem-ky"
+      ]
+    },
+    {
+      "key": "12lit",
+      "name": "Hộp nhựa 12 lít (6kg)",
+      "unit": "hộp",
+      "packQty": null,
+      "volumeMl": 12000,
+      "sortOrder": 51,
+      "categorySlugs": [
+        "kem-ky"
+      ]
+    }
+  ],
+  "products": [
+    {
+      "source": {
+        "wp_id": 877,
+        "wp_slug": "kem-1-lit-tra-thai",
+        "source_url": "https://kemmingo.com/kem-1-lit-tra-thai/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem 1 lít – Trà Thái"
+      },
+      "slug": {
+        "vi": "kem-1-lit-tra-thai",
+        "en": "kem-1-lit-tra-thai"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (Dung tích) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-1-lit-tra-thai.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-877-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-877",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem 1 lít – Trà Thái | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (Dung tích) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 861,
+        "wp_slug": "kem-kep-1-lit-phuc-bon-tu",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit-phuc-bon-tu/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Phúc Bồn Tử"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit-phuc-bon-tu",
+        "en": "kem-kep-1-lit-phuc-bon-tu"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit-phuc-bon-tu.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-861-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-861",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Phúc Bồn Tử | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 859,
+        "wp_slug": "kem-kep-1-lit-khoai-mon",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit-khoai-mon/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Khoai Môn"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit-khoai-mon",
+        "en": "kem-kep-1-lit-khoai-mon"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit-khoai-mon.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-859-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-859",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Khoai Môn | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 853,
+        "wp_slug": "kem-kep-1-lit-xoai",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit-xoai/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Xoài"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit-xoai",
+        "en": "kem-kep-1-lit-xoai"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit-xoai.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-853-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-853",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Xoài | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 851,
+        "wp_slug": "kem-kep-1-lit-vanila",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit-vanila/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Vanila"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit-vanila",
+        "en": "kem-kep-1-lit-vanila"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit-vanila.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-851-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-851",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Vanila | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 844,
+        "wp_slug": "kem-kep-1-lit-sau-rieng",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit-sau-rieng/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Sầu Riêng"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit-sau-rieng",
+        "en": "kem-kep-1-lit-sau-rieng"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit-sau-rieng.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-844-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-844",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Sầu Riêng | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 830,
+        "wp_slug": "kem-kep-1-lit-dau",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit-dau/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Dâu"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit-dau",
+        "en": "kem-kep-1-lit-dau"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích ) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit-dau.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-830-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-830",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Dâu | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích ) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 828,
+        "wp_slug": "kem-kep-1-lit-cau-vong",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit-cau-vong/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Cầu Vòng"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit-cau-vong",
+        "en": "kem-kep-1-lit-cau-vong"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích ) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit-cau-vong.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-828-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-828",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Cầu Vòng | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích ) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 826,
+        "wp_slug": "kem-kep-1-lit-chocola",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit-chocola/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Chocola"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit-chocola",
+        "en": "kem-kep-1-lit-chocola"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích ) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit-chocola.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-826-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-826",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Chocola | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích ) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 824,
+        "wp_slug": "kem-kep-1-lit-vani-hat-chocola",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit-vani-hat-chocola/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Vani hạt chocola"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit-vani-hat-chocola",
+        "en": "kem-kep-1-lit-vani-hat-chocola"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích ) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit-vani-hat-chocola.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-824-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-824",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Vani hạt chocola | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích ) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 822,
+        "wp_slug": "kem-kep-1-lit",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Cà Phê"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit",
+        "en": "kem-kep-1-lit"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích ) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-822-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-822",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Cà Phê | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích ) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 820,
+        "wp_slug": "kem-kep-1-lt1-caramel-muoi",
+        "source_url": "https://kemmingo.com/kem-kep-1-lt1-caramel-muoi/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lt1 – Caramel muối"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lt1-caramel-muoi",
+        "en": "kem-kep-1-lt1-caramel-muoi"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích ) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lt1-caramel-muoi.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-820-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-820",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lt1 – Caramel muối | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích ) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 818,
+        "wp_slug": "kem-kep-1-lit-bac-ha",
+        "source_url": "https://kemmingo.com/kem-kep-1-lit-bac-ha/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem kẹp 1 lít – Bạc hà"
+      },
+      "slug": {
+        "vi": "kem-kep-1-lit-bac-ha",
+        "en": "kem-kep-1-lit-bac-ha"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích ) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-kep-1-lit-bac-ha.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-818-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-818",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem kẹp 1 lít – Bạc hà | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích ) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 816,
+        "wp_slug": "kem-1-lit-bap",
+        "source_url": "https://kemmingo.com/kem-1-lit-bap/",
+        "original_category_slugs": [
+          "kem-1-lit-kem-kep"
+        ]
+      },
+      "name": {
+        "vi": "Kem 1 lít – Bắp"
+      },
+      "slug": {
+        "vi": "kem-1-lit-bap",
+        "en": "kem-1-lit-bap"
+      },
+      "description": {
+        "vi": "<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Trọng lượng (dung tích ) : 600gr (1 lít)</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-1-lit-bap.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 1 lít (600g)"
+          },
+          "size_key": "1lit",
+          "sku": "MINGO-WP-816-1L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-816",
+      "category_slug": "kem-1-lit-kem-kep",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-1-lit-kem-kep"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem 1 lít – Bắp | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng (dung tích ) : 600gr (1 lít)"
+      },
+      "weight": 0.6
+    },
+    {
+      "source": {
+        "wp_id": 801,
+        "wp_slug": "yogurt",
+        "source_url": "https://kemmingo.com/yogurt/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Yogurt"
+      },
+      "slug": {
+        "vi": "yogurt",
+        "en": "yogurt"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Yogurt</p>\n\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Yogurt</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/yogurt.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-801-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-801-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-801",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Yogurt | Mingo"
+      },
+      "meta_description": {
+        "vi": "Yogurt"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 798,
+        "wp_slug": "caramel-muoi",
+        "source_url": "https://kemmingo.com/caramel-muoi/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Caramel Muối"
+      },
+      "slug": {
+        "vi": "caramel-muoi",
+        "en": "caramel-muoi"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Caramel muối</p>\n\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Caramel muối</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/caramel-muoi.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-798-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-798-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-798",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Caramel Muối | Mingo"
+      },
+      "meta_description": {
+        "vi": "Caramel muối"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 794,
+        "wp_slug": "kem-ky-kem-ly-loai-6-lit-3kg",
+        "source_url": "https://kemmingo.com/kem-ky-kem-ly-loai-6-lit-3kg/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Trà Thái"
+      },
+      "slug": {
+        "vi": "kem-ky-kem-ly-loai-6-lit-3kg",
+        "en": "kem-ky-kem-ly-loai-6-lit-3kg"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Trà Thái</p>\n\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Trà Thái</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-ky-kem-ly-loai-6-lit-3kg.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-794-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-794-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-794",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Trà Thái | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trà Thái"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 687,
+        "wp_slug": "kem-3oz-chocolate",
+        "source_url": "https://kemmingo.com/kem-3oz-chocolate/",
+        "original_category_slugs": [
+          "3oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem 3OZ – Chocolate"
+      },
+      "slug": {
+        "vi": "kem-3oz-chocolate",
+        "en": "kem-3oz-chocolate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem 3OZ – Chocolate</p>\n<p>Trọng lượng : 42gr</p>\n<p>Quy cách : 24 hủ/thùng</p>\n</div>\n<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Kem 3OZ – Chocolate</p>\n\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem 3OZ – Chocolate</p>\n<p>Trọng lượng : 42gr</p>\n<p>Quy cách : 24 hủ/thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-3oz-chocolate.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 3oz (42g)"
+          },
+          "size_key": "3oz",
+          "sku": "MINGO-WP-687-3OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-687",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "3oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem 3OZ – Chocolate | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem 3OZ – Chocolate Trọng lượng : 42gr Quy cách : 24 hủ/thùng"
+      },
+      "weight": 0.042
+    },
+    {
+      "source": {
+        "wp_id": 684,
+        "wp_slug": "kem-3oz-vanila",
+        "source_url": "https://kemmingo.com/kem-3oz-vanila/",
+        "original_category_slugs": [
+          "3oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem 3OZ – Vanila"
+      },
+      "slug": {
+        "vi": "kem-3oz-vanila",
+        "en": "kem-3oz-vanila"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem 3OZ – Vanila</p>\n<p>Trọng lượng : 42gr</p>\n<p>Quy cách : 24 hủ/thùng</p>\n</div>\n<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Kem 3OZ – Vanila</p>\n\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem 3OZ – Vanila</p>\n<p>Trọng lượng : 42gr</p>\n<p>Quy cách : 24 hủ/thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-3oz-vanila.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 3oz (42g)"
+          },
+          "size_key": "3oz",
+          "sku": "MINGO-WP-684-3OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-684",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "3oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem 3OZ – Vanila | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem 3OZ – Vanila Trọng lượng : 42gr Quy cách : 24 hủ/thùng"
+      },
+      "weight": 0.042
+    },
+    {
+      "source": {
+        "wp_id": 682,
+        "wp_slug": "kem-3oz-bap",
+        "source_url": "https://kemmingo.com/kem-3oz-bap/",
+        "original_category_slugs": [
+          "3oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem 3OZ – Bắp"
+      },
+      "slug": {
+        "vi": "kem-3oz-bap",
+        "en": "kem-3oz-bap"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem 3OZ – Bắp</p>\n<p>Trọng lượng : 42gr</p>\n<p>Quy cách : 24 hủ/thùng</p>\n</div>\n<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Kem 3OZ – Bắp</p>\n\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem 3OZ – Bắp</p>\n<p>Trọng lượng : 42gr</p>\n<p>Quy cách : 24 hủ/thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-3oz-bap.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 3oz (42g)"
+          },
+          "size_key": "3oz",
+          "sku": "MINGO-WP-682-3OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-682",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "3oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem 3OZ – Bắp | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem 3OZ – Bắp Trọng lượng : 42gr Quy cách : 24 hủ/thùng"
+      },
+      "weight": 0.042
+    },
+    {
+      "source": {
+        "wp_id": 680,
+        "wp_slug": "kem-3oz-chanh",
+        "source_url": "https://kemmingo.com/kem-3oz-chanh/",
+        "original_category_slugs": [
+          "3oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem 3OZ – Chanh"
+      },
+      "slug": {
+        "vi": "kem-3oz-chanh",
+        "en": "kem-3oz-chanh"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem 3OZ – Chanh</p>\n<p>Trọng lượng : 42gr</p>\n<p>Quy cách : 24hủ/thùng</p>\n</div>\n<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Kem 3OZ – Chanh</p>\n\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem 3OZ – Chanh</p>\n<p>Trọng lượng : 42gr</p>\n<p>Quy cách : 24hủ/thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-3oz-chanh.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 3oz (42g)"
+          },
+          "size_key": "3oz",
+          "sku": "MINGO-WP-680-3OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-680",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "3oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem 3OZ – Chanh | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem 3OZ – Chanh Trọng lượng : 42gr Quy cách : 24hủ/thùng"
+      },
+      "weight": 0.042
+    },
+    {
+      "source": {
+        "wp_id": 678,
+        "wp_slug": "kem-3oz-dau",
+        "source_url": "https://kemmingo.com/kem-3oz-dau/",
+        "original_category_slugs": [
+          "3oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem 3OZ – Dâu"
+      },
+      "slug": {
+        "vi": "kem-3oz-dau",
+        "en": "kem-3oz-dau"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem 3OZ – Dâu</p>\n<p>Trọng lượng : 42gr</p>\n<p>Quy cách : 24hủ/thùng</p>\n</div>\n<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Kem 3OZ – Dâu</p>\n\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem 3OZ – Dâu</p>\n<p>Trọng lượng : 42gr</p>\n<p>Quy cách : 24hủ/thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-3oz-dau.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 3oz (42g)"
+          },
+          "size_key": "3oz",
+          "sku": "MINGO-WP-678-3OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-678",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "3oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem 3OZ – Dâu | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem 3OZ – Dâu Trọng lượng : 42gr Quy cách : 24hủ/thùng"
+      },
+      "weight": 0.042
+    },
+    {
+      "source": {
+        "wp_id": 676,
+        "wp_slug": "kem-4oz-caramel",
+        "source_url": "https://kemmingo.com/kem-4oz-caramel/",
+        "original_category_slugs": [
+          "4oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem 4OZ – Caramel (Salted Caramel Brownie)"
+      },
+      "slug": {
+        "vi": "kem-4oz-caramel",
+        "en": "kem-4oz-caramel"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hủ 4OZ – Caramel muối</p>\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>\n</div>\n<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Kem 4OZ – Caramel muối (Salted Caramel Brownie)</p>\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hủ 4OZ – Caramel muối</p>\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-4oz-caramel.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 4oz (60g)"
+          },
+          "size_key": "4oz",
+          "sku": "MINGO-WP-676-4OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-676",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "4oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem 4OZ – Caramel (Salted Caramel Brownie) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hủ 4OZ – Caramel muối Trọng lượng : 60 gr / 1 hủ Quy cách đóng gói : 24 hủ / 1 thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 674,
+        "wp_slug": "kem-4oz-chocolate-mach-nha-banh-cookies",
+        "source_url": "https://kemmingo.com/kem-4oz-chocolate-mach-nha-banh-cookies/",
+        "original_category_slugs": [
+          "4oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem hủ 4OZ – Xoài (Mango)"
+      },
+      "slug": {
+        "vi": "kem-4oz-chocolate-mach-nha-banh-cookies",
+        "en": "kem-4oz-chocolate-mach-nha-banh-cookies"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hủ 4OZ – Kem Xoài (Mango)</p>\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hủ 4OZ – Kem Xoài (Mango)</p>\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-4oz-chocolate-mach-nha-banh-cookies.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 4oz (60g)"
+          },
+          "size_key": "4oz",
+          "sku": "MINGO-WP-674-4OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-674",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "4oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hủ 4OZ – Xoài (Mango) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hủ 4OZ – Kem Xoài (Mango) Trọng lượng : 60 gr / 1 hủ Quy cách đóng gói : 24 hủ / 1 thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 662,
+        "wp_slug": "kem-hu-4oz-mat-ong",
+        "source_url": "https://kemmingo.com/kem-hu-4oz-mat-ong/",
+        "original_category_slugs": [
+          "4oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem hủ 4OZ – Mật ong (Shibuya Honey Toast)"
+      },
+      "slug": {
+        "vi": "kem-hu-4oz-mat-ong",
+        "en": "kem-hu-4oz-mat-ong"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hủ 4OZ – Mật ong bánh mì nướng</p>\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cánh đóng gói : 24 hủ / 1 thùng</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hủ 4OZ – Mật ong bánh mì nướng</p>\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cánh đóng gói : 24 hủ / 1 thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-4oz-mat-ong.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 4oz (60g)"
+          },
+          "size_key": "4oz",
+          "sku": "MINGO-WP-662-4OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-662",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "4oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hủ 4OZ – Mật ong (Shibuya Honey Toast) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hủ 4OZ – Mật ong bánh mì nướng Trọng lượng : 60 gr / 1 hủ Quy cánh đóng gói : 24 hủ / 1 thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 511,
+        "wp_slug": "kem-que-da-oasis-colours-3-mau",
+        "source_url": "https://kemmingo.com/kem-que-da-oasis-colours-3-mau/",
+        "original_category_slugs": [
+          "que-da"
+        ]
+      },
+      "name": {
+        "vi": "Kem que đá- Oasis colours 3 màu"
+      },
+      "slug": {
+        "vi": "kem-que-da-oasis-colours-3-mau",
+        "en": "kem-que-da-oasis-colours-3-mau"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Trọng lượng : 60gr</p>\n<p>Thẻ tích :</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Trọng lượng : 60gr</p>\n<p>Thẻ tích :</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-que-da-oasis-colours-3-mau.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây kem đá"
+          },
+          "size_key": "que-da",
+          "sku": "MINGO-WP-511-QDA",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-511",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-da"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem que đá- Oasis colours 3 màu | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 60gr Thẻ tích :"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 508,
+        "wp_slug": "kem-hu-4oz-tra-thai",
+        "source_url": "https://kemmingo.com/kem-hu-4oz-tra-thai/",
+        "original_category_slugs": [
+          "4oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem hủ 4OZ- Trà Thái (Thai tea)"
+      },
+      "slug": {
+        "vi": "kem-hu-4oz-tra-thai",
+        "en": "kem-hu-4oz-tra-thai"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-4oz-tra-thai.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 4oz (60g)"
+          },
+          "size_key": "4oz",
+          "sku": "MINGO-WP-508-4OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-508",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "4oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hủ 4OZ- Trà Thái (Thai tea) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 60 gr / 1 hủ Quy cách đóng gói : 24 hủ / 1 thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 503,
+        "wp_slug": "kem-hu-4oz-sau-rieng-durian",
+        "source_url": "https://kemmingo.com/kem-hu-4oz-sau-rieng-durian/",
+        "original_category_slugs": [
+          "4oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem hủ 4OZ – Sầu riêng (Durian)"
+      },
+      "slug": {
+        "vi": "kem-hu-4oz-sau-rieng-durian",
+        "en": "kem-hu-4oz-sau-rieng-durian"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-4oz-sau-rieng-durian.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 4oz (60g)"
+          },
+          "size_key": "4oz",
+          "sku": "MINGO-WP-503-4OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-503",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "4oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hủ 4OZ – Sầu riêng (Durian) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 60 gr / 1 hủ Quy cách đóng gói : 24 hủ / 1 thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 494,
+        "wp_slug": "kem-hop-giay-500ml-cau-vong",
+        "source_url": "https://kemmingo.com/kem-hop-giay-500ml-cau-vong/",
+        "original_category_slugs": [
+          "500ml"
+        ]
+      },
+      "name": {
+        "vi": "Kem hộp 473ml – Cầu Vòng (Tutti fruity)"
+      },
+      "slug": {
+        "vi": "kem-hop-giay-500ml-cau-vong",
+        "en": "kem-hop-giay-500ml-cau-vong"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hộp 473ml – Cầu Vòng (Tutti fruity)</p>\n<p>Dung tích : 473 ml / 1 hộp</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hộp 473ml – Cầu Vòng (Tutti fruity)</p>\n<p>Dung tích : 473 ml / 1 hộp</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hop-giay-500ml-cau-vong.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 473ml"
+          },
+          "size_key": "500ml",
+          "sku": "MINGO-WP-494-473ML",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-494",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "500ml"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hộp 473ml – Cầu Vòng (Tutti fruity) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hộp 473ml – Cầu Vòng (Tutti fruity) Dung tích : 473 ml / 1 hộp"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 284,
+        "wp_slug": "fruttega-passion-fruit",
+        "source_url": "https://kemmingo.com/fruttega-passion-fruit/",
+        "original_category_slugs": [
+          "que-da"
+        ]
+      },
+      "name": {
+        "vi": "Kem que đá- Fruttega Passion Fruit (Chanh dây)"
+      },
+      "slug": {
+        "vi": "fruttega-passion-fruit",
+        "en": "fruttega-passion-fruit"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Trọng lượng : 60gr</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Trọng lượng : 60gr</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/fruttega-passion-fruit.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây kem đá"
+          },
+          "size_key": "que-da",
+          "sku": "MINGO-WP-284-QDA",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-284",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-da"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem que đá- Fruttega Passion Fruit (Chanh dây) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 60gr"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 282,
+        "wp_slug": "fruttega-summer-berries",
+        "source_url": "https://kemmingo.com/fruttega-summer-berries/",
+        "original_category_slugs": [
+          "que-da"
+        ]
+      },
+      "name": {
+        "vi": "Kem que đá – Fruttega Summer Berries"
+      },
+      "slug": {
+        "vi": "fruttega-summer-berries",
+        "en": "fruttega-summer-berries"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Trọng lượng : 60gr</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Trọng lượng : 60gr</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/fruttega-summer-berries.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây kem đá"
+          },
+          "size_key": "que-da",
+          "sku": "MINGO-WP-282-QDA",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-282",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-da"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem que đá – Fruttega Summer Berries | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 60gr"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 278,
+        "wp_slug": "oasis-lemon",
+        "source_url": "https://kemmingo.com/oasis-lemon/",
+        "original_category_slugs": [
+          "que-da"
+        ]
+      },
+      "name": {
+        "vi": "Kem que đá – Oasis Lemon"
+      },
+      "slug": {
+        "vi": "oasis-lemon",
+        "en": "oasis-lemon"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Trọng lượng : 60gr</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Trọng lượng : 60gr</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/oasis-lemon.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây kem đá"
+          },
+          "size_key": "que-da",
+          "sku": "MINGO-WP-278-QDA",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-278",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-da"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem que đá – Oasis Lemon | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 60gr"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 276,
+        "wp_slug": "oasis-cola",
+        "source_url": "https://kemmingo.com/oasis-cola/",
+        "original_category_slugs": [
+          "que-da"
+        ]
+      },
+      "name": {
+        "vi": "Kem que đá- Oasis Cola"
+      },
+      "slug": {
+        "vi": "oasis-cola",
+        "en": "oasis-cola"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Trọng lượng : 60gr</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Trọng lượng : 60gr</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/oasis-cola.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây kem đá"
+          },
+          "size_key": "que-da",
+          "sku": "MINGO-WP-276-QDA",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-276",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-da"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem que đá- Oasis Cola | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 60gr"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 274,
+        "wp_slug": "oasis-orange",
+        "source_url": "https://kemmingo.com/oasis-orange/",
+        "original_category_slugs": [
+          "que-da"
+        ]
+      },
+      "name": {
+        "vi": "Kem que đá – Oasis Orange"
+      },
+      "slug": {
+        "vi": "oasis-orange",
+        "en": "oasis-orange"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Trọng lượng : 60gr</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Trọng lượng : 60gr</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/oasis-orange.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây kem đá"
+          },
+          "size_key": "que-da",
+          "sku": "MINGO-WP-274-QDA",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-274",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-da"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem que đá – Oasis Orange | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 60gr"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 221,
+        "wp_slug": "kem-que-khoai-mon",
+        "source_url": "https://kemmingo.com/kem-que-khoai-mon/",
+        "original_category_slugs": [
+          "que-sua"
+        ]
+      },
+      "name": {
+        "vi": "Kem que sữa – khoai môn"
+      },
+      "slug": {
+        "vi": "kem-que-khoai-mon",
+        "en": "kem-que-khoai-mon"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<div class=\"entry-desc\">\n<p>Trọng lượng : 65 gr  / que</p>\n<p>Quy cách đóng gói : 30 que / thùng</p>\n</div>\n</div>"
+      },
+      "short_description": {
+        "vi": "<div class=\"entry-desc\">\n<p>Trọng lượng : 65 gr  / que</p>\n<p>Quy cách đóng gói : 30 que / thùng</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-que-khoai-mon.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây kem sữa"
+          },
+          "size_key": "que-sua",
+          "sku": "MINGO-WP-221-QSUA",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-221",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-sua"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem que sữa – khoai môn | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 65 gr / que Quy cách đóng gói : 30 que / thùng"
+      },
+      "weight": 0.065
+    },
+    {
+      "source": {
+        "wp_id": 219,
+        "wp_slug": "kem-que-dau-den",
+        "source_url": "https://kemmingo.com/kem-que-dau-den/",
+        "original_category_slugs": [
+          "que-sua"
+        ]
+      },
+      "name": {
+        "vi": "Kem que sữa – đậu đen"
+      },
+      "slug": {
+        "vi": "kem-que-dau-den",
+        "en": "kem-que-dau-den"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<div class=\"entry-desc\">\n<p>Trọng lượng : 65 gr  / que</p>\n<p>Quy cách đóng gói : 30 que / thùng</p>\n</div>\n</div>\n<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>30 que/1 thùng (65gr/que)</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<div class=\"entry-desc\">\n<p>Trọng lượng : 65 gr  / que</p>\n<p>Quy cách đóng gói : 30 que / thùng</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-que-dau-den.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây kem sữa"
+          },
+          "size_key": "que-sua",
+          "sku": "MINGO-WP-219-QSUA",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-219",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-sua"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem que sữa – đậu đen | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 65 gr / que Quy cách đóng gói : 30 que / thùng"
+      },
+      "weight": 0.065
+    },
+    {
+      "source": {
+        "wp_id": 217,
+        "wp_slug": "kem-que-trai-cay",
+        "source_url": "https://kemmingo.com/kem-que-trai-cay/",
+        "original_category_slugs": [
+          "que-sua"
+        ]
+      },
+      "name": {
+        "vi": "Kem que sữa – trái cây"
+      },
+      "slug": {
+        "vi": "kem-que-trai-cay",
+        "en": "kem-que-trai-cay"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<div class=\"entry-desc\">\n<p>Trọng lượng : 65 gr  / que</p>\n<p>Quy cách đóng gói : 30 que / thùng</p>\n</div>\n</div>"
+      },
+      "short_description": {
+        "vi": "<div class=\"entry-desc\">\n<p>Trọng lượng : 65 gr  / que</p>\n<p>Quy cách đóng gói : 30 que / thùng</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-que-trai-cay.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây kem sữa"
+          },
+          "size_key": "que-sua",
+          "sku": "MINGO-WP-217-QSUA",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-217",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-sua"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem que sữa – trái cây | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 65 gr / que Quy cách đóng gói : 30 que / thùng"
+      },
+      "weight": 0.065
+    },
+    {
+      "source": {
+        "wp_id": 214,
+        "wp_slug": "kem-que-sau-rieng",
+        "source_url": "https://kemmingo.com/kem-que-sau-rieng/",
+        "original_category_slugs": [
+          "que-sua"
+        ]
+      },
+      "name": {
+        "vi": "Kem que sữa – sầu riêng"
+      },
+      "slug": {
+        "vi": "kem-que-sau-rieng",
+        "en": "kem-que-sau-rieng"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<div class=\"entry-desc\">\n<p>Trọng lượng : 65 gr  / que</p>\n<p>Quy cách đóng gói : 30 que / thùng</p>\n</div>\n</div>"
+      },
+      "short_description": {
+        "vi": "<div class=\"entry-desc\">\n<p>Trọng lượng : 65 gr  / que</p>\n<p>Quy cách đóng gói : 30 que / thùng</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-que-sau-rieng.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây kem sữa"
+          },
+          "size_key": "que-sua",
+          "sku": "MINGO-WP-214-QSUA",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-214",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-sua"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem que sữa – sầu riêng | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trọng lượng : 65 gr / que Quy cách đóng gói : 30 que / thùng"
+      },
+      "weight": 0.065
+    },
+    {
+      "source": {
+        "wp_id": 212,
+        "wp_slug": "kem-que-vani-phu-chocolate",
+        "source_url": "https://kemmingo.com/kem-que-vani-phu-chocolate/",
+        "original_category_slugs": [
+          "que-phu-chocolate"
+        ]
+      },
+      "name": {
+        "vi": "Kem Que Vani – Phủ Chocolate"
+      },
+      "slug": {
+        "vi": "kem-que-vani-phu-chocolate",
+        "en": "kem-que-vani-phu-chocolate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<div class=\"entry-desc\">\n<p>Kem que sữa hương Vanilla có phủ 1 lớp chocolate bên ngoài và đậu phọng rang</p>\n<p>Trọng lượng : 60 gr / que</p>\n<p>Quy cách đóng gói : 30 que / thùng</p>\n\n</div>\n</div>"
+      },
+      "short_description": {
+        "vi": "<div class=\"entry-desc\">\n<p>Kem que sữa hương Vanilla có phủ 1 lớp chocolate bên ngoài và đậu phọng rang</p>\n<p>Trọng lượng : 60 gr / que</p>\n<p>Quy cách đóng gói : 30 que / thùng</p>\n\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-que-vani-phu-chocolate.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây phủ chocolate"
+          },
+          "size_key": "que-phu-chocolate",
+          "sku": "MINGO-WP-212-QPC",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-212",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-phu-chocolate"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem Que Vani – Phủ Chocolate | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem que sữa hương Vanilla có phủ 1 lớp chocolate bên ngoài và đậu phọng rang Trọng lượng : 60 gr / que Quy cách đóng gói : 30 que / thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 210,
+        "wp_slug": "kem-que-ca-phe-phu-chocolate",
+        "source_url": "https://kemmingo.com/kem-que-ca-phe-phu-chocolate/",
+        "original_category_slugs": [
+          "que-phu-chocolate"
+        ]
+      },
+      "name": {
+        "vi": "Kem Que Cà Phê – Phủ Chocolate"
+      },
+      "slug": {
+        "vi": "kem-que-ca-phe-phu-chocolate",
+        "en": "kem-que-ca-phe-phu-chocolate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<div class=\"entry-desc\">\n<p>Kem que sữa hương cà phê có bao phủ lớp chocolate bên ngoài và đậu phọng rang</p>\n<p>Trọng lượng : 60gr/que</p>\n<p>Quy cách đóng gói : 30 que/thùng</p>\n</div>\n</div>"
+      },
+      "short_description": {
+        "vi": "<div class=\"entry-desc\">\n<p>Kem que sữa hương cà phê có bao phủ lớp chocolate bên ngoài và đậu phọng rang</p>\n<p>Trọng lượng : 60gr/que</p>\n<p>Quy cách đóng gói : 30 que/thùng</p>\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-que-ca-phe-phu-chocolate.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Cây phủ chocolate"
+          },
+          "size_key": "que-phu-chocolate",
+          "sku": "MINGO-WP-210-QPC",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-210",
+      "category_slug": "kem-que",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "que-phu-chocolate"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem Que Cà Phê – Phủ Chocolate | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem que sữa hương cà phê có bao phủ lớp chocolate bên ngoài và đậu phọng rang Trọng lượng : 60gr/que Quy cách đóng gói : 30 que/thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 208,
+        "wp_slug": "kem-oc-que-chocolate",
+        "source_url": "https://kemmingo.com/kem-oc-que-chocolate/",
+        "original_category_slugs": [
+          "kem-oc"
+        ]
+      },
+      "name": {
+        "vi": "Kem ốc quế Chocolate"
+      },
+      "slug": {
+        "vi": "kem-oc-que-chocolate",
+        "en": "kem-oc-que-chocolate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem ốc quế Chocolate</p>\n<p>– Trọng lương : 70gr</p>\n<p>– Quy cách đóng gói : 20 ốc/thùng</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem ốc quế Chocolate</p>\n<p>– Trọng lương : 70gr</p>\n<p>– Quy cách đóng gói : 20 ốc/thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-oc-que-chocolate.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Ốc quế"
+          },
+          "size_key": "kem-oc",
+          "sku": "MINGO-WP-208-OC",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-208",
+      "category_slug": "kem-oc",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-oc"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem ốc quế Chocolate | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem ốc quế Chocolate – Trọng lương : 70gr – Quy cách đóng gói : 20 ốc/thùng"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 205,
+        "wp_slug": "kem-oc-que-vani",
+        "source_url": "https://kemmingo.com/kem-oc-que-vani/",
+        "original_category_slugs": [
+          "kem-oc"
+        ]
+      },
+      "name": {
+        "vi": "Kem ốc quế Vanilla"
+      },
+      "slug": {
+        "vi": "kem-oc-que-vani",
+        "en": "kem-oc-que-vani"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem ốc quế Vanilla</p>\n<p>– Trọng lương : 70gr</p>\n<p>– Quy cách đóng gói : 20 ốc/thùng</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem ốc quế Vanilla</p>\n<p>– Trọng lương : 70gr</p>\n<p>– Quy cách đóng gói : 20 ốc/thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-oc-que-vani.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Ốc quế"
+          },
+          "size_key": "kem-oc",
+          "sku": "MINGO-WP-205-OC",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-205",
+      "category_slug": "kem-oc",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-oc"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem ốc quế Vanilla | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem ốc quế Vanilla – Trọng lương : 70gr – Quy cách đóng gói : 20 ốc/thùng"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 164,
+        "wp_slug": "kem-oc-que-dau",
+        "source_url": "https://kemmingo.com/kem-oc-que-dau/",
+        "original_category_slugs": [
+          "kem-oc"
+        ]
+      },
+      "name": {
+        "vi": "Kem ốc quế Dâu"
+      },
+      "slug": {
+        "vi": "kem-oc-que-dau",
+        "en": "kem-oc-que-dau"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem ốc quế Dâu</p>\n<p>Trọng lượng : 70gr</p>\n<p>Quy cách đóng gói : 20 ốc/thùng</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem ốc quế Dâu</p>\n<p>Trọng lượng : 70gr</p>\n<p>Quy cách đóng gói : 20 ốc/thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-oc-que-dau.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Ốc quế"
+          },
+          "size_key": "kem-oc",
+          "sku": "MINGO-WP-164-OC",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-164",
+      "category_slug": "kem-oc",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "kem-oc"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem ốc quế Dâu | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem ốc quế Dâu Trọng lượng : 70gr Quy cách đóng gói : 20 ốc/thùng"
+      },
+      "weight": 0.07
+    },
+    {
+      "source": {
+        "wp_id": 195,
+        "wp_slug": "pint-tropicana",
+        "source_url": "https://kemmingo.com/pint-tropicana/",
+        "original_category_slugs": [
+          "500ml"
+        ]
+      },
+      "name": {
+        "vi": "Kem hộp 473ml – Trái cây(Tropicana)"
+      },
+      "slug": {
+        "vi": "pint-tropicana",
+        "en": "pint-tropicana"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hộp 473ml – Trái cây(Tropicana)</p>\n<p>Thể tích: 473 ml / 1 hộp</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hộp 473ml – Trái cây(Tropicana)</p>\n<p>Thể tích: 473 ml / 1 hộp</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/pint-tropicana.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 473ml"
+          },
+          "size_key": "500ml",
+          "sku": "MINGO-WP-195-473ML",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-195",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "500ml"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hộp 473ml – Trái cây(Tropicana) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hộp 473ml – Trái cây(Tropicana) Thể tích: 473 ml / 1 hộp"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 193,
+        "wp_slug": "pint-sau-rieng-durian",
+        "source_url": "https://kemmingo.com/pint-sau-rieng-durian/",
+        "original_category_slugs": [
+          "500ml"
+        ]
+      },
+      "name": {
+        "vi": "Kem hộp 473ml – Sầu riêng (Durian)"
+      },
+      "slug": {
+        "vi": "pint-sau-rieng-durian",
+        "en": "pint-sau-rieng-durian"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hộp 473ml – Sầu riêng (Durian)</p>\n<p>Thể tích : 473 ml / 1 hộp</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hộp 473ml – Sầu riêng (Durian)</p>\n<p>Thể tích : 473 ml / 1 hộp</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/pint-sau-rieng-durian.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 473ml"
+          },
+          "size_key": "500ml",
+          "sku": "MINGO-WP-193-473ML",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-193",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "500ml"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hộp 473ml – Sầu riêng (Durian) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hộp 473ml – Sầu riêng (Durian) Thể tích : 473 ml / 1 hộp"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 191,
+        "wp_slug": "pint-xoai-mango",
+        "source_url": "https://kemmingo.com/pint-xoai-mango/",
+        "original_category_slugs": [
+          "500ml"
+        ]
+      },
+      "name": {
+        "vi": "Kem hộp 473ml – Xoài (Mango)"
+      },
+      "slug": {
+        "vi": "pint-xoai-mango",
+        "en": "pint-xoai-mango"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hộp 473ml – Xoài (Mango)</p>\n<p>Thể tích: 473ml / 1 hộp</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hộp 473ml – Xoài (Mango)</p>\n<p>Thể tích: 473ml / 1 hộp</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/pint-xoai-mango.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 473ml"
+          },
+          "size_key": "500ml",
+          "sku": "MINGO-WP-191-473ML",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-191",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "500ml"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hộp 473ml – Xoài (Mango) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hộp 473ml – Xoài (Mango) Thể tích: 473ml / 1 hộp"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 188,
+        "wp_slug": "pint-chocolate",
+        "source_url": "https://kemmingo.com/pint-chocolate/",
+        "original_category_slugs": [
+          "500ml"
+        ]
+      },
+      "name": {
+        "vi": "Kem hộp 473ml – Chocolate"
+      },
+      "slug": {
+        "vi": "pint-chocolate",
+        "en": "pint-chocolate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hộp 473ml – Chocolate</p>\n<p>Thể tích: 473ml / 1 hộp</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hộp 473ml – Chocolate</p>\n<p>Thể tích: 473ml / 1 hộp</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/pint-chocolate.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 473ml"
+          },
+          "size_key": "500ml",
+          "sku": "MINGO-WP-188-473ML",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-188",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "500ml"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hộp 473ml – Chocolate | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hộp 473ml – Chocolate Thể tích: 473ml / 1 hộp"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 186,
+        "wp_slug": "pint-vanilla",
+        "source_url": "https://kemmingo.com/pint-vanilla/",
+        "original_category_slugs": [
+          "500ml"
+        ]
+      },
+      "name": {
+        "vi": "Kem hộp 473ml – Vanilla"
+      },
+      "slug": {
+        "vi": "pint-vanilla",
+        "en": "pint-vanilla"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hộp 473ml – Vanilla</p>\n<p>Thể tích: 473 ml / 1 hộp</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hộp 473ml – Vanilla</p>\n<p>Thể tích: 473 ml / 1 hộp</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/pint-vanilla.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 473ml"
+          },
+          "size_key": "500ml",
+          "sku": "MINGO-WP-186-473ML",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-186",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "500ml"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hộp 473ml – Vanilla | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hộp 473ml – Vanilla Thể tích: 473 ml / 1 hộp"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 171,
+        "wp_slug": "pint-strawberry",
+        "source_url": "https://kemmingo.com/pint-strawberry/",
+        "original_category_slugs": [
+          "500ml"
+        ]
+      },
+      "name": {
+        "vi": "Kem hộp 473ml – Dâu tây (Strawberry)"
+      },
+      "slug": {
+        "vi": "pint-strawberry",
+        "en": "pint-strawberry"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hộp 473ml – Dâu tây (Strawberry)</p>\n<p>Thể tích : 473 ml / 1 hộp</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hộp 473ml – Dâu tây (Strawberry)</p>\n<p>Thể tích : 473 ml / 1 hộp</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/pint-strawberry.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 473ml"
+          },
+          "size_key": "500ml",
+          "sku": "MINGO-WP-171-473ML",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-171",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "500ml"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hộp 473ml – Dâu tây (Strawberry) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hộp 473ml – Dâu tây (Strawberry) Thể tích : 473 ml / 1 hộp"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 167,
+        "wp_slug": "pint-raisin-grandeur",
+        "source_url": "https://kemmingo.com/pint-raisin-grandeur/",
+        "original_category_slugs": [
+          "500ml"
+        ]
+      },
+      "name": {
+        "vi": "Kem hộp 473ml – Ruhm Nho Khô"
+      },
+      "slug": {
+        "vi": "pint-raisin-grandeur",
+        "en": "pint-raisin-grandeur"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hộp 473ml – Ruhm Nho Khô<br/>\nThể tích: 473 ml / 1 hộp</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hộp 473ml – Ruhm Nho Khô<br/>\nThể tích: 473 ml / 1 hộp</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/pint-raisin-grandeur.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp 473ml"
+          },
+          "size_key": "500ml",
+          "sku": "MINGO-WP-167-473ML",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-167",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "500ml"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hộp 473ml – Ruhm Nho Khô | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hộp 473ml – Ruhm Nho Khô Thể tích: 473 ml / 1 hộp"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 161,
+        "wp_slug": "kem-hu-vani",
+        "source_url": "https://kemmingo.com/kem-hu-vani/",
+        "original_category_slugs": [
+          "3oz"
+        ]
+      },
+      "name": {
+        "vi": "kem hủ Vani"
+      },
+      "slug": {
+        "vi": "kem-hu-vani",
+        "en": "kem-hu-vani"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Supermingo Vanilla: vị vani cổ điển được nâng lên tầm cao mới về mùi vị, hương vani ngọt ngào tan chảy trong kem Mingo.</p>\n<p>Khối lượng tịnh: 42 g</p>\n<p>Thể tích: 3 oz</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Supermingo Vanilla: vị vani cổ điển được nâng lên tầm cao mới về mùi vị, hương vani ngọt ngào tan chảy trong kem Mingo.</p>\n<p>Khối lượng tịnh: 42 g</p>\n<p>Thể tích: 3 oz</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-vani.jpg"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 3oz (42g)"
+          },
+          "size_key": "3oz",
+          "sku": "MINGO-WP-161-3OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-161",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "3oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "kem hủ Vani | Mingo"
+      },
+      "meta_description": {
+        "vi": "Supermingo Vanilla: vị vani cổ điển được nâng lên tầm cao mới về mùi vị, hương vani ngọt ngào tan chảy trong kem Mingo. Khối lượng tịnh: 42 g Thể tích: 3 o"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 159,
+        "wp_slug": "kem-hu-chocolate",
+        "source_url": "https://kemmingo.com/kem-hu-chocolate/",
+        "original_category_slugs": [
+          "3oz"
+        ]
+      },
+      "name": {
+        "vi": "kem hủ Chocolate"
+      },
+      "slug": {
+        "vi": "kem-hu-chocolate",
+        "en": "kem-hu-chocolate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Supermingo Chocolate: Kem sôcôla mềm mại, thơm ngon và thơm ngon, làm từ hạt ca cao thơm.</p>\n<p>Khối lượng tịnh: 42 g</p>\n<p>Thể tích: 3 oz</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Supermingo Chocolate: Kem sôcôla mềm mại, thơm ngon và thơm ngon, làm từ hạt ca cao thơm.</p>\n<p>Khối lượng tịnh: 42 g</p>\n<p>Thể tích: 3 oz</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-chocolate.jpg"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 3oz (42g)"
+          },
+          "size_key": "3oz",
+          "sku": "MINGO-WP-159-3OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-159",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "3oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "kem hủ Chocolate | Mingo"
+      },
+      "meta_description": {
+        "vi": "Supermingo Chocolate: Kem sôcôla mềm mại, thơm ngon và thơm ngon, làm từ hạt ca cao thơm. Khối lượng tịnh: 42 g Thể tích: 3 oz"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 157,
+        "wp_slug": "kem-hu-dau",
+        "source_url": "https://kemmingo.com/kem-hu-dau/",
+        "original_category_slugs": [
+          "3oz"
+        ]
+      },
+      "name": {
+        "vi": "kem hủ dâu"
+      },
+      "slug": {
+        "vi": "kem-hu-dau",
+        "en": "kem-hu-dau"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Supermingo Strawberry: Kem dâu tây với mứt dâu tây làm bằng dâu tây thật – đó là một bất ngờ ngọt ngào ngon miệng ở mọi lần cắn.</p>\n<p>Khối lượng tịnh: 42 g</p>\n<p>Thể tích: 3 oz</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Supermingo Strawberry: Kem dâu tây với mứt dâu tây làm bằng dâu tây thật – đó là một bất ngờ ngọt ngào ngon miệng ở mọi lần cắn.</p>\n<p>Khối lượng tịnh: 42 g</p>\n<p>Thể tích: 3 oz</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-dau.jpg"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 3oz (42g)"
+          },
+          "size_key": "3oz",
+          "sku": "MINGO-WP-157-3OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-157",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "3oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "kem hủ dâu | Mingo"
+      },
+      "meta_description": {
+        "vi": "Supermingo Strawberry: Kem dâu tây với mứt dâu tây làm bằng dâu tây thật – đó là một bất ngờ ngọt ngào ngon miệng ở mọi lần cắn. Khối lượng tịnh: 42 g Thể"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 150,
+        "wp_slug": "kem-hu-chanh",
+        "source_url": "https://kemmingo.com/kem-hu-chanh/",
+        "original_category_slugs": [
+          "3oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem hủ chanh"
+      },
+      "slug": {
+        "vi": "kem-hu-chanh",
+        "en": "kem-hu-chanh"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Supermingo Lime Sherbet: Hoàn hảo cho một ngày mùa hè nóng. Với một chút hương vị, sherbet chanh của chúng tôi rất nhẹ nhàng và tươi mới!.</p>\n<p>Khối lượng tịnh: 42 g</p>\n<p>Thể tích: 3 oz</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Supermingo Lime Sherbet: Hoàn hảo cho một ngày mùa hè nóng. Với một chút hương vị, sherbet chanh của chúng tôi rất nhẹ nhàng và tươi mới!.</p>\n<p>Khối lượng tịnh: 42 g</p>\n<p>Thể tích: 3 oz</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-chanh.jpg"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 3oz (42g)"
+          },
+          "size_key": "3oz",
+          "sku": "MINGO-WP-150-3OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-150",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "3oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hủ chanh | Mingo"
+      },
+      "meta_description": {
+        "vi": "Supermingo Lime Sherbet: Hoàn hảo cho một ngày mùa hè nóng. Với một chút hương vị, sherbet chanh của chúng tôi rất nhẹ nhàng và tươi mới!. Khối lượng tịnh:"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 149,
+        "wp_slug": "kem-hu-chocolate-chip",
+        "source_url": "https://kemmingo.com/kem-hu-chocolate-chip/",
+        "original_category_slugs": [
+          "4oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem hủ 4OZ- Vani hạt ( Chocolate chip)"
+      },
+      "slug": {
+        "vi": "kem-hu-chocolate-chip",
+        "en": "kem-hu-chocolate-chip"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<div class=\"entry-desc\">\n<p>Kem hủ 4OZ – Vani hạt ( Chocolate chip)</p>\n<p><span style=\"color: #333333\">– Trọng lượng : 60 gr / 1 hủ</span></p>\n</div>\n<dl class=\"sku-info\">\n<dt>– Quy cách đóng gói : 24 hủ / 1 thùng</dt>\n</dl>\n</div>"
+      },
+      "short_description": {
+        "vi": "<div class=\"entry-desc\">\n<p>Kem hủ 4OZ – Vani hạt ( Chocolate chip)</p>\n<p><span style=\"color: #333333\">– Trọng lượng : 60 gr / 1 hủ</span></p>\n</div>\n<dl class=\"sku-info\">\n<dt>– Quy cách đóng gói : 24 hủ / 1 thùng</dt>\n</dl>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-chocolate-chip.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 4oz (60g)"
+          },
+          "size_key": "4oz",
+          "sku": "MINGO-WP-149-4OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-149",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "4oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hủ 4OZ- Vani hạt ( Chocolate chip) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hủ 4OZ – Vani hạt ( Chocolate chip) – Trọng lượng : 60 gr / 1 hủ – Quy cách đóng gói : 24 hủ / 1 thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 148,
+        "wp_slug": "kem-hu-double-chololate",
+        "source_url": "https://kemmingo.com/kem-hu-double-chololate/",
+        "original_category_slugs": [
+          "4oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem hủ 4OZ- Chololate Double"
+      },
+      "slug": {
+        "vi": "kem-hu-double-chololate",
+        "en": "kem-hu-double-chololate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<div class=\"entry-desc\">\n<p>Kem hủ 4OZ – Chocolate hạt</p>\n</div>\n<dl class=\"sku-info\">\n<dt>Trọng lượng : 60 gr / 1 hủ</dt>\n<dt>Quy cách đóng gói : 24 hủ / 1 thùng</dt>\n</dl>\n</div>"
+      },
+      "short_description": {
+        "vi": "<div class=\"entry-desc\">\n<p>Kem hủ 4OZ – Chocolate hạt</p>\n</div>\n<dl class=\"sku-info\">\n<dt>Trọng lượng : 60 gr / 1 hủ</dt>\n<dt>Quy cách đóng gói : 24 hủ / 1 thùng</dt>\n</dl>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-double-chololate.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 4oz (60g)"
+          },
+          "size_key": "4oz",
+          "sku": "MINGO-WP-148-4OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-148",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "4oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hủ 4OZ- Chololate Double | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hủ 4OZ – Chocolate hạt Trọng lượng : 60 gr / 1 hủ Quy cách đóng gói : 24 hủ / 1 thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 56,
+        "wp_slug": "kem-hu-dua",
+        "source_url": "https://kemmingo.com/kem-hu-dua/",
+        "original_category_slugs": [
+          "4oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem hủ 4OZ- Dừa (Classic Coconut)"
+      },
+      "slug": {
+        "vi": "kem-hu-dua",
+        "en": "kem-hu-dua"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<div class=\"entry-desc\">\n<p> Kem hủ 4OZ – Dừa (Classic Coconut)</p>\n<p><span style=\"color: #333333\">  – Trọng lượng : 60 gr / 1 hủ</span></p>\n</div>\n<dl class=\"sku-info\">\n<dt> – Quy cách đóng gói : 24 hủ / 1 thùng</dt>\n</dl>\n</div>"
+      },
+      "short_description": {
+        "vi": "<div class=\"entry-desc\">\n<p> Kem hủ 4OZ – Dừa (Classic Coconut)</p>\n<p><span style=\"color: #333333\">  – Trọng lượng : 60 gr / 1 hủ</span></p>\n</div>\n<dl class=\"sku-info\">\n<dt> – Quy cách đóng gói : 24 hủ / 1 thùng</dt>\n</dl>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-dua.gif"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 4oz (60g)"
+          },
+          "size_key": "4oz",
+          "sku": "MINGO-WP-56-4OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-56",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "4oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hủ 4OZ- Dừa (Classic Coconut) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hủ 4OZ – Dừa (Classic Coconut) – Trọng lượng : 60 gr / 1 hủ – Quy cách đóng gói : 24 hủ / 1 thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 145,
+        "wp_slug": "kem-hu-tra-xanh",
+        "source_url": "https://kemmingo.com/kem-hu-tra-xanh/",
+        "original_category_slugs": [
+          "4oz"
+        ]
+      },
+      "name": {
+        "vi": "Kem hủ 4OZ- Matcha Trà Xanh (Matcha Green Tea)"
+      },
+      "slug": {
+        "vi": "kem-hu-tra-xanh",
+        "en": "kem-hu-tra-xanh"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem hủ 4OZ – Matcha Trà Xanh ( Matcha Green tea)</p>\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem hủ 4OZ – Matcha Trà Xanh ( Matcha Green tea)</p>\n<p>Trọng lượng : 60 gr / 1 hủ</p>\n<p>Quy cách đóng gói : 24 hủ / 1 thùng</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/kem-hu-tra-xanh.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hũ 4oz (60g)"
+          },
+          "size_key": "4oz",
+          "sku": "MINGO-WP-145-4OZ",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-145",
+      "category_slug": "kem-hu",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "4oz"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Kem hủ 4OZ- Matcha Trà Xanh (Matcha Green Tea) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem hủ 4OZ – Matcha Trà Xanh ( Matcha Green tea) Trọng lượng : 60 gr / 1 hủ Quy cách đóng gói : 24 hủ / 1 thùng"
+      },
+      "weight": 0.06
+    },
+    {
+      "source": {
+        "wp_id": 143,
+        "wp_slug": "trai-vai",
+        "source_url": "https://kemmingo.com/trai-vai/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Trái vải"
+      },
+      "slug": {
+        "vi": "trai-vai",
+        "en": "trai-vai"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Với một chút trái vải thiều trên kem phù hợp cho một ngày mùa hè nóng bức!</p>\n<p>Thể tích : 6 lít/hộp và 12 lít/hộp</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Với một chút trái vải thiều trên kem phù hợp cho một ngày mùa hè nóng bức!</p>\n<p>Thể tích : 6 lít/hộp và 12 lít/hộp</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/trai-vai.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-143-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-143-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-143",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Trái vải | Mingo"
+      },
+      "meta_description": {
+        "vi": "Với một chút trái vải thiều trên kem phù hợp cho một ngày mùa hè nóng bức! Thể tích : 6 lít/hộp và 12 lít/hộp"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 141,
+        "wp_slug": "chocolate-hat",
+        "source_url": "https://kemmingo.com/chocolate-hat/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Chocolate hạt"
+      },
+      "slug": {
+        "vi": "chocolate-hat",
+        "en": "chocolate-hat"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Vị chocolate được tăng thêm gấp đôi với sự tăng cường Chocolate hạt.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Vị chocolate được tăng thêm gấp đôi với sự tăng cường Chocolate hạt.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/chocolate-hat.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-141-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-141-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-141",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Chocolate hạt | Mingo"
+      },
+      "meta_description": {
+        "vi": "Vị chocolate được tăng thêm gấp đôi với sự tăng cường Chocolate hạt."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 139,
+        "wp_slug": "cau-vong-tutti-fruity",
+        "source_url": "https://kemmingo.com/cau-vong-tutti-fruity/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Cầu vòng (Tutti Fruity)"
+      },
+      "slug": {
+        "vi": "cau-vong-tutti-fruity",
+        "en": "cau-vong-tutti-fruity"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem Cầu vòng giống như hương vị kẹo bông hoặc kẹo cao su! Hỗn hợp này được làm thành kem mang đến sự trải nghiệm hương vị mới tuyệt vời!</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem Cầu vòng giống như hương vị kẹo bông hoặc kẹo cao su! Hỗn hợp này được làm thành kem mang đến sự trải nghiệm hương vị mới tuyệt vời!</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/cau-vong-tutti-fruity.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-139-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-139-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-139",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Cầu vòng (Tutti Fruity) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem Cầu vòng giống như hương vị kẹo bông hoặc kẹo cao su! Hỗn hợp này được làm thành kem mang đến sự trải nghiệm hương vị mới tuyệt vời!"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 137,
+        "wp_slug": "trai-caytropicana",
+        "source_url": "https://kemmingo.com/trai-caytropicana/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Trái cây (Tropicana)"
+      },
+      "slug": {
+        "vi": "trai-caytropicana",
+        "en": "trai-caytropicana"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Một hỗn hợp trái cây nhiệt đới hoàn hảo của bắp ngọt, mít và sữa ong chúa trong kem dừa.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Một hỗn hợp trái cây nhiệt đới hoàn hảo của bắp ngọt, mít và sữa ong chúa trong kem dừa.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/trai-caytropicana.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-137-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-137-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-137",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Trái cây (Tropicana) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Một hỗn hợp trái cây nhiệt đới hoàn hảo của bắp ngọt, mít và sữa ong chúa trong kem dừa."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 135,
+        "wp_slug": "khoai-mon-taro",
+        "source_url": "https://kemmingo.com/khoai-mon-taro/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Khoai môn (Taro)"
+      },
+      "slug": {
+        "vi": "khoai-mon-taro",
+        "en": "khoai-mon-taro"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Khoai môn được pha trộn để làm cho kem mịn màng và ngon ngọt hơn.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Khoai môn được pha trộn để làm cho kem mịn màng và ngon ngọt hơn.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/khoai-mon-taro.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-135-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-135-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-135",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Khoai môn (Taro) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Khoai môn được pha trộn để làm cho kem mịn màng và ngon ngọt hơn."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 133,
+        "wp_slug": "bap-sweet-corn",
+        "source_url": "https://kemmingo.com/bap-sweet-corn/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Bắp (Sweet corn)"
+      },
+      "slug": {
+        "vi": "bap-sweet-corn",
+        "en": "bap-sweet-corn"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n\n</div>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/bap-sweet-corn.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-133-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-133-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-133",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Bắp (Sweet corn) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Bắp (Sweet corn) thuộc danh mục sản phẩm kem Mingo."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 131,
+        "wp_slug": "nho-kho-rhum-nho",
+        "source_url": "https://kemmingo.com/nho-kho-rhum-nho/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Nho khô (Rhum nho)"
+      },
+      "slug": {
+        "vi": "nho-kho-rhum-nho",
+        "en": "nho-kho-rhum-nho"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Quả nho khô đầy dinh dưỡng được hòa nguyện vào rhum nồng nàn làm ra một vị kem đầy quyến rũ.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Quả nho khô đầy dinh dưỡng được hòa nguyện vào rhum nồng nàn làm ra một vị kem đầy quyến rũ.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/nho-kho-rhum-nho.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-131-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-131-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-131",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Nho khô (Rhum nho) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Quả nho khô đầy dinh dưỡng được hòa nguyện vào rhum nồng nàn làm ra một vị kem đầy quyến rũ."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 128,
+        "wp_slug": "viet-quoc-blueberry",
+        "source_url": "https://kemmingo.com/viet-quoc-blueberry/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Việt Quốc (Blueberry)"
+      },
+      "slug": {
+        "vi": "viet-quoc-blueberry",
+        "en": "viet-quoc-blueberry"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p><strong>Quả việt quất</strong> được ví như túi dinh dưỡng mà thiên nhiên đem lại cho con người, đặc biệt cho phụ nữ mang thai và trẻ nhỏ. Mingo đã đem trái việt quất vào kem của mình để phục vụ khách hàng.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p><strong>Quả việt quất</strong> được ví như túi dinh dưỡng mà thiên nhiên đem lại cho con người, đặc biệt cho phụ nữ mang thai và trẻ nhỏ. Mingo đã đem trái việt quất vào kem của mình để phục vụ khách hàng.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/viet-quoc-blueberry.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-128-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-128-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-128",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Việt Quốc (Blueberry) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Quả việt quất được ví như túi dinh dưỡng mà thiên nhiên đem lại cho con người, đặc biệt cho phụ nữ mang thai và trẻ nhỏ. Mingo đã đem trái việt quất vào ke"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 126,
+        "wp_slug": "thach-dua",
+        "source_url": "https://kemmingo.com/thach-dua/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Thạch dừa"
+      },
+      "slug": {
+        "vi": "thach-dua",
+        "en": "thach-dua"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Thạch dừa được làm từ dừa tươi kết hợp với kem mang đến sự trải nghiệm cực kỳ thú vị</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Thạch dừa được làm từ dừa tươi kết hợp với kem mang đến sự trải nghiệm cực kỳ thú vị</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/thach-dua.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-126-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-126-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-126",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Thạch dừa | Mingo"
+      },
+      "meta_description": {
+        "vi": "Thạch dừa được làm từ dừa tươi kết hợp với kem mang đến sự trải nghiệm cực kỳ thú vị"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 124,
+        "wp_slug": "ca-phe-chip-hat-chocolate",
+        "source_url": "https://kemmingo.com/ca-phe-chip-hat-chocolate/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Cà phê chip (Hạt chocolate)"
+      },
+      "slug": {
+        "vi": "ca-phe-chip-hat-chocolate",
+        "en": "ca-phe-chip-hat-chocolate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Cà phê kết hợp với Chocolate mang đến một món Mocha tuyệt vời. Thơm, đắng, ngọt, béo của kem làm cho hỗn hợp kem không thể nào cưỡng lại được.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Cà phê kết hợp với Chocolate mang đến một món Mocha tuyệt vời. Thơm, đắng, ngọt, béo của kem làm cho hỗn hợp kem không thể nào cưỡng lại được.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/ca-phe-chip-hat-chocolate.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-124-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-124-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-124",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Cà phê chip (Hạt chocolate) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Cà phê kết hợp với Chocolate mang đến một món Mocha tuyệt vời. Thơm, đắng, ngọt, béo của kem làm cho hỗn hợp kem không thể nào cưỡng lại được."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 122,
+        "wp_slug": "bac-ha-chip-hat-chocolate",
+        "source_url": "https://kemmingo.com/bac-ha-chip-hat-chocolate/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Bạc hà chip (Hạt Chocolate)"
+      },
+      "slug": {
+        "vi": "bac-ha-chip-hat-chocolate",
+        "en": "bac-ha-chip-hat-chocolate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Trải nghiệm sự phấn khích với kem sô cô la bạc hà của chúng tôi.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Trải nghiệm sự phấn khích với kem sô cô la bạc hà của chúng tôi.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/bac-ha-chip-hat-chocolate.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-122-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-122-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-122",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Bạc hà chip (Hạt Chocolate) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Trải nghiệm sự phấn khích với kem sô cô la bạc hà của chúng tôi."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 120,
+        "wp_slug": "xoai-tuoi-mango",
+        "source_url": "https://kemmingo.com/xoai-tuoi-mango/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Xoài tươi (Mango)"
+      },
+      "slug": {
+        "vi": "xoai-tuoi-mango",
+        "en": "xoai-tuoi-mango"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem xoài của chúng tôi được làm từ xoài Thái – bạn có thể tìm thấy xoài thực sự trong kem của chúng tôi!</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem xoài của chúng tôi được làm từ xoài Thái – bạn có thể tìm thấy xoài thực sự trong kem của chúng tôi!</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/xoai-tuoi-mango.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-120-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-120-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-120",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Xoài tươi (Mango) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem xoài của chúng tôi được làm từ xoài Thái – bạn có thể tìm thấy xoài thực sự trong kem của chúng tôi!"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 117,
+        "wp_slug": "chanh-tuoi-lemon",
+        "source_url": "https://kemmingo.com/chanh-tuoi-lemon/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Chanh tươi (Lemon)"
+      },
+      "slug": {
+        "vi": "chanh-tuoi-lemon",
+        "en": "chanh-tuoi-lemon"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Ngày hè nóng mà có được 1 ly kem chanh thật tươi mát, vị chua của chanh trong ly kem sẽ làm quý khách cảm thấy thật mát dịu &amp; sảng khoái.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Ngày hè nóng mà có được 1 ly kem chanh thật tươi mát, vị chua của chanh trong ly kem sẽ làm quý khách cảm thấy thật mát dịu &amp; sảng khoái.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/chanh-tuoi-lemon.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-117-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-117-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-117",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Chanh tươi (Lemon) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Ngày hè nóng mà có được 1 ly kem chanh thật tươi mát, vị chua của chanh trong ly kem sẽ làm quý khách cảm thấy thật mát dịu & sảng khoái."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 113,
+        "wp_slug": "mit-trai-jack-fruity",
+        "source_url": "https://kemmingo.com/mit-trai-jack-fruity/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Mít trái (Jack Fruity)"
+      },
+      "slug": {
+        "vi": "mit-trai-jack-fruity",
+        "en": "mit-trai-jack-fruity"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Mít tươi thơm ngon được hòa nguyện vào vị kem.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Mít tươi thơm ngon được hòa nguyện vào vị kem.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/mit-trai-jack-fruity.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-113-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-113-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-113",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Mít trái (Jack Fruity) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Mít tươi thơm ngon được hòa nguyện vào vị kem."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 111,
+        "wp_slug": "tra-xanh-green-tea",
+        "source_url": "https://kemmingo.com/tra-xanh-green-tea/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Trà xanh (Green tea)"
+      },
+      "slug": {
+        "vi": "tra-xanh-green-tea",
+        "en": "tra-xanh-green-tea"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Chúng tôi cung cấp cả trà Jasmine và Matcha. Sử dụng lá trà xanh và matcha từ Nhật Bản, cả hai lựa chọn đều mịn màng và thơm ngon, hấp dẫn và tuyệt ngon.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Chúng tôi cung cấp cả trà Jasmine và Matcha. Sử dụng lá trà xanh và matcha từ Nhật Bản, cả hai lựa chọn đều mịn màng và thơm ngon, hấp dẫn và tuyệt ngon.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/tra-xanh-green-tea.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-111-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-111-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-111",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Trà xanh (Green tea) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Chúng tôi cung cấp cả trà Jasmine và Matcha. Sử dụng lá trà xanh và matcha từ Nhật Bản, cả hai lựa chọn đều mịn màng và thơm ngon, hấp dẫn và tuyệt ngon."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 109,
+        "wp_slug": "sau-rieng-durian",
+        "source_url": "https://kemmingo.com/sau-rieng-durian/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Sầu Riêng (Durian)"
+      },
+      "slug": {
+        "vi": "sau-rieng-durian",
+        "en": "sau-rieng-durian"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Được biết đến như là vua của trái cây, kem sầu riêng của chúng tôi được làm từ sầu riêng thực sự và đã trở thành một trong những hương vị đặc trưng của chúng tôi. Thưởng thức kem mát lạnh với hương vị sầu riêng đậm đà sẽ làm cho thực khách ngất ngây.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Được biết đến như là vua của trái cây, kem sầu riêng của chúng tôi được làm từ sầu riêng thực sự và đã trở thành một trong những hương vị đặc trưng của chúng tôi. Thưởng thức kem mát lạnh với hương vị sầu riêng đậm đà sẽ làm cho thực khách ngất ngây.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/sau-rieng-durian.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-109-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-109-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-109",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Sầu Riêng (Durian) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Được biết đến như là vua của trái cây, kem sầu riêng của chúng tôi được làm từ sầu riêng thực sự và đã trở thành một trong những hương vị đặc trưng của chú"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 107,
+        "wp_slug": "cookies-cream",
+        "source_url": "https://kemmingo.com/cookies-cream/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "kem Cookies Cream"
+      },
+      "slug": {
+        "vi": "cookies-cream",
+        "en": "cookies-cream"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Bánh Cookies sôcôla được nghiền khuấy vào kem sữa.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Bánh Cookies sôcôla được nghiền khuấy vào kem sữa.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/cookies-cream.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-107-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-107-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-107",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "kem Cookies Cream | Mingo"
+      },
+      "meta_description": {
+        "vi": "Bánh Cookies sôcôla được nghiền khuấy vào kem sữa."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 105,
+        "wp_slug": "dua-non-coconut",
+        "source_url": "https://kemmingo.com/dua-non-coconut/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Dừa non (Coconut)"
+      },
+      "slug": {
+        "vi": "dua-non-coconut",
+        "en": "dua-non-coconut"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem được làm từ dừa trái, thơm ngon, ngọt béo tự nhiên mang đến sự trải nghiệm mới mẻ thật sự.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem được làm từ dừa trái, thơm ngon, ngọt béo tự nhiên mang đến sự trải nghiệm mới mẻ thật sự.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/dua-non-coconut.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-105-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-105-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-105",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Dừa non (Coconut) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem được làm từ dừa trái, thơm ngon, ngọt béo tự nhiên mang đến sự trải nghiệm mới mẻ thật sự."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 103,
+        "wp_slug": "chocolate-ripple",
+        "source_url": "https://kemmingo.com/chocolate-ripple/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Chocolate sữa"
+      },
+      "slug": {
+        "vi": "chocolate-ripple",
+        "en": "chocolate-ripple"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Những giọt sôcôla tan vani để tạo thành vị kem quyến rũ.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Những giọt sôcôla tan vani để tạo thành vị kem quyến rũ.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/chocolate-ripple.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-103-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-103-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-103",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Chocolate sữa | Mingo"
+      },
+      "meta_description": {
+        "vi": "Những giọt sôcôla tan vani để tạo thành vị kem quyến rũ."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 101,
+        "wp_slug": "vanilla-chip-hat-chocolate",
+        "source_url": "https://kemmingo.com/vanilla-chip-hat-chocolate/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Vanilla hạt chocolate"
+      },
+      "slug": {
+        "vi": "vanilla-chip-hat-chocolate",
+        "en": "vanilla-chip-hat-chocolate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Các hạt chocolate sôcôla được phân tán kết hợp với kem vani mềm mại.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Các hạt chocolate sôcôla được phân tán kết hợp với kem vani mềm mại.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/vanilla-chip-hat-chocolate.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-101-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-101-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-101",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Vanilla hạt chocolate | Mingo"
+      },
+      "meta_description": {
+        "vi": "Các hạt chocolate sôcôla được phân tán kết hợp với kem vani mềm mại."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 77,
+        "wp_slug": "ca-phe-mocha",
+        "source_url": "https://kemmingo.com/ca-phe-mocha/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Cà phê (Mocha)"
+      },
+      "slug": {
+        "vi": "ca-phe-mocha",
+        "en": "ca-phe-mocha"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Hương vị đâm đà, hương thơm cafe ngọt ngào</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Hương vị đâm đà, hương thơm cafe ngọt ngào</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/ca-phe-mocha.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-77-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-77-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-77",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Cà phê (Mocha) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Hương vị đâm đà, hương thơm cafe ngọt ngào"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 75,
+        "wp_slug": "dau-tay",
+        "source_url": "https://kemmingo.com/dau-tay/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Dâu tây (Strawberry)"
+      },
+      "slug": {
+        "vi": "dau-tay",
+        "en": "dau-tay"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Kem dâu tây với mứt dâu tây làm bằng dâu tây thật – quý khách sẽ thấy sự ngọt ngào ngon miệng mỗi lần thưởng thức.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Kem dâu tây với mứt dâu tây làm bằng dâu tây thật – quý khách sẽ thấy sự ngọt ngào ngon miệng mỗi lần thưởng thức.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/dau-tay.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-75-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-75-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-75",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Dâu tây (Strawberry) | Mingo"
+      },
+      "meta_description": {
+        "vi": "Kem dâu tây với mứt dâu tây làm bằng dâu tây thật – quý khách sẽ thấy sự ngọt ngào ngon miệng mỗi lần thưởng thức."
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 73,
+        "wp_slug": "chocolate",
+        "source_url": "https://kemmingo.com/chocolate/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Chocolate"
+      },
+      "slug": {
+        "vi": "chocolate",
+        "en": "chocolate"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Vị kem Vani</p>\n</div>\n<div class=\"panel entry-content active\" id=\"tab-description\">\n<p>Kem Chocolate mềm mại, thơm ngon, làm từ hạt ca nguyên chất.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Vị kem Vani</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/chocolate.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-73-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-73-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-73",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Chocolate | Mingo"
+      },
+      "meta_description": {
+        "vi": "Vị kem Vani"
+      },
+      "weight": null
+    },
+    {
+      "source": {
+        "wp_id": 65,
+        "wp_slug": "vanilla",
+        "source_url": "https://kemmingo.com/vanilla/",
+        "original_category_slugs": [
+          "6kg",
+          "kem-hop-nhua-6-lit-3kg"
+        ]
+      },
+      "name": {
+        "vi": "Vanilla"
+      },
+      "slug": {
+        "vi": "vanilla",
+        "en": "vanilla"
+      },
+      "description": {
+        "vi": "<div class=\"product-short-description\">\n<p>Hương vị Vani ngọt ngào.</p>\n</div>"
+      },
+      "short_description": {
+        "vi": "<p>Hương vị Vani ngọt ngào.</p>"
+      },
+      "price": 0,
+      "sale_price": null,
+      "images": [
+        "/assets/mingo/legacy-products/vanilla.png"
+      ],
+      "variants": [
+        {
+          "name": {
+            "vi": "Hộp nhựa 6 lít (3kg)"
+          },
+          "size_key": "6lit",
+          "sku": "MINGO-WP-65-6L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 0
+        },
+        {
+          "name": {
+            "vi": "Hộp nhựa 12 lít (6kg)"
+          },
+          "size_key": "12lit",
+          "sku": "MINGO-WP-65-12L",
+          "price": 0,
+          "stock": 0,
+          "sort_order": 1
+        }
+      ],
+      "stock_quantity": 0,
+      "sku": "MINGO-WP-65",
+      "category_slug": "kem-ky",
+      "brand_slug": "mingo",
+      "tags": [
+        "legacy-wp",
+        "price-pending",
+        "6kg",
+        "kem-hop-nhua-6-lit-3kg"
+      ],
+      "status": "active",
+      "is_featured": false,
+      "enable_sale_tag": false,
+      "meta_title": {
+        "vi": "Vanilla | Mingo"
+      },
+      "meta_description": {
+        "vi": "Hương vị Vani ngọt ngào."
+      },
+      "weight": null
+    }
+  ]
+}
