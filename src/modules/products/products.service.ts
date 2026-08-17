@@ -630,16 +630,33 @@ export class ProductsService {
   private validateProduct(productDto: Partial<CreateProductDto>): void {
     // Validate sale_price <= price
     if (productDto.sale_price && productDto.price && productDto.sale_price > productDto.price) {
-      throw new BadRequestException('Sale price cannot be greater than regular price');
+      throw new BadRequestException(
+        'Sale price cannot be greater than regular price / giá khuyến mãi không được lớn hơn giá gốc',
+      );
+    }
+
+    // Reject duplicate variant SKUs so the correct variant can always be addressed later.
+    if (productDto.variants && productDto.variants.length > 0) {
+      const skus = productDto.variants.map((v) => v.sku?.trim()).filter(Boolean) as string[];
+      const duplicates = skus.filter((sku, i) => skus.indexOf(sku) !== i);
+      if (duplicates.length > 0) {
+        throw new BadRequestException(
+          `Duplicate variant SKU: "${[...new Set(duplicates)].join(', ')}" / SKU biến thể bị trùng`,
+        );
+      }
     }
 
     // Validate variants vs stock_quantity logic
     if (productDto.variants && productDto.variants.length > 0) {
       if (productDto.stock_quantity && productDto.stock_quantity > 0) {
-        throw new BadRequestException('Product with variants should not have stock_quantity set');
+        throw new BadRequestException(
+          'Product with variants should not have stock_quantity set / sản phẩm có biến thể không được đặt tồn kho tổng',
+        );
       }
       if (productDto.sku) {
-        throw new BadRequestException('Product with variants should not have SKU set');
+        throw new BadRequestException(
+          'Product with variants should not have SKU set / sản phẩm có biến thể không được đặt SKU chung',
+        );
       }
     }
   }
