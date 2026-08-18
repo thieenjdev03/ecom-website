@@ -410,7 +410,7 @@ export class ProductsService {
       if (!product) {
         throw new NotFoundException(`Product #${id} not found`);
       }
-      await this.productsRepository.softDelete(id);
+      await this.productsRepository.delete(id);
     } catch (err) {
       this.handleError(err, 'Unable to delete product');
     }
