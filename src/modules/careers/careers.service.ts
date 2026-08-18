@@ -62,7 +62,7 @@ export class CareersService {
     let slug = base;
     let i = 1;
     // ponytail: sequential probe, fine for admin-rate writes
-    while (await this.careersRepository.findOne({ where: { slug }, withDeleted: true })) {
+    while (await this.careersRepository.findOne({ where: { slug } })) {
       slug = `${base}-${i++}`;
     }
     return slug;
@@ -83,7 +83,6 @@ export class CareersService {
     if (dto.slug) {
       const existing = await this.careersRepository.findOne({
         where: { slug: dto.slug },
-        withDeleted: true,
       });
       if (existing) {
         throw new ConflictException(`Career with slug "${dto.slug}" already exists`);
@@ -164,7 +163,6 @@ export class CareersService {
     if (dto.slug && dto.slug !== career.slug) {
       const existing = await this.careersRepository.findOne({
         where: { slug: dto.slug },
-        withDeleted: true,
       });
       if (existing) {
         throw new ConflictException(`Career with slug "${dto.slug}" already exists`);
@@ -184,7 +182,7 @@ export class CareersService {
 
   async remove(id: string): Promise<void> {
     const career = await this.findOne(id);
-    await this.careersRepository.softRemove(career);
+    await this.careersRepository.remove(career);
   }
 
   // ---- Applications ----

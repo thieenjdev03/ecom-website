@@ -40,6 +40,6 @@ export class HomepageBannersService {
 
   async remove(id: string): Promise<void> {
     const banner = await this.findOne(id);
-    await this.bannersRepository.softRemove(banner);
+    await this.bannersRepository.remove(banner);
   }
 }

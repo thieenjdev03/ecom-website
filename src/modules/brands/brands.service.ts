@@ -14,7 +14,6 @@ export class BrandsService {
   private async assertSlugFree(slug: string): Promise<void> {
     const existing = await this.brandsRepository.findOne({
       where: { slug },
-      withDeleted: true,
     });
     if (existing) throw new ConflictException(`Brand with slug "${slug}" already exists`);
   }
@@ -52,6 +51,6 @@ export class BrandsService {
 
   async remove(id: string): Promise<void> {
     const brand = await this.findOne(id);
-    await this.brandsRepository.softRemove(brand);
+    await this.brandsRepository.remove(brand);
   }
 }

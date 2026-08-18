@@ -51,7 +51,7 @@ export class PoliciesService {
     let i = 2;
     // eslint-disable-next-line no-await-in-loop
     while (true) {
-      const existing = await this.policiesRepository.findOne({ where: { slug }, withDeleted: true });
+      const existing = await this.policiesRepository.findOne({ where: { slug } });
       if (!existing || existing.id === ignoreId) return slug;
       slug = `${base}-${i++}`;
     }
@@ -110,7 +110,6 @@ export class PoliciesService {
     if (dto.slug !== undefined && dto.slug !== policy.slug) {
       const existing = await this.policiesRepository.findOne({
         where: { slug: dto.slug },
-        withDeleted: true,
       });
       if (existing && existing.id !== id) {
         throw new ConflictException(`Policy with slug "${dto.slug}" already exists`);
@@ -128,6 +127,6 @@ export class PoliciesService {
 
   async remove(id: string): Promise<void> {
     const policy = await this.findOne(id);
-    await this.policiesRepository.softRemove(policy);
+    await this.policiesRepository.remove(policy);
   }
 }
