@@ -1,20 +1,31 @@
 services:
   postgres:
     image: postgres:16
-    container_name: pg
+    restart: unless-stopped
     environment:
       POSTGRES_DB: appdb
       POSTGRES_USER: appuser
-      POSTGRES_PASSWORD: secret
-    ports:
-      - "5432:5432"         # expose cho DBeaver/Nest local
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./initdb:/docker-entrypoint-initdb.d  # (tuỳ chọn) SQL init/migrations
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
       interval: 5s
       timeout: 3s
       retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    init: true
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://appuser:${POSTGRES_PASSWORD}@postgres:5432/appdb?sslmode=disable
+    ports:
+      - "127.0.0.1:3000:3000"   # nginx/caddy trên host proxy vào đây
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   pgdata:

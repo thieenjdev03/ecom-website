@@ -1,30 +1,19 @@
-# ---------- Base (dependencies only)
-FROM node:20-alpine AS base
+# ---------- build
+FROM node:22-bookworm-slim AS build
 WORKDIR /app
-ENV CI=true
-COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
-# choose one:
-RUN if [ -f package-lock.json ]; then npm ci --legacy-peer-deps; \
-    elif [ -f pnpm-lock.yaml ]; then npm i -g pnpm && pnpm i --frozen-lockfile; \
-    elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
-    else npm i --legacy-peer-deps; fi
-
-# ---------- Builder (compile TS)
-FROM base AS builder
-COPY tsconfig*.json ./
+COPY package.json package-lock.json ./
+RUN npm ci --legacy-peer-deps
+COPY tsconfig*.json nest-cli.json ./
 COPY src ./src
-RUN npm run build  # expects to output to ./dist
+RUN npm run build && npm prune --omit=dev
 
-# ---------- Runtime (small image)
-FROM node:22-alpine
+# ---------- runtime
+FROM node:22-bookworm-slim
 WORKDIR /app
-ENV NODE_ENV=production
-# system tz/ca-certificates optional
-RUN apk add --no-cache tini
-COPY --from=base /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY package.json .
-# COPY .env ./.env  # optional; you can also provide env via compose
-ENTRYPOINT ["/sbin/tini","--"]
-CMD ["node","dist/main.js"]
-EXPOSE 3001
+ENV NODE_ENV=production PORT=3000
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist ./dist
+COPY package.json ./
+USER node
+EXPOSE 3000
+CMD ["node", "dist/main.js"]
