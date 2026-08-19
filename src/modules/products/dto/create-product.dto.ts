@@ -1,9 +1,10 @@
-import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, Min, Max, ValidateNested, ValidateIf, IsEnum, MaxLength, IsUUID, IsObject } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, Min, Max, ValidateNested, ValidateIf, IsEnum, MaxLength, IsUUID, IsObject, IsUrl } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductVariantDto } from './product-variant.dto';
 import { DimensionsDto } from './dimensions.dto';
 import { LocalizedStringDto } from './localized-string.dto';
+import { IsLocalizedNotEmpty, IsLocalizedSlug } from '../../../common/validators/localized-string.validators';
 
 export class CreateProductDto {
   @ApiProperty({
@@ -11,6 +12,7 @@ export class CreateProductDto {
     example: { en: 'Premium Polo Shirt', vi: 'Áo Polo Cao Cấp' },
     description: 'Product name in multiple languages'
   })
+  @IsLocalizedNotEmpty()
   @ValidateNested()
   @Type(() => LocalizedStringDto)
   name: LocalizedStringDto;
@@ -20,6 +22,8 @@ export class CreateProductDto {
     example: { en: 'premium-polo-shirt', vi: 'ao-polo-cao-cap' },
     description: 'Product slug in multiple languages'
   })
+  @IsLocalizedNotEmpty()
+  @IsLocalizedSlug()
   @ValidateNested()
   @Type(() => LocalizedStringDto)
   slug: LocalizedStringDto;
@@ -80,27 +84,31 @@ export class CreateProductDto {
   @Type(() => LocalizedStringDto)
   notes?: LocalizedStringDto;
 
-  @ApiProperty({ example: 399000 })
-  @IsNumber()
-  @Min(0)
-  price: number;
+  @ApiPropertyOptional({ example: 399000, nullable: true })
+  @IsOptional()
+  @IsNumber({}, { message: 'price must be a number / giá phải là một con số' })
+  @Min(0, { message: 'price cannot be negative / giá không được nhỏ hơn 0' })
+  price?: number | null;
 
   @ApiPropertyOptional({ example: 349000 })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
+  @IsNumber({}, { message: 'sale_price must be a number / giá khuyến mãi phải là một con số' })
+  @Min(0, { message: 'sale_price cannot be negative / giá khuyến mãi không được nhỏ hơn 0' })
   sale_price?: number;
 
   @ApiPropertyOptional({ example: 200000 })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
+  @IsNumber({}, { message: 'cost_price must be a number / giá vốn phải là một con số' })
+  @Min(0, { message: 'cost_price cannot be negative / giá vốn không được nhỏ hơn 0' })
   cost_price?: number;
 
   @ApiPropertyOptional({ example: ['https://example.com/image1.jpg'] })
   @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
+  @IsArray({ message: 'images must be an array of URLs / danh sách ảnh phải là một mảng URL' })
+  @IsUrl(
+    { protocols: ['http', 'https'], require_protocol: true },
+    { each: true, message: 'each image must be a valid http(s) URL / mỗi ảnh phải là một URL hợp lệ' },
+  )
   images?: string[];
 
   @ApiPropertyOptional({ type: [ProductVariantDto] })
@@ -112,25 +120,25 @@ export class CreateProductDto {
 
   @ApiPropertyOptional({ example: 50 })
   @IsOptional()
-  @IsNumber()
-  @Min(0)
+  @IsNumber({}, { message: 'stock_quantity must be a number / tồn kho phải là một con số' })
+  @Min(0, { message: 'stock_quantity cannot be negative / tồn kho không được nhỏ hơn 0' })
   stock_quantity?: number;
 
   @ApiPropertyOptional({ example: 'POLO-001' })
   @IsOptional()
   @IsString()
-  @MaxLength(100)
+  @MaxLength(100, { message: 'sku must not exceed 100 characters / SKU không được vượt quá 100 ký tự' })
   sku?: string;
 
   @ApiPropertyOptional({ example: '1234567890123' })
   @IsOptional()
   @IsString()
-  @MaxLength(100)
+  @MaxLength(100, { message: 'barcode must not exceed 100 characters / mã vạch không được vượt quá 100 ký tự' })
   barcode?: string;
 
   @ApiPropertyOptional({ example: 'b4b2b07f-6825-402b-bd2c-f9aef8cfbba5' })
   @IsOptional()
-  @IsUUID()
+  @IsUUID('4', { message: 'category_id must be a valid UUID / category_id không hợp lệ' })
   category_id?: string;
 
   @ApiPropertyOptional({
@@ -140,7 +148,7 @@ export class CreateProductDto {
   })
   @IsOptional()
   @ValidateIf((o) => o.brand_id !== null)
-  @IsUUID()
+  @IsUUID('4', { message: 'brand_id must be a valid UUID or null / brand_id không hợp lệ' })
   brand_id?: string | null;
 
   @ApiPropertyOptional({ example: ['polo', 'men', 'premium'] })
@@ -151,7 +159,9 @@ export class CreateProductDto {
 
   @ApiPropertyOptional({ enum: ['active', 'inactive', 'draft'] })
   @IsOptional()
-  @IsEnum(['active', 'inactive', 'draft'])
+  @IsEnum(['active', 'inactive', 'draft'], {
+    message: 'status must be one of: active, inactive, draft / trạng thái không hợp lệ',
+  })
   status?: 'active' | 'inactive' | 'draft';
 
   @ApiPropertyOptional({ example: false })
@@ -163,6 +173,11 @@ export class CreateProductDto {
   @IsOptional()
   @IsBoolean()
   enable_sale_tag?: boolean;
+
+  @ApiPropertyOptional({ example: false, description: 'Show a contact-for-quote CTA instead of a numeric product price.' })
+  @IsOptional()
+  @IsBoolean()
+  is_contact_for_price?: boolean;
 
   @ApiPropertyOptional({
     type: () => LocalizedStringDto,
