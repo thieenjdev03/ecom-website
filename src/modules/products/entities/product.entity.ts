@@ -49,8 +49,8 @@ export class Product {
   @Column({ type: 'jsonb', nullable: true })
   notes: LangObject;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  price: number;
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  price: number | null;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   sale_price: number;
@@ -101,6 +101,9 @@ export class Product {
 
   @Column({ default: false })
   enable_sale_tag: boolean;
+
+  @Column({ default: false })
+  is_contact_for_price: boolean;
 
   @Column({ type: 'jsonb', nullable: true })
   meta_title: LangObject | null;

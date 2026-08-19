@@ -74,8 +74,8 @@ export class ProductVariantResponseDto {
   @ApiProperty()
   sku: string;
 
-  @ApiProperty()
-  price: number;
+  @ApiPropertyOptional({ nullable: true })
+  price: number | null;
 
   @ApiProperty()
   stock: number;
@@ -177,6 +177,9 @@ export class ProductResponseDto {
 
   @ApiProperty()
   enable_sale_tag: boolean;
+
+  @ApiProperty()
+  is_contact_for_price: boolean;
 
   @ApiPropertyOptional({ nullable: true })
   meta_title: string | null;

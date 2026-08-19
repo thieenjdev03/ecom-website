@@ -84,10 +84,11 @@ export class CreateProductDto {
   @Type(() => LocalizedStringDto)
   notes?: LocalizedStringDto;
 
-  @ApiProperty({ example: 399000 })
+  @ApiPropertyOptional({ example: 399000, nullable: true })
+  @IsOptional()
   @IsNumber({}, { message: 'price must be a number / giá phải là một con số' })
   @Min(0, { message: 'price cannot be negative / giá không được nhỏ hơn 0' })
-  price: number;
+  price?: number | null;
 
   @ApiPropertyOptional({ example: 349000 })
   @IsOptional()
@@ -172,6 +173,11 @@ export class CreateProductDto {
   @IsOptional()
   @IsBoolean()
   enable_sale_tag?: boolean;
+
+  @ApiPropertyOptional({ example: false, description: 'Show a contact-for-quote CTA instead of a numeric product price.' })
+  @IsOptional()
+  @IsBoolean()
+  is_contact_for_price?: boolean;
 
   @ApiPropertyOptional({
     type: () => LocalizedStringDto,

@@ -125,6 +125,7 @@ export class ProductsService {
       status: product.status,
       is_featured: product.is_featured,
       enable_sale_tag: product.enable_sale_tag,
+      is_contact_for_price: product.is_contact_for_price,
       meta_title: product.meta_title ? this.getLocalizedValue(product.meta_title, locale) : null,
       meta_description: product.meta_description ? this.getLocalizedValue(product.meta_description, locale) : null,
       weight: product.weight,
@@ -200,7 +201,7 @@ export class ProductsService {
   async create(createProductDto: CreateProductDto, locale: string = 'en'): Promise<any> {
     try {
       // Validate business rules
-      this.validateProduct(createProductDto);
+      this.validateProduct(createProductDto, true);
 
       // Check slug uniqueness - check all language slugs using JSONB operators
       const slugKeys = Object.keys(createProductDto.slug);
@@ -412,7 +413,8 @@ export class ProductsService {
 
       // Validate business rules
       if (Object.keys(updateProductDto).length > 0) {
-        this.validateProduct(updateProductDto);
+        const { status: _currentStatus, ...currentProductForValidation } = product;
+        this.validateProduct({ ...currentProductForValidation, ...updateProductDto }, true);
       }
 
       // Check slug uniqueness if changing - check all language slugs using JSONB operators
@@ -627,9 +629,16 @@ export class ProductsService {
     } as Product;
   }
 
-  private validateProduct(productDto: Partial<CreateProductDto>): void {
+  private validateProduct(productDto: Partial<CreateProductDto>, requirePrice: boolean = false): void {
+    const hasVariants = (productDto.variants?.length ?? 0) > 0;
+    if (requirePrice && !hasVariants && !productDto.is_contact_for_price && productDto.price == null) {
+      throw new BadRequestException(
+        'Price is required unless the product has variants or uses contact-for-price / giá là bắt buộc nếu sản phẩm không có biến thể hoặc không bật liên hệ báo giá',
+      );
+    }
+
     // Validate sale_price <= price
-    if (productDto.sale_price && productDto.price && productDto.sale_price > productDto.price) {
+    if (productDto.sale_price != null && productDto.price != null && productDto.sale_price > productDto.price) {
       throw new BadRequestException(
         'Sale price cannot be greater than regular price / giá khuyến mãi không được lớn hơn giá gốc',
       );
