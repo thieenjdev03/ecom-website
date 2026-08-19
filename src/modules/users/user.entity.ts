@@ -67,6 +67,13 @@ export class User {
   @Column({ default: '' })
   profile: string;
 
+  @ApiProperty({
+    description: 'Điểm loyalty tích lũy hiện tại (cache của ledger point_transaction)',
+    example: 7,
+  })
+  @Column({ type: 'int', default: 0 })
+  pointsBalance: number;
+
   @OneToMany(() => Address, (a) => a.user, { cascade: false })
   addresses: Address[];
 

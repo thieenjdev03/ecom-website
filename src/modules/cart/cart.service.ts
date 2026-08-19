@@ -140,6 +140,18 @@ export class CartService {
     return this.buildResponse(await this.loadCart(trimmed), locale);
   }
 
+  /**
+   * Return a cart that is safe to turn into an order. Unlike getCart, checkout
+   * must reject a missing token instead of treating it as an empty guest cart.
+   */
+  async getCartForCheckout(
+    token: string | undefined,
+    locale = 'en',
+  ): Promise<CartResponseDto> {
+    const tk = this.requireToken(token);
+    return this.buildResponse(await this.loadCart(tk), locale);
+  }
+
   async addItem(
     token: string | undefined,
     dto: AddCartItemDto,

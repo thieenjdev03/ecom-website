@@ -152,9 +152,13 @@ export class ShippingAddressDto {
 }
 
 export class CreateOrderDto {
-  @ApiProperty({ description: 'User ID', example: 'uuid-string' })
+  @ApiPropertyOptional({
+    description: 'User ID. Ignored for authenticated requests; the server uses the JWT subject.',
+    example: 'uuid-string',
+  })
+  @IsOptional()
   @IsUUID()
-  userId: string;
+  userId?: string;
 
   @ApiProperty({ description: 'Order items', type: [OrderItemDto] })
   @IsArray()

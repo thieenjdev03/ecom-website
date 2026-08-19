@@ -27,6 +27,8 @@ import { HomepageModule } from './modules/homepage/homepage.module';
 import { DistributorsModule } from './modules/distributors/distributors.module';
 import { PoliciesModule } from './modules/policies/policies.module';
 import { CartModule } from './modules/cart/cart.module';
+import { PointsModule } from './modules/points/points.module';
+import { CheckoutModule } from './modules/checkout/checkout.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -68,6 +70,8 @@ import { CartModule } from './modules/cart/cart.module';
     DistributorsModule,
     PoliciesModule,
     CartModule,
+    PointsModule,
+    CheckoutModule,
   ],
 })
 export class AppModule {}

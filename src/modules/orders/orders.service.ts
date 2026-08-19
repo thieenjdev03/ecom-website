@@ -9,6 +9,7 @@ import { Product } from '../products/entities/product.entity';
 import { UserAddressesService } from '../addresses/user-addresses.service';
 import { CreateUserAddressDto } from '../addresses/dto/create-user-address.dto';
 import { OrderStatus } from './enums/order-status.enum';
+import { PointsService } from '../points/points.service';
 
 @Injectable()
 export class OrdersService {
@@ -24,7 +25,42 @@ export class OrdersService {
     @InjectRepository(Product)
     private productRepository: Repository<Product>,
     private readonly userAddressesService: UserAddressesService,
+    private readonly pointsService: PointsService,
   ) {}
+
+  // Trạng thái làm PHÁT SINH điểm khi đơn chuyển tới.
+  private static readonly EARN_ON: OrderStatus = OrderStatus.DELIVERED;
+  private static readonly REVERSE_ON: ReadonlySet<OrderStatus> = new Set([
+    OrderStatus.CANCELLED,
+    OrderStatus.REFUNDED,
+  ]);
+
+  /**
+   * Cộng/trừ điểm loyalty theo chuyển trạng thái đơn. Idempotent ở tầng
+   * PointsService (unique orderId+type) nên gọi lại nhiều lần vô hại. Lỗi điểm
+   * KHÔNG được làm hỏng thao tác đổi trạng thái -> nuốt lỗi và chỉ log.
+   */
+  private async applyPointsForStatusChange(
+    order: Order,
+    fromStatus: OrderStatus,
+    toStatus: OrderStatus,
+  ): Promise<void> {
+    if (fromStatus === toStatus) {
+      return;
+    }
+    try {
+      if (toStatus === OrdersService.EARN_ON) {
+        await this.pointsService.earnForOrder(order);
+      } else if (OrdersService.REVERSE_ON.has(toStatus)) {
+        await this.pointsService.reverseForOrder(order);
+      }
+    } catch (error: any) {
+      this.logger.error(
+        `Áp điểm loyalty thất bại cho order ${order.orderNumber} (${fromStatus} -> ${toStatus}): ${error?.message}`,
+        error?.stack,
+      );
+    }
+  }
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
     try {
@@ -211,9 +247,13 @@ export class OrdersService {
         );
       }
 
+      const previousStatus = order.status;
       Object.assign(order, updateOrderDto);
       const updatedOrder = await this.orderRepository.save(order);
       this.logger.log(`Order updated successfully: ${updatedOrder.orderNumber}`);
+      if (updateOrderDto.status) {
+        await this.applyPointsForStatusChange(updatedOrder, previousStatus, updatedOrder.status);
+      }
       return updatedOrder;
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
@@ -499,10 +539,12 @@ export class OrdersService {
       order.tracking_history.push(trackingItem);
 
       // Update order status
+      const previousStatus = trackingItem.from_status;
       order.status = changeOrderStatusDto.toStatus;
 
       const updatedOrder = await this.orderRepository.save(order);
       this.logger.log(`Order ${updatedOrder.orderNumber} status changed from ${trackingItem.from_status} to ${trackingItem.to_status} by ${changedBy}`);
+      await this.applyPointsForStatusChange(updatedOrder, previousStatus, updatedOrder.status);
       return updatedOrder;
     } catch (error) {
       if (error instanceof BadRequestException || error instanceof NotFoundException) {
