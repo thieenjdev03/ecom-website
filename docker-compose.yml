@@ -14,6 +14,17 @@ services:
       timeout: 3s
       retries: 10
 
+  migrate:
+    build: .
+    restart: "no"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://appuser:${POSTGRES_PASSWORD}@postgres:5432/appdb?sslmode=disable
+    command: ["node", "dist/scripts/migrate-deploy.js"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   api:
     build: .
     restart: unless-stopped
@@ -24,8 +35,8 @@ services:
     ports:
       - "127.0.0.1:3000:3000"   # nginx/caddy trên host proxy vào đây
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
 volumes:
   pgdata:
