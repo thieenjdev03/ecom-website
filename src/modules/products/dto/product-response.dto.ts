@@ -89,8 +89,8 @@ export class ProductVariantResponseDto {
   @ApiPropertyOptional({ format: 'uuid', nullable: true })
   size_id?: string;
 
-  @ApiPropertyOptional({ nullable: true })
-  image_url?: string;
+  @ApiPropertyOptional({ nullable: true, description: 'Variant-specific image used by the storefront gallery' })
+  image_url?: string | null;
 
   @ApiPropertyOptional({ type: () => ProductVariantColorDto })
   color?: ProductVariantColorDto;

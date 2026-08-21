@@ -165,6 +165,9 @@ export class ProductsService {
         const transformedVariant: any = {
           ...variant,
           name: this.getLocalizedValue(variant.name, locale),
+          // Keep a stable response shape so clients can deterministically fall back
+          // to the product gallery when a variant has no dedicated image.
+          image_url: variant.image_url ?? null,
         };
 
         // Transform color if exists
