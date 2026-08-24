@@ -29,6 +29,7 @@ import { PoliciesModule } from './modules/policies/policies.module';
 import { CartModule } from './modules/cart/cart.module';
 import { PointsModule } from './modules/points/points.module';
 import { CheckoutModule } from './modules/checkout/checkout.module';
+import { AuditModule } from './audit/audit.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -72,6 +73,7 @@ import { CheckoutModule } from './modules/checkout/checkout.module';
     CartModule,
     PointsModule,
     CheckoutModule,
+    AuditModule,
   ],
 })
 export class AppModule {}

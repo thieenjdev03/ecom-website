@@ -499,7 +499,7 @@ export class ProductsService {
       if (!product) {
         throw new NotFoundException(`Product #${id} not found`);
       }
-      await this.productsRepository.delete(id);
+      await this.productsRepository.remove(product);
     } catch (err) {
       this.handleError(err, 'Unable to delete product');
     }

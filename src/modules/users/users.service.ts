@@ -130,8 +130,8 @@ export class UsersService {
       updateData.passwordHash = await bcrypt.hash(password, 12);
     }
 
-    await this.usersRepository.update(id, updateData);
-    const updatedUser = await this.usersRepository.findOne({ where: { id } });
+    Object.assign(user, updateData);
+    const updatedUser = await this.usersRepository.save(user);
     return this.toResponseDto(updatedUser);
   }
 
@@ -146,7 +146,7 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    await this.usersRepository.delete(id);
+    await this.usersRepository.remove(user);
   }
 
   private toResponseDto(user: User): UserResponseDto {
