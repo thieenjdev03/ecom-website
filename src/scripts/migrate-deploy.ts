@@ -1,5 +1,7 @@
 import dataSource from "../database/typeorm.config";
 
+const MIGRATION_LOCK_ID = "847362514209";
+
 interface DatabaseState {
   hasUserTable: boolean;
   migrationCount: number;
@@ -25,10 +27,19 @@ async function getDatabaseState(): Promise<DatabaseState> {
   return { hasUserTable, migrationCount: Number(count) };
 }
 
-async function main(): Promise<void> {
+export async function runDeploymentMigrations(): Promise<void> {
   await dataSource.initialize();
+  const lockRunner = dataSource.createQueryRunner();
+  let lockAcquired = false;
 
   try {
+    await lockRunner.connect();
+    console.log("[migrate] Waiting for the database migration lock...");
+    await lockRunner.query("SELECT pg_advisory_lock($1::bigint)", [
+      MIGRATION_LOCK_ID,
+    ]);
+    lockAcquired = true;
+
     const state = await getDatabaseState();
 
     if (!state.hasUserTable && state.migrationCount === 0) {
@@ -53,11 +64,29 @@ async function main(): Promise<void> {
     const migrations = await dataSource.runMigrations({ transaction: "all" });
     console.log(`[migrate] Applied ${migrations.length} pending migration(s).`);
   } finally {
-    await dataSource.destroy();
+    try {
+      if (lockAcquired) {
+        await lockRunner.query("SELECT pg_advisory_unlock($1::bigint)", [
+          MIGRATION_LOCK_ID,
+        ]);
+      }
+    } finally {
+      try {
+        if (!lockRunner.isReleased) {
+          await lockRunner.release();
+        }
+      } finally {
+        if (dataSource.isInitialized) {
+          await dataSource.destroy();
+        }
+      }
+    }
   }
 }
 
-main().catch((error) => {
-  console.error("[migrate] Deployment migration failed.", error);
-  process.exitCode = 1;
-});
+if (require.main === module) {
+  runDeploymentMigrations().catch((error) => {
+    console.error("[migrate] Deployment migration failed.", error);
+    process.exitCode = 1;
+  });
+}

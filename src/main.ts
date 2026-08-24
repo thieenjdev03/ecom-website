@@ -8,7 +8,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
-async function bootstrap() {
+export async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, {
     rawBody: true, // Enable raw body parsing for webhook signature verification
     bodyParser: false, // Disable default body parser to handle manually
@@ -76,4 +76,10 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`✅ Swagger UI: http://localhost:${port}/docs`);
 }
-bootstrap();
+
+if (require.main === module) {
+  bootstrap().catch((error) => {
+    console.error('Application startup failed.', error);
+    process.exitCode = 1;
+  });
+}
