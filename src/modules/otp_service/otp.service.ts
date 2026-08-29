@@ -250,6 +250,30 @@ export class OtpService {
     return { message: 'Mã OTP đăng nhập đã được gửi đến email của bạn' }
   }
 
+  /**
+   * Đặt lại mật khẩu bằng OTP đã gửi qua sendPasswordResetOtp. Một lần gọi = xác thực OTP
+   * + đổi mật khẩu, nên KHÔNG dùng verifyOtp cho luồng này (verifyOtp tự tạo tài khoản mới).
+   */
+  async resetPassword(email: string, otp: string, newPassword: string) {
+    const record = await this.otpRepo.findOne({ where: { email, otp } })
+
+    if (!record) throw new BadRequestException('OTP không hợp lệ')
+    if (record.isVerified) throw new BadRequestException('OTP đã được sử dụng')
+    if (record.expiresAt < new Date()) throw new BadRequestException('OTP đã hết hạn')
+
+    const user = await this.userRepo.findOne({ where: { email } })
+    if (!user) throw new BadRequestException('Email không tồn tại trong hệ thống')
+
+    user.passwordHash = await bcrypt.hash(newPassword, 12)
+    await this.userRepo.save(user)
+
+    // OTP chỉ dùng được một lần.
+    record.isVerified = true
+    await this.otpRepo.save(record)
+
+    return { message: 'Đặt lại mật khẩu thành công', status: 200 }
+  }
+
   async verifyOtp(email: string, otp: string) {
     const record = await this.otpRepo.findOne({ where: { email, otp } })
 

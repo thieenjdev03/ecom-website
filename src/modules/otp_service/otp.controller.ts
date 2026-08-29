@@ -2,6 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common'
 import { ApiOperation, ApiTags } from '@nestjs/swagger'
 import { SendOtpDto } from './dtos/send-otp.dto'
 import { VerifyOtpDto } from './dtos/verify-otp.dto'
+import { ResetPasswordDto } from './dtos/reset-password.dto'
 import { OtpService } from './otp.service'
 
 @ApiTags('OTP')
@@ -21,6 +22,13 @@ export class OtpController {
   @HttpCode(HttpStatus.OK)
   async sendPasswordResetOtp(@Body() dto: SendOtpDto) {
     return this.otpService.sendPasswordResetOtp(dto.email)
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password with the OTP sent to email' })
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.otpService.resetPassword(dto.email, dto.otp, dto.newPassword)
   }
 
   @Post('verify')

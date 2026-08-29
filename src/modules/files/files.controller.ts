@@ -20,6 +20,9 @@ export class FilesController {
   constructor(private readonly filesService: FilesService) {}
 
   @Get('signature')
+  @UseGuards(JwtGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ 
     summary: 'Generate Cloudinary signature',
     description: 'Generates a Cloudinary signature for client-side uploads with optional folder and public ID.'

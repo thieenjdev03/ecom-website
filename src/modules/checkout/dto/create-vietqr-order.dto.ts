@@ -55,6 +55,7 @@ export class CreateVietQrOrderDto {
   @ApiPropertyOptional({
     example: "VIETQR",
     enum: ["VIETQR"],
+    enumName: "VietQrPaymentMethod",
     description: "Legacy storefront field name. Only VIETQR is accepted.",
   })
   @IsOptional()
@@ -65,6 +66,7 @@ export class CreateVietQrOrderDto {
   @ApiPropertyOptional({
     example: "VIETQR",
     enum: ["VIETQR"],
+    enumName: "VietQrPaymentMethod",
     description: "Only VIETQR is accepted.",
   })
   @IsOptional()

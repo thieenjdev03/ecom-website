@@ -61,7 +61,7 @@ export class UsersController {
   }
 
   @Get()
-  @Roles(Role.ADMIN, Role.USER)
+  @Roles(Role.ADMIN)
   @ApiOperation({
     summary: 'Get all users',
     description: 'Retrieve a paginated list of users with optional filtering and sorting.',
@@ -83,7 +83,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  // @Roles(Role.ADMIN, Role.USER)
+  @Roles(Role.ADMIN)
   @ApiOperation({
     summary: 'Get user by ID',
     description: 'Retrieve a specific user by their ID.',

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import * as nodemailer from 'nodemailer';
 import { renderMingoEmail, type MingoEmailBrand } from '../../common/email/mingo-email';
 
 type MailOrderItemInput = {
@@ -27,6 +28,7 @@ type NormalizedMailOrderItem = {
 export class MailService {
   private readonly logger = new Logger(MailService.name);
   private resend: Resend;
+  private readonly transporter: nodemailer.Transporter | null;
   private readonly defaultFromAddress: string;
   private readonly brandName: string;
   private readonly brandUrl: string;
@@ -35,11 +37,29 @@ export class MailService {
   private readonly supportEmail: string;
 
   constructor(private configService: ConfigService) {
+    const mailUser = this.configService.get<string>('MAIL_USER');
+    const mailPass = this.configService.get<string>('MAIL_PASS');
+    // MAIL_HOST cho hộp thư không phải Google (Zoho, cPanel, mail server riêng);
+    // bỏ trống thì mặc định Gmail/Google Workspace như OtpService.
+    const mailHost = this.configService.get<string>('MAIL_HOST');
+    const mailPort = Number(this.configService.get<string>('MAIL_PORT') ?? 587);
+    this.transporter = mailUser && mailPass
+      ? nodemailer.createTransport(
+          mailHost
+            ? { host: mailHost, port: mailPort, secure: mailPort === 465, auth: { user: mailUser, pass: mailPass } }
+            : { service: 'gmail', secure: false, auth: { user: mailUser, pass: mailPass } },
+        )
+      : null;
+
     const apiKey = this.configService.get<string>('RESEND_API_KEY');
     if (apiKey) {
       this.resend = new Resend(apiKey);
     } else {
-      this.logger.warn('RESEND_API_KEY not configured, email functionality disabled');
+      this.logger.warn(
+        this.transporter
+          ? 'RESEND_API_KEY not configured, sending through SMTP (MAIL_USER)'
+          : 'Neither RESEND_API_KEY nor MAIL_USER/MAIL_PASS configured, email functionality disabled',
+      );
     }
 
     // Get from address from env or use Resend test domain for development
@@ -72,6 +92,52 @@ export class MailService {
   }
 
   /**
+   * Gửi thật: Resend trước, hỏng (hoặc chưa cấu hình / domain chưa verify) thì rơi xuống SMTP.
+   * Cùng thứ tự dự phòng như OtpService để mail đặt lại mật khẩu và mail liên hệ hành xử như nhau.
+   */
+  private async deliver(message: {
+    from: string;
+    to: string;
+    subject: string;
+    html: string;
+    replyTo?: string;
+  }): Promise<void> {
+    let lastError: Error | null = null;
+
+    if (this.resend) {
+      try {
+        const result = await this.resend.emails.send({
+          from: message.from,
+          to: [message.to],
+          subject: message.subject,
+          html: message.html,
+          ...(message.replyTo ? { replyTo: message.replyTo } : {}),
+        });
+        if ((result as any).error) {
+          throw new Error((result as any).error.message || 'Resend send failed');
+        }
+        return;
+      } catch (error) {
+        lastError = error as Error;
+        this.logger.warn(`Resend failed, falling back to SMTP: ${lastError.message}`);
+      }
+    }
+
+    if (this.transporter) {
+      await this.transporter.sendMail({
+        from: message.from,
+        to: message.to,
+        subject: message.subject,
+        html: message.html,
+        replyTo: message.replyTo,
+      });
+      return;
+    }
+
+    throw lastError ?? new Error('Email service is not configured (RESEND_API_KEY hoặc MAIL_USER/MAIL_PASS)');
+  }
+
+  /**
    * Generic email sender used across services
    * Accepts either direct HTML or a known template + data
    */
@@ -82,13 +148,9 @@ export class MailService {
     template?: 'payment-success' | 'order-confirmation' | 'password-reset' | 'welcome' | 'payment-failure' | 'paid-order-confirmation';
     data?: any;
     from?: string;
+    replyTo?: string;
   }): Promise<void> {
     try {
-      if (!this.resend) {
-        this.logger.warn('Resend not configured, skipping email');
-        return;
-      }
-
       const fromAddress = payload.from || this.defaultFromAddress;
 
       let html = payload.html;
@@ -155,12 +217,7 @@ export class MailService {
         html = '<p>No email content provided.</p>';
       }
 
-      await this.resend.emails.send({
-        from: fromAddress,
-        to: [payload.to],
-        subject: payload.subject,
-        html,
-      });
+      await this.deliver({ from: fromAddress, to: payload.to, subject: payload.subject, html, replyTo: payload.replyTo });
 
       this.logger.log(`Email sent to ${payload.to} with subject: ${payload.subject}`);
     } catch (error) {

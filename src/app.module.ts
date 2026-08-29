@@ -29,6 +29,8 @@ import { PoliciesModule } from './modules/policies/policies.module';
 import { CartModule } from './modules/cart/cart.module';
 import { PointsModule } from './modules/points/points.module';
 import { CheckoutModule } from './modules/checkout/checkout.module';
+import { ContactModule } from './modules/contact/contact.module';
+import { SettingsModule } from './modules/settings/settings.module';
 import { AuditModule } from './audit/audit.module';
 @Module({
   imports: [
@@ -73,6 +75,8 @@ import { AuditModule } from './audit/audit.module';
     CartModule,
     PointsModule,
     CheckoutModule,
+    ContactModule,
+    SettingsModule,
     AuditModule,
   ],
 })
