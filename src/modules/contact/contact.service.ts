@@ -55,27 +55,83 @@ export class ContactService {
     )
 
     const inbox = process.env.CONTACT_INBOX_EMAIL?.trim()
-    if (!inbox) {
-      this.logger.warn('CONTACT_INBOX_EMAIL chưa cấu hình — liên hệ chỉ được lưu DB, không gửi mail')
-      return saved
+
+    // 1) Báo nội bộ cho đội ngũ (nếu đã cấu hình hộp thư nhận liên hệ).
+    if (inbox) {
+      try {
+        await this.mailService.sendEmail({
+          to: inbox,
+          // Reply-To = email khách, bấm "Trả lời" là trả thẳng cho họ. From luôn là domain của mình
+          // để không hỏng SPF/DMARC.
+          replyTo: saved.email,
+          subject: `[Liên hệ] ${DEPARTMENT_LABEL[dto.department] ?? dto.department} — ${dto.subject}`,
+          html: this.buildEmail(saved),
+        })
+        saved.notified = true
+        await this.contactRepo.save(saved)
+      } catch (error) {
+        this.logger.error(`Không gửi được mail liên hệ nội bộ ${saved.id}`, error as Error)
+      }
+    } else {
+      this.logger.warn('CONTACT_INBOX_EMAIL chưa cấu hình — liên hệ chỉ được lưu DB, không báo nội bộ')
     }
 
+    // 2) Gửi mail xác nhận cho chính người liên hệ (độc lập với mail nội bộ:
+    //    một cái hỏng không kéo cái kia hỏng theo).
     try {
       await this.mailService.sendEmail({
-        to: inbox,
-        // Reply-To = email khách, bấm "Trả lời" là trả thẳng cho họ. From luôn là domain của mình
-        // để không hỏng SPF/DMARC.
-        replyTo: saved.email,
-        subject: `[Liên hệ] ${DEPARTMENT_LABEL[dto.department] ?? dto.department} — ${dto.subject}`,
-        html: this.buildEmail(saved),
+        to: saved.email,
+        // Khách bấm "Trả lời" thì thư về hộp thư liên hệ của đội ngũ (nếu có), rơi về support mặc định.
+        replyTo: inbox,
+        subject: 'Mingo đã nhận được liên hệ của bạn',
+        html: this.buildAcknowledgementEmail(saved),
       })
-      saved.notified = true
-      await this.contactRepo.save(saved)
     } catch (error) {
-      this.logger.error(`Không gửi được mail liên hệ ${saved.id}`, error as Error)
+      this.logger.error(`Không gửi được mail xác nhận cho khách ${saved.id}`, error as Error)
     }
 
     return saved
+  }
+
+  /** Mail xác nhận gửi lại cho người liên hệ — khớp design brand Mingo. */
+  private buildAcknowledgementEmail(contact: ContactMessage): string {
+    const departmentLabel = DEPARTMENT_LABEL[contact.department] ?? contact.department
+
+    const row = (label: string, value: string) => `
+      <tr>
+        <td style="padding:8px 0;color:${MINGO.muted};font-size:13px;width:150px;vertical-align:top;">${label}</td>
+        <td style="padding:8px 0;color:${MINGO.brown};font-size:14px;font-weight:600;">${escapeHtml(value)}</td>
+      </tr>`
+
+    const content = `
+      <p style="margin:0 0 18px;font-size:16px;color:${MINGO.brown};">Chào <strong>${escapeHtml(contact.fullName)}</strong>,</p>
+
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:${MINGO.brown};">
+        Cảm ơn bạn đã liên hệ với Mingo! Hệ thống đã ghi nhận thông tin của bạn và tự động
+        chuyển trực tiếp đến <strong>${escapeHtml(departmentLabel)}</strong>.
+      </p>
+
+      <p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:${MINGO.brown};">
+        Đội ngũ Mingo sẽ nghiên cứu nội dung và phản hồi qua email này hoặc số điện thoại
+        <strong>${escapeHtml(contact.phone)}</strong> trong thời gian sớm nhất
+        (không tính Thứ 7, Chủ Nhật &amp; Ngày lễ).
+      </p>
+
+      <p style="margin:0 0 10px;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:${MINGO.orange};font-weight:700;">Nội dung bạn đã gửi</p>
+      <div style="background:${MINGO.ivory};border:1px solid ${MINGO.border};border-radius:12px;padding:18px 20px;">
+        <table style="width:100%;border-collapse:collapse;">
+          ${row('Bộ phận', departmentLabel)}
+          ${row('Tiêu đề', contact.subject)}
+        </table>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid ${MINGO.border};color:${MINGO.brown};font-size:14px;line-height:1.7;white-space:pre-wrap;">${escapeHtml(contact.message)}</div>
+      </div>
+    `
+
+    return renderMingoEmail(mingoBrandFromEnv(), {
+      title: 'Mingo đã nhận được liên hệ của bạn',
+      preheader: `Cảm ơn ${contact.fullName}, Mingo đã ghi nhận liên hệ của bạn.`,
+      content,
+    })
   }
 
   private buildEmail(contact: ContactMessage): string {
