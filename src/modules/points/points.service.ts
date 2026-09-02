@@ -6,7 +6,16 @@ import { PointTransactionType } from './enums/point-transaction-type.enum';
 import { User } from '../users/user.entity';
 import { Order } from '../orders/entities/order.entity';
 
-const POINTS_DIVISOR = 10;
+export const MINGO_POINT_VALUE_VND = 10_000;
+
+export function calculateMingoPoints(total: unknown): number {
+  const amount = Number(total);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return 0;
+  }
+
+  return Math.round(amount / MINGO_POINT_VALUE_VND);
+}
 
 @Injectable()
 export class PointsService {
@@ -14,13 +23,9 @@ export class PointsService {
 
   constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
-  /** Công thức tích điểm: floor(grandTotal / 10), grandTotal = order.summary.total. */
+  /** Mỗi 10.000 VND được 1 điểm, phần lẻ từ 0,5 điểm được làm tròn lên. */
   private computeEarnPoints(order: Order): number {
-    const total = Number(order.summary?.total ?? 0);
-    if (!Number.isFinite(total) || total <= 0) {
-      return 0;
-    }
-    return Math.floor(total / POINTS_DIVISOR);
+    return calculateMingoPoints(order.summary?.total);
   }
 
   /**
