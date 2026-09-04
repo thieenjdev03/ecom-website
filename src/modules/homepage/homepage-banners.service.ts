@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HomepageBanner } from './entities/homepage-banner.entity';
@@ -14,6 +14,7 @@ export class HomepageBannersService {
   ) {}
 
   async create(dto: CreateHomepageBannerDto): Promise<HomepageBanner> {
+    this.assertHasMedia(dto.image_url, dto.video_url);
     const banner = this.bannersRepository.create(dto);
     return this.bannersRepository.save(banner);
   }
@@ -34,8 +35,17 @@ export class HomepageBannersService {
 
   async update(id: string, dto: UpdateHomepageBannerDto): Promise<HomepageBanner> {
     const banner = await this.findOne(id);
+    const nextImageUrl = dto.image_url !== undefined ? dto.image_url : banner.image_url;
+    const nextVideoUrl = dto.video_url !== undefined ? dto.video_url : banner.video_url;
+    this.assertHasMedia(nextImageUrl, nextVideoUrl);
     Object.assign(banner, dto);
     return this.bannersRepository.save(banner);
+  }
+
+  private assertHasMedia(imageUrl?: string | null, videoUrl?: string | null): void {
+    if (!imageUrl && !videoUrl) {
+      throw new BadRequestException('Banner must have an image or a video');
+    }
   }
 
   async remove(id: string): Promise<void> {

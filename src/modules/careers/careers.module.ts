@@ -6,9 +6,10 @@ import { CareerApplicationsController } from './career-applications.controller';
 import { Career } from './entities/career.entity';
 import { CareerApplication } from './entities/career-application.entity';
 import { FilesModule } from '../files/files.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Career, CareerApplication]), FilesModule],
+  imports: [TypeOrmModule.forFeature([Career, CareerApplication]), FilesModule, MailModule],
   controllers: [CareersController, CareerApplicationsController],
   providers: [CareersService],
   exports: [CareersService],

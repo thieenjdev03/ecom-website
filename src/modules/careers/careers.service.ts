@@ -19,6 +19,8 @@ import {
   QueryCareerApplicationsDto as QueryAllApplicationsDto,
 } from './dto/career-application.dto';
 import { FilesService } from '../files/files.service';
+import { MailService } from '../mail/mail.service';
+import { renderMingoEmail, mingoBrandFromEnv, MINGO, MINGO_FONT } from '../../common/email/mingo-email';
 import {
   decodeCursor,
   buildCursorResponse,
@@ -41,6 +43,7 @@ export class CareersService {
     @InjectRepository(CareerApplication)
     private applicationsRepository: Repository<CareerApplication>,
     private filesService: FilesService,
+    private mailService: MailService,
   ) {}
 
   private sanitize(html: string): string {
@@ -219,7 +222,7 @@ export class CareersService {
       resourceType: 'raw',
     });
 
-    return this.applicationsRepository.save(
+    const saved = await this.applicationsRepository.save(
       this.applicationsRepository.create({
         career_id: career.id,
         full_name: dto.full_name,
@@ -229,6 +232,98 @@ export class CareersService {
         cv_url: uploaded.url,
       }),
     );
+
+    const inbox = process.env.CONTACT_INBOX_EMAIL?.trim();
+
+    // 1) Báo nội bộ tới hộp thư chung của hệ thống (nếu đã cấu hình).
+    if (inbox) {
+      try {
+        await this.mailService.sendEmail({
+          to: inbox,
+          // Reply-To = email ứng viên, bấm "Trả lời" là trả thẳng cho họ.
+          replyTo: saved.email,
+          subject: `[Ứng tuyển] ${career.title} — ${saved.full_name}`,
+          html: this.buildApplicationNotificationEmail(saved, career.title),
+        });
+      } catch (error) {
+        this.logger.error(`Không gửi được mail thông báo ứng tuyển nội bộ ${saved.id}`, error as Error);
+      }
+    } else {
+      this.logger.warn('CONTACT_INBOX_EMAIL chưa cấu hình — đơn ứng tuyển chỉ được lưu DB, không báo nội bộ');
+    }
+
+    // 2) Gửi mail xác nhận cho chính ứng viên (độc lập với mail nội bộ).
+    try {
+      await this.mailService.sendEmail({
+        to: saved.email,
+        replyTo: inbox,
+        subject: 'Mingo đã nhận được đơn ứng tuyển của bạn',
+        html: this.buildApplicationAcknowledgementEmail(saved, career.title),
+      });
+    } catch (error) {
+      this.logger.error(`Không gửi được mail xác nhận ứng tuyển cho ứng viên ${saved.id}`, error as Error);
+    }
+
+    return saved;
+  }
+
+  /** Mail xác nhận gửi lại cho ứng viên — khớp design brand Mingo. */
+  private buildApplicationAcknowledgementEmail(application: CareerApplication, careerTitle: string): string {
+    const content = `
+      <p style="margin:0 0 18px;font-size:16px;color:${MINGO.brown};">Chào <strong>${escapeHtml(application.full_name)}</strong>,</p>
+
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:${MINGO.brown};">
+        Cảm ơn bạn đã quan tâm và ứng tuyển vị trí <strong>${escapeHtml(careerTitle)}</strong> tại Mingo!
+        Hệ thống đã ghi nhận hồ sơ của bạn và chuyển trực tiếp đến bộ phận tuyển dụng.
+      </p>
+
+      <p style="margin:0 0 24px;font-size:15px;line-height:1.7;color:${MINGO.brown};">
+        Đội ngũ Mingo sẽ xem xét hồ sơ và phản hồi qua email này hoặc số điện thoại
+        <strong>${escapeHtml(application.phone)}</strong> nếu hồ sơ của bạn phù hợp với vị trí đang tuyển.
+      </p>
+
+      <p style="margin:0;font-size:15px;line-height:1.7;color:${MINGO.brown};">
+        Chúc bạn may mắn!
+      </p>
+    `;
+
+    return renderMingoEmail(mingoBrandFromEnv(), {
+      title: 'Mingo đã nhận được đơn ứng tuyển của bạn',
+      preheader: `Cảm ơn ${application.full_name}, Mingo đã ghi nhận đơn ứng tuyển vị trí ${careerTitle}.`,
+      content,
+    });
+  }
+
+  /** Mail báo nội bộ khi có đơn ứng tuyển mới. */
+  private buildApplicationNotificationEmail(application: CareerApplication, careerTitle: string): string {
+    const row = (label: string, value: string) => `
+      <tr>
+        <td style="padding:8px 0;color:${MINGO.muted};font-size:13px;width:150px;vertical-align:top;">${label}</td>
+        <td style="padding:8px 0;color:${MINGO.brown};font-size:14px;font-weight:600;">${escapeHtml(value)}</td>
+      </tr>`;
+
+    const content = `
+      <p style="margin:0 0 8px;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:${MINGO.orange};font-weight:700;">Ứng tuyển mới</p>
+      <h1 style="margin:0 0 18px;font-family:${MINGO_FONT};font-size:24px;font-weight:800;color:${MINGO.brown};">${escapeHtml(careerTitle)}</h1>
+      <table style="width:100%;border-collapse:collapse;">
+        ${row('Họ tên', application.full_name)}
+        ${row('Email', application.email)}
+        ${row('Số điện thoại', application.phone)}
+        ${row('Thời gian', application.created_at.toLocaleString('vi-VN'))}
+      </table>
+      ${application.cover_letter
+        ? `<div style="margin-top:20px;padding:16px;background:${MINGO.ivory};border-left:3px solid ${MINGO.orange};color:${MINGO.brown};font-size:14px;line-height:1.7;white-space:pre-wrap;">${escapeHtml(application.cover_letter)}</div>`
+        : ''}
+      <p style="margin-top:20px;">
+        <a href="${application.cv_url}" style="color:${MINGO.orange};font-weight:600;">Xem CV đính kèm</a>
+      </p>
+    `;
+
+    return renderMingoEmail(mingoBrandFromEnv(), {
+      title: `Ứng tuyển mới - ${careerTitle}`,
+      preheader: `${application.full_name} · ${application.email}`,
+      content,
+    });
   }
 
   async findApplications(careerId: string): Promise<CareerApplication[]> {
@@ -277,4 +372,20 @@ export class CareersService {
     application.status = dto.status;
     return this.applicationsRepository.save(application);
   }
+
+  async removeApplication(id: string): Promise<void> {
+    const application = await this.applicationsRepository.findOne({ where: { id } });
+    if (!application) {
+      throw new NotFoundException(`Application with ID "${id}" not found`);
+    }
+    await this.applicationsRepository.remove(application);
+  }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }

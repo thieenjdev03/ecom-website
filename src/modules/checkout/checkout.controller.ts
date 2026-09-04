@@ -7,7 +7,6 @@ import {
   Post,
   Query,
   Req,
-  UnauthorizedException,
   UseGuards,
 } from "@nestjs/common";
 import {
@@ -18,7 +17,7 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import { Request } from "express";
-import { JwtGuard } from "../../auth/jwt.guard";
+import { OptionalJwtGuard } from "../../auth/optional-jwt.guard";
 import { CheckoutService } from "./checkout.service";
 import { CreateVietQrOrderDto } from "./dto/create-vietqr-order.dto";
 
@@ -29,7 +28,7 @@ import { CreateVietQrOrderDto } from "./dto/create-vietqr-order.dto";
   required: true,
   description: "Storefront cart token.",
 })
-@UseGuards(JwtGuard)
+@UseGuards(OptionalJwtGuard)
 @Controller("checkout")
 export class CheckoutController {
   constructor(private readonly checkoutService: CheckoutService) {}
@@ -37,7 +36,8 @@ export class CheckoutController {
   @Post("create-order")
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: "Create a VIETQR order from the current cart for manual approval",
+    summary:
+      "Create an order (VIETQR or COD) from the current cart. Works without login — a guest is identified by shipping_address.recipient_phone and gets a lightweight account so the order can later be claimed.",
   })
   @ApiCreatedResponse({
     description:
@@ -50,13 +50,10 @@ export class CheckoutController {
     @Req() req: Request,
   ) {
     const user: any = (req as any).user;
-    const userId = user?.sub ?? user?.userId ?? user?.id;
-    if (!userId) {
-      throw new UnauthorizedException("Unauthorized");
-    }
+    const authenticatedUserId = user?.sub ?? user?.userId ?? user?.id ?? undefined;
 
     return this.checkoutService.createVietQrOrder(
-      userId,
+      authenticatedUserId,
       cartToken,
       dto,
       locale === "vi" ? "vi" : "en",

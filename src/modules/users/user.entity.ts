@@ -13,12 +13,12 @@ export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ApiProperty({
-    description: 'User email address',
+  @ApiPropertyOptional({
+    description: 'User email address. Null for a guest account created from checkout until claimed.',
     example: 'user@example.com',
   })
-  @Column({ unique: true })
-  email: string;
+  @Column({ unique: true, nullable: true })
+  email: string | null;
 
   @ApiPropertyOptional({ description: 'User first name', example: 'John' })
   @Column({ unique: false, nullable: true })
@@ -37,10 +37,18 @@ export class User {
   phoneNumber: string;
 
   // Sensitive: never load or serialize by default. Auth flows must opt in
-  // explicitly via QueryBuilder.addSelect('user.passwordHash').
+  // explicitly via QueryBuilder.addSelect('user.passwordHash'). Null for a
+  // guest account (created from checkout) until claimed via /auth/set-password.
   @Exclude()
-  @Column({ select: false })
-  passwordHash: string;
+  @Column({ select: false, nullable: true })
+  passwordHash: string | null;
+
+  @ApiProperty({
+    description: 'True for a guest account auto-created from checkout that has not set a password yet.',
+    example: false,
+  })
+  @Column({ default: false })
+  isGuest: boolean;
 
   @ApiProperty({
     description: 'User role',

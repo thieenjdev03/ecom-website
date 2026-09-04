@@ -4,6 +4,8 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from '../../auth/dto/register.dto';
 import { LoginDto } from '../../auth/dto/login.dto';
 import { LoginResponseDto, LoginUserDto } from '../../auth/dto/login-response.dto';
+import { CheckExistsDto } from '../../auth/dto/check-exists.dto';
+import { SetPasswordDto } from '../../auth/dto/set-password.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -34,6 +36,29 @@ export class AuthController {
   @ApiBadRequestResponse({ description: 'Invalid input' })
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password);
+  }
+
+  @Post('check-exists')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Look up an account by phone or email before registering. Used by the storefront to route "Đăng ký" to either normal registration or claiming an existing guest account (exists && !hasPassword).',
+  })
+  @ApiOkResponse({ description: 'exists / hasPassword flags' })
+  async checkExists(@Body() dto: CheckExistsDto) {
+    return this.authService.checkExists(dto);
+  }
+
+  @Post('set-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary:
+      'Claim a passwordless guest account (created from a guest checkout) by setting its first password. Logs the caller in on success.',
+  })
+  @ApiOkResponse({ description: 'Password set; login successful', type: LoginResponseDto })
+  @ApiBadRequestResponse({ description: 'Invalid input, account not found, or already has a password' })
+  async setPassword(@Body() dto: SetPasswordDto) {
+    return this.authService.setPassword(dto);
   }
 }
 

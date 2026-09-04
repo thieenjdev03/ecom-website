@@ -12,12 +12,12 @@ export class HomepageBanner {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ length: 500 })
-  image_url: string;
-
-  // Video nền tuỳ chọn (mp4). Khi có, storefront phát video autoplay/muted/loop và dùng image_url làm poster/fallback.
   @Column({ length: 500, nullable: true })
-  video_url: string;
+  image_url: string | null;
+
+  // Video nền tuỳ chọn (mp4). Khi có, storefront phát video autoplay/muted/loop và dùng image_url làm poster nếu có.
+  @Column({ length: 500, nullable: true })
+  video_url: string | null;
 
   @Column({ length: 255, nullable: true })
   alt_text: string;

@@ -2,17 +2,18 @@ import { IsBoolean, IsInt, IsOptional, IsString, IsUrl, Min, MaxLength } from 'c
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateHomepageBannerDto {
-  @ApiProperty({
+  @ApiPropertyOptional({
     example: 'https://res.cloudinary.com/.../banner-captain-hopper.jpg',
-    description: 'Banner image URL, from /files/upload(-multiple)',
+    description: 'Optional banner image URL, from /files/upload(-multiple). At least one of image_url or video_url is required.',
   })
+  @IsOptional()
   @IsUrl({ protocols: ['http', 'https'], require_protocol: true })
   @MaxLength(500)
-  image_url: string;
+  image_url?: string;
 
   @ApiPropertyOptional({
     example: 'https://res.cloudinary.com/.../hero-loop.mp4',
-    description: 'Optional background video (mp4). When set, storefront autoplays it (muted/loop) with image_url as poster/fallback.',
+    description: 'Optional background video (mp4). At least one of image_url or video_url is required; both may be provided.',
   })
   @IsOptional()
   @IsUrl({ protocols: ['http', 'https'], require_protocol: true })
