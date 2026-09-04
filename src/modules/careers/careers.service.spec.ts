@@ -6,6 +6,7 @@ import { Career } from './entities/career.entity';
 import { CareerApplication } from './entities/career-application.entity';
 import { CreateCareerDto } from './dto/create-career.dto';
 import { FilesService } from '../files/files.service';
+import { MailService } from '../mail/mail.service';
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
 // sanitize-html pulls ESM-only htmlparser2 that ts-jest can't transform, and
@@ -18,6 +19,7 @@ describe('CareersService', () => {
   let repo: any;
   let applicationsRepo: any;
   let filesService: any;
+  let mailService: any;
 
   beforeEach(async () => {
     repo = {
@@ -33,6 +35,7 @@ describe('CareersService', () => {
       find: jest.fn(),
     };
     filesService = { uploadFile: jest.fn().mockResolvedValue({ url: 'https://cdn/cv.pdf' }) };
+    mailService = { sendEmail: jest.fn().mockResolvedValue(undefined) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -40,6 +43,7 @@ describe('CareersService', () => {
         { provide: getRepositoryToken(Career), useValue: repo },
         { provide: getRepositoryToken(CareerApplication), useValue: applicationsRepo },
         { provide: FilesService, useValue: filesService },
+        { provide: MailService, useValue: mailService },
       ],
     }).compile();
 
@@ -98,7 +102,7 @@ describe('CareersService', () => {
       ({ originalname: name, size, buffer: Buffer.from('x') }) as any;
 
     beforeEach(() => {
-      repo.findOne.mockResolvedValue({ id: 'c1', status: 'published' });
+      repo.findOne.mockResolvedValue({ id: 'c1', title: 'Content Marketing', status: 'published' });
     });
 
     it('uploads the CV and stores the returned URL', async () => {
