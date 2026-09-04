@@ -18,6 +18,7 @@ import {
   mingoBrandFromEnv,
   MINGO,
   MINGO_FONT,
+  escapeHtml,
 } from '../../common/email/mingo-email';
 
 @Injectable()
@@ -169,7 +170,7 @@ export class MarketingService {
       <p style="margin:0 0 16px;">Xin chào,</p>
       <p style="margin:0 0 16px;">
         Rất vui được chào đón bạn! Bạn đã đăng ký nhận bản tin của Mingo bằng địa chỉ
-        <strong>${email}</strong>.
+        <strong>${escapeHtml(email)}</strong>.
       </p>
       <p style="margin:0 0 12px;">Từ giờ, bạn sẽ là người đầu tiên biết về:</p>
       <ul style="margin:0 0 24px;padding-left:20px;color:${MINGO.brown};">
@@ -195,4 +196,3 @@ export class MarketingService {
     });
   }
 }
-

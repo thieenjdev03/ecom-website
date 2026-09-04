@@ -60,13 +60,21 @@ export class ContactService {
       return saved
     }
 
+    // Không chờ mail gửi xong: liên hệ đã nằm trong DB, còn SMTP chậm/bị chặn sẽ kéo response
+    // quá hạn proxy và trả 502. Gửi nền, kết quả ghi vào cột notified.
+    void this.notify(saved, inbox)
+
+    return saved
+  }
+
+  private async notify(saved: ContactMessage, inbox: string): Promise<void> {
     try {
       await this.mailService.sendEmail({
         to: inbox,
         // Reply-To = email khách, bấm "Trả lời" là trả thẳng cho họ. From luôn là domain của mình
         // để không hỏng SPF/DMARC.
         replyTo: saved.email,
-        subject: `[Liên hệ] ${DEPARTMENT_LABEL[dto.department] ?? dto.department} — ${dto.subject}`,
+        subject: `[Liên hệ] ${DEPARTMENT_LABEL[saved.department] ?? saved.department} — ${saved.subject}`,
         html: this.buildEmail(saved),
       })
       saved.notified = true
@@ -74,8 +82,6 @@ export class ContactService {
     } catch (error) {
       this.logger.error(`Không gửi được mail liên hệ ${saved.id}`, error as Error)
     }
-
-    return saved
   }
 
   private buildEmail(contact: ContactMessage): string {

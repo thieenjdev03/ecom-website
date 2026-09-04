@@ -58,11 +58,11 @@ export function mingoBrandFromEnv(): MingoEmailBrand {
 /** Nút CTA bo tròn kiểu Mingo. */
 export function mingoButton(href: string, label: string): string {
   return `
-    <a href="${href}"
+    <a href="${escapeHtml(href)}"
        style="display:inline-block;background:${MINGO.orange};color:${MINGO.white};
               text-decoration:none;font-weight:700;font-size:16px;line-height:1;
               padding:15px 36px;border-radius:999px;font-family:${MINGO_FONT};">
-      ${label}
+      ${escapeHtml(label)}
     </a>`;
 }
 
@@ -70,9 +70,9 @@ export function mingoButton(href: string, label: string): string {
 export function mingoOtpBlock(code: string): string {
   return `
     <div style="margin:26px auto 20px;max-width:340px;background:${MINGO.blush};
-                border:2px dashed #ffb489;border-radius:16px;padding:20px 12px;text-align:center;">
+                border:2px dashed ${MINGO.orange};border-radius:16px;padding:20px 12px;text-align:center;">
       <div style="font-family:${MINGO_FONT};font-size:36px;font-weight:800;
-                  letter-spacing:12px;color:${MINGO.orange};padding-left:12px;">${code}</div>
+                  letter-spacing:12px;color:${MINGO.orange};padding-left:12px;">${escapeHtml(code)}</div>
     </div>`;
 }
 
@@ -91,15 +91,19 @@ interface RenderOptions {
 export function renderMingoEmail(brand: MingoEmailBrand, opts: RenderOptions): string {
   const year = new Date().getFullYear();
   const preheader = opts.preheader
-    ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;">${opts.preheader}</div>`
+    ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;">${escapeHtml(opts.preheader)}</div>`
     : '';
 
   const privacyLink = brand.privacyUrl
-    ? `<a href="${brand.privacyUrl}" style="color:${MINGO.muted};text-decoration:none;margin:0 8px;">Chính sách bảo mật</a>`
+    ? `<a href="${escapeHtml(brand.privacyUrl)}" style="color:${MINGO.muted};text-decoration:none;margin:0 8px;">Chính sách bảo mật</a>`
     : '';
   const termsLink = brand.termsUrl
-    ? `<a href="${brand.termsUrl}" style="color:${MINGO.muted};text-decoration:none;margin:0 8px;">Điều khoản</a>`
+    ? `<a href="${escapeHtml(brand.termsUrl)}" style="color:${MINGO.muted};text-decoration:none;margin:0 8px;">Điều khoản</a>`
     : '';
+
+  const brandName = escapeHtml(brand.brandName);
+  const brandUrl = escapeHtml(brand.brandUrl);
+  const supportEmail = escapeHtml(brand.supportEmail);
 
   return `<!DOCTYPE html>
 <html lang="vi">
@@ -107,28 +111,36 @@ export function renderMingoEmail(brand: MingoEmailBrand, opts: RenderOptions): s
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
-  <title>${opts.title}</title>
+  <title>${escapeHtml(opts.title)}</title>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    @media screen and (max-width: 620px) {
+      .mingo-page { padding: 16px 10px !important; }
+      .mingo-card { border-radius: 16px !important; }
+      .mingo-content { padding: 24px 20px 8px !important; }
+      .mingo-header { padding: 26px 20px 8px !important; }
+    }
+  </style>
 </head>
 <body style="margin:0;padding:0;background:${MINGO.cream};font-family:${MINGO_FONT};
              line-height:1.6;color:${MINGO.brown};-webkit-font-smoothing:antialiased;">
   ${preheader}
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
-         style="background:${MINGO.cream};padding:32px 16px;">
+         class="mingo-page" style="background:${MINGO.cream};padding:32px 16px;">
     <tr>
       <td align="center">
         <table role="presentation" width="600" cellpadding="0" cellspacing="0"
-               style="max-width:600px;width:100%;background:${MINGO.white};border-radius:20px;
+               class="mingo-card" style="max-width:600px;width:100%;background:${MINGO.white};border-radius:20px;
                       overflow:hidden;box-shadow:0 8px 30px rgba(86,62,43,0.08);">
           <!-- top accent bar -->
-          <tr><td style="height:6px;background:${MINGO.orange};"></td></tr>
+          <tr><td style="height:8px;background:${MINGO.orange};font-size:0;line-height:0;"></td></tr>
 
           <!-- header / wordmark -->
           <tr>
-            <td align="center" style="padding:32px 28px 8px;">
-              <a href="${brand.brandUrl}" style="text-decoration:none;">
+            <td align="center" class="mingo-header" style="padding:32px 28px 8px;">
+              <a href="${brandUrl}" style="text-decoration:none;">
                 <span style="font-family:${MINGO_FONT};font-size:32px;font-weight:800;
-                             color:${MINGO.orange};letter-spacing:-0.5px;">${brand.brandName}</span>
+                             color:${MINGO.orange};letter-spacing:-0.5px;">${brandName}</span>
                 <span style="font-size:26px;vertical-align:middle;">🍦</span>
               </a>
             </td>
@@ -137,7 +149,7 @@ export function renderMingoEmail(brand: MingoEmailBrand, opts: RenderOptions): s
 
           <!-- content -->
           <tr>
-            <td style="padding:28px 32px 8px;font-size:16px;color:${MINGO.brown};">
+            <td class="mingo-content" style="padding:28px 32px 8px;font-size:16px;color:${MINGO.brown};">
               ${opts.content}
             </td>
           </tr>
@@ -146,10 +158,10 @@ export function renderMingoEmail(brand: MingoEmailBrand, opts: RenderOptions): s
           <tr><td style="padding:0 28px;"><div style="height:1px;background:${MINGO.border};margin-top:16px;"></div></td></tr>
           <tr>
             <td align="center" style="padding:22px 20px 34px;">
-              <p style="margin:0 0 6px;color:${MINGO.muted};font-size:13px;">&copy; ${year} ${brand.brandName}</p>
+              <p style="margin:0 0 6px;color:${MINGO.muted};font-size:13px;">&copy; ${year} ${brandName}</p>
               <p style="margin:0 0 12px;color:${MINGO.muted};font-size:12px;">
                 Cần hỗ trợ? Liên hệ
-                <a href="mailto:${brand.supportEmail}" style="color:${MINGO.orange};text-decoration:none;">${brand.supportEmail}</a>
+                <a href="mailto:${supportEmail}" style="color:${MINGO.orange};text-decoration:none;">${supportEmail}</a>
               </p>
               <div style="font-size:12px;">${privacyLink}${termsLink}</div>
             </td>
@@ -160,4 +172,13 @@ export function renderMingoEmail(brand: MingoEmailBrand, opts: RenderOptions): s
   </table>
 </body>
 </html>`;
+}
+
+export function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
