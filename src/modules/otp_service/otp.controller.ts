@@ -6,7 +6,7 @@ import { ResetPasswordDto } from './dtos/reset-password.dto'
 import { OtpService } from './otp.service'
 
 @ApiTags('OTP')
-@Controller('api/v1/otp')
+@Controller('otp')
 export class OtpController {
   constructor(private readonly otpService: OtpService) {}
 
