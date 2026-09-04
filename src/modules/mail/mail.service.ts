@@ -2,7 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 import * as nodemailer from 'nodemailer';
-import { renderMingoEmail, type MingoEmailBrand } from '../../common/email/mingo-email';
+import {
+  MINGO,
+  MINGO_FONT,
+  mingoButton,
+  renderMingoEmail,
+  type MingoEmailBrand,
+} from '../../common/email/mingo-email';
 
 type MailOrderItemInput = {
   name?: string;
@@ -23,6 +29,10 @@ type NormalizedMailOrderItem = {
   unitPrice?: string;
   totalPrice?: string;
 };
+
+// Nhiều PaaS chặn cổng SMTP ra: không có timeout thì nodemailer treo tới 10 phút và
+// proxy trả 502 trước khi mình kịp fallback. Hỏng nhanh còn hơn giữ request.
+const SMTP_TIMEOUTS = { connectionTimeout: 10_000, greetingTimeout: 10_000, socketTimeout: 15_000 } as const;
 
 @Injectable()
 export class MailService {
@@ -46,8 +56,8 @@ export class MailService {
     this.transporter = mailUser && mailPass
       ? nodemailer.createTransport(
           mailHost
-            ? { host: mailHost, port: mailPort, secure: mailPort === 465, auth: { user: mailUser, pass: mailPass } }
-            : { service: 'gmail', secure: false, auth: { user: mailUser, pass: mailPass } },
+            ? { host: mailHost, port: mailPort, secure: mailPort === 465, auth: { user: mailUser, pass: mailPass }, ...SMTP_TIMEOUTS }
+            : { service: 'gmail', secure: false, auth: { user: mailUser, pass: mailPass }, ...SMTP_TIMEOUTS },
         )
       : null;
 
@@ -83,9 +93,9 @@ export class MailService {
 
     this.brandUrl = normalizedBrandUrl;
     this.privacyUrl =
-      this.configService.get<string>('MAIL_PRIVACY_URL') || `${normalizedBrandUrl}/privacy`;
+      this.configService.get<string>('MAIL_PRIVACY_URL') || `${normalizedBrandUrl}/policies`;
     this.termsUrl =
-      this.configService.get<string>('MAIL_TERMS_URL') || `${normalizedBrandUrl}/terms`;
+      this.configService.get<string>('MAIL_TERMS_URL') || `${normalizedBrandUrl}/policies`;
     const fallbackHost = this.getHostnameFromUrl(normalizedBrandUrl);
     this.supportEmail =
       this.configService.get<string>('MAIL_SUPPORT_EMAIL') || `support@${fallbackHost}`;
@@ -378,37 +388,40 @@ export class MailService {
           .map(
             (item) => `
         <tr>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">
-            <div style="font-weight: 600;">${item.title}</div>
-            ${item.variant ? `<div style="color: #666; font-size: 12px;">${item.variant}</div>` : ''}
-            ${item.unitPrice ? `<div style="color: #999; font-size: 12px;">Unit: ${item.unitPrice}</div>` : ''}
+          <td style="padding: 14px 8px 14px 0;border-bottom:1px solid ${MINGO.border};vertical-align:top;">
+            <div style="font-weight:700;color:${MINGO.brown};">${item.title}</div>
+            ${item.variant ? `<div style="color:${MINGO.muted};font-size:12px;">${item.variant}</div>` : ''}
+            ${item.unitPrice ? `<div style="color:${MINGO.muted};font-size:12px;margin-top:3px;">Đơn giá: ${item.unitPrice}</div>` : ''}
           </td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.totalPrice ?? item.unitPrice ?? '-'}</td>
+          <td style="padding:14px 8px;border-bottom:1px solid ${MINGO.border};text-align:center;vertical-align:top;">${item.quantity}</td>
+          <td style="padding:14px 0 14px 8px;border-bottom:1px solid ${MINGO.border};text-align:right;vertical-align:top;font-weight:700;">${item.totalPrice ?? item.unitPrice ?? '-'}</td>
         </tr>
       `,
           )
           .join('')
       : `
         <tr>
-          <td colspan="3" style="padding: 16px; text-align: center; color: #888;">No order items provided.</td>
+          <td colspan="3" style="padding:16px;text-align:center;color:${MINGO.muted};">No order items provided.</td>
         </tr>
       `;
 
     const totalDisplay = this.formatMoneyFromUnknown(data.orderTotal, data.currency) ?? '-';
+    const customerName = escapeHtml(data.customerName || 'there');
+    const orderId = escapeHtml(data.orderId);
 
     const content = `
-      <h1 style="color: #563e2b; margin: 0 0 16px;">Order Confirmation</h1>
-      <p style="margin: 0 0 16px;">Dear ${data.customerName},</p>
-      <p style="margin: 0 0 24px;">Thank you for your order! Your order #${data.orderId} has been confirmed.</p>
+      <p style="margin:0 0 8px;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:${MINGO.orange};font-weight:700;">Order confirmation</p>
+      <h1 style="margin:0 0 14px;font-family:${MINGO_FONT};font-size:28px;line-height:1.25;color:${MINGO.brown};">Your order is confirmed!</h1>
+      <p style="margin:0 0 12px;">Dear ${customerName},</p>
+      <p style="margin:0 0 24px;">Thank you for your order. We’re preparing order <strong>#${orderId}</strong> for you.</p>
 
-      <h2 style="margin: 24px 0 12px; font-size: 18px; color: #563e2b;">Order Details</h2>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+      <h2 style="margin:0 0 12px;font-family:${MINGO_FONT};font-size:18px;color:${MINGO.brown};">Order details</h2>
+      <table role="presentation" style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px;">
         <thead>
-          <tr style="background-color: #fdf2f2;">
-            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Item</th>
-            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Quantity</th>
-            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Price</th>
+          <tr style="background:${MINGO.blush};color:${MINGO.muted};font-size:12px;text-transform:uppercase;letter-spacing:.06em;">
+            <th style="padding:10px 8px 10px 12px;text-align:left;">Item</th>
+            <th style="padding:10px 8px;text-align:center;">Qty</th>
+            <th style="padding:10px 12px 10px 8px;text-align:right;">Price</th>
           </tr>
         </thead>
         <tbody>
@@ -416,15 +429,20 @@ export class MailService {
         </tbody>
       </table>
 
-      <div style="margin: 0 0 24px; padding: 15px; background-color: #fdf2f2; border-radius: 5px;">
-        <h3 style="margin: 0; font-size: 18px;">Total: ${totalDisplay}</h3>
+      <div style="margin:0 0 24px;padding:18px 20px;background:${MINGO.ivory};border:1px solid ${MINGO.border};border-radius:16px;">
+        <p style="margin:0 0 4px;color:${MINGO.muted};font-size:13px;">Total</p>
+        <h3 style="margin:0;font-family:${MINGO_FONT};font-size:22px;color:${MINGO.orange};">${totalDisplay}</h3>
       </div>
 
-      <p style="margin: 0 0 8px;">We'll send you another email when your order ships.</p>
-      <p style="margin: 0;">Thank you for shopping with us!</p>
+      <p style="margin:0 0 8px;">We’ll send you another email when your order ships.</p>
+      <p style="margin:0;color:${MINGO.muted};">Thank you for shopping with us!</p>
     `;
 
-    return this.wrapWithLayout(content);
+    return this.wrapWithLayout(
+      content,
+      `Order confirmed - #${data.orderId}`,
+      `Your Mingo order #${data.orderId} is confirmed.`,
+    );
   }
 
   /**
@@ -444,41 +462,47 @@ export class MailService {
           .map(
             (item) => `
         <tr>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">
-            <div style="font-weight: 600;">${item.title}</div>
-            ${item.variant ? `<div style="color: #666; font-size: 12px;">${item.variant}</div>` : ''}
-            ${item.unitPrice ? `<div style="color: #999; font-size: 12px;">Unit: ${item.unitPrice}</div>` : ''}
+          <td style="padding:14px 8px 14px 0;border-bottom:1px solid ${MINGO.border};vertical-align:top;">
+            <div style="font-weight:700;color:${MINGO.brown};">${item.title}</div>
+            ${item.variant ? `<div style="color:${MINGO.muted};font-size:12px;">${item.variant}</div>` : ''}
+            ${item.unitPrice ? `<div style="color:${MINGO.muted};font-size:12px;margin-top:3px;">Đơn giá: ${item.unitPrice}</div>` : ''}
           </td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.quantity ?? ''}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.totalPrice ?? item.unitPrice ?? '-'}</td>
+          <td style="padding:14px 8px;border-bottom:1px solid ${MINGO.border};text-align:center;vertical-align:top;">${item.quantity ?? ''}</td>
+          <td style="padding:14px 0 14px 8px;border-bottom:1px solid ${MINGO.border};text-align:right;vertical-align:top;font-weight:700;">${item.totalPrice ?? item.unitPrice ?? '-'}</td>
         </tr>
       `,
           )
           .join('')
       : `
         <tr>
-          <td colspan="3" style="padding: 16px; text-align: center; color: #888;">No items available</td>
+          <td colspan="3" style="padding:16px;text-align:center;color:${MINGO.muted};">No items available</td>
         </tr>
       `;
 
     const totalDisplay =
       this.formatMoneyFromUnknown(data.summary?.total ?? data.amount, data.currency) ?? '-';
+    const customerName = escapeHtml(data.customerName || 'there');
+    const orderNumber = escapeHtml(data.orderNumber);
+    const currency = escapeHtml(data.currency);
 
     const content = `
-      <h1 style="color: #563e2b; margin: 0 0 16px;">Payment Confirmed</h1>
-      <p style="margin: 0 0 16px;">Dear ${data.customerName},</p>
-      <p style="margin: 0 0 24px;">We have received your payment for order <strong>#${data.orderNumber}</strong>.</p>
+      <p style="margin:0 0 8px;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:${MINGO.orange};font-weight:700;">Payment received</p>
+      <h1 style="margin:0 0 14px;font-family:${MINGO_FONT};font-size:28px;line-height:1.25;color:${MINGO.brown};">Payment confirmed</h1>
+      <p style="margin:0 0 16px;">Dear ${customerName},</p>
+      <p style="margin:0 0 24px;">We have received your payment for order <strong>#${orderNumber}</strong>.</p>
 
-      <h2 style="margin: 24px 0 8px; font-size: 18px; color: #563e2b;">Payment Summary</h2>
-      <p style="margin: 0 0 24px;"><strong>Amount:</strong> ${data.amount} ${data.currency}</p>
+      <div style="margin:0 0 24px;padding:18px 20px;background:${MINGO.ivory};border:1px solid ${MINGO.border};border-radius:16px;">
+        <p style="margin:0 0 4px;color:${MINGO.muted};font-size:13px;">Amount paid</p>
+        <p style="margin:0;font-family:${MINGO_FONT};font-size:22px;font-weight:800;color:${MINGO.orange};">${escapeHtml(String(data.amount))} ${currency}</p>
+      </div>
 
-      <h2 style="margin: 24px 0 12px; font-size: 18px; color: #563e2b;">Order Items</h2>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px;">
+      <h2 style="margin:0 0 12px;font-family:${MINGO_FONT};font-size:18px;color:${MINGO.brown};">Order items</h2>
+      <table role="presentation" style="width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px;">
         <thead>
-          <tr style="background-color: #fdf2f2;">
-            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Item</th>
-            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Quantity</th>
-            <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd; font-size: 14px;">Price</th>
+          <tr style="background:${MINGO.blush};color:${MINGO.muted};font-size:12px;text-transform:uppercase;letter-spacing:.06em;">
+            <th style="padding:10px 8px 10px 12px;text-align:left;">Item</th>
+            <th style="padding:10px 8px;text-align:center;">Qty</th>
+            <th style="padding:10px 12px 10px 8px;text-align:right;">Price</th>
           </tr>
         </thead>
         <tbody>
@@ -486,14 +510,19 @@ export class MailService {
         </tbody>
       </table>
 
-      <div style="margin: 0 0 24px; padding: 15px; background-color: #fdf2f2; border-radius: 5px;">
-        <h3 style="margin: 0;">Total: ${totalDisplay}</h3>
+      <div style="margin:0 0 24px;padding:18px 20px;background:${MINGO.ivory};border:1px solid ${MINGO.border};border-radius:16px;">
+        <p style="margin:0 0 4px;color:${MINGO.muted};font-size:13px;">Total</p>
+        <h3 style="margin:0;font-family:${MINGO_FONT};font-size:22px;color:${MINGO.orange};">${totalDisplay}</h3>
       </div>
 
-      <p style="margin: 0;">We'll send another update when your order ships. Thank you for your purchase!</p>
+      <p style="margin:0;color:${MINGO.muted};">We’ll send another update when your order ships. Thank you for your purchase!</p>
     `;
 
-    return this.wrapWithLayout(content);
+    return this.wrapWithLayout(
+      content,
+      `Payment confirmed - #${data.orderNumber}`,
+      `Payment received for Mingo order #${data.orderNumber}.`,
+    );
   }
 
   /**
@@ -501,61 +530,66 @@ export class MailService {
    */
   private generatePasswordResetHTML(resetUrl: string): string {
     const content = `
-      <h1 style="color: #563e2b; margin: 0 0 16px;">Password Reset Request</h1>
-      <p style="margin: 0 0 16px;">You requested a password reset for your account.</p>
-      <p style="margin: 0 0 24px;">Click the button below to reset your password:</p>
-      <div style="text-align: center; margin-bottom: 24px;">
-        <a href="${resetUrl}" style="display: inline-block; padding: 14px 32px; background-color: #fe5000; color: #ffffff; text-decoration: none; border-radius: 999px; font-weight: bold;">Reset Password</a>
+      <p style="margin:0 0 8px;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:${MINGO.orange};font-weight:700;">Account security</p>
+      <h1 style="margin:0 0 14px;font-family:${MINGO_FONT};font-size:28px;line-height:1.25;color:${MINGO.brown};">Reset your password</h1>
+      <p style="margin:0 0 16px;">You requested a password reset for your Mingo account.</p>
+      <p style="margin:0 0 24px;">Use the button below to choose a new password:</p>
+      <div style="text-align:center;margin:0 0 24px;">
+        ${mingoButton(resetUrl, 'Reset password')}
       </div>
-      <p style="margin: 0 0 8px;">This link will expire in 1 hour.</p>
-      <p style="margin: 0;">If you didn't request this, please ignore this email.</p>
+      <div style="padding:16px 18px;background:${MINGO.blush};border:1px solid ${MINGO.border};border-radius:16px;">
+        <p style="margin:0 0 6px;font-weight:700;color:${MINGO.brown};">This link expires in 1 hour.</p>
+        <p style="margin:0;color:${MINGO.muted};font-size:14px;">If you didn’t request this, you can safely ignore this email.</p>
+      </div>
     `;
 
-    return this.wrapWithLayout(content);
+    return this.wrapWithLayout(content, 'Reset your Mingo password', 'Use the secure link to reset your Mingo password.');
   }
 
   /**
    * Generate welcome HTML
    */
   private generateWelcomeHTML(name: string): string {
-    const safeName = name || 'there';
-    const brandUpper = this.brandName.toUpperCase();
-    const buttonUrl = this.brandUrl || '#';
-    const hostLabel = this.brandUrl ? `go to ${this.getHostnameFromUrl(this.brandUrl)}` : 'visit our store';
+    const safeName = escapeHtml(name || 'there');
+    const brandUpper = escapeHtml(this.brandName.toUpperCase());
 
     const content = `
-      <p style="font-size: 14px; letter-spacing: 4px; color: #fe5000; text-transform: uppercase; margin: 0 0 12px; text-align: center;">
+      <p style="font-size:13px;letter-spacing:3px;color:${MINGO.orange};text-transform:uppercase;margin:0 0 8px;text-align:center;font-weight:700;">
         WELCOME TO ${brandUpper}!
       </p>
-      <h1 style="font-size: 26px; margin: 0 0 20px; color: #563e2b; text-align: center;">We're glad you're here</h1>
-      <p style="margin: 0 0 12px;">Hi ${safeName}, you've activated your customer account.</p>
-      <p style="margin: 0 0 24px;">Log in to view past orders, update your addresses and check-out faster.</p>
-      <div style="text-align: center; margin-bottom: 24px;">
-        <a href="${buttonUrl}" style="display: inline-block; padding: 14px 40px; background-color: #fe5000; color: #ffffff; text-decoration: none; border-radius: 999px; font-weight: 600; text-transform: lowercase;">
-          ${hostLabel}
-        </a>
+      <h1 style="font-family:${MINGO_FONT};font-size:28px;line-height:1.25;margin:0 0 18px;color:${MINGO.brown};text-align:center;">We’re glad you’re here</h1>
+      <p style="margin:0 0 12px;">Hi ${safeName}, your customer account is ready.</p>
+      <p style="margin:0 0 24px;">Log in to view past orders, update your addresses and check out faster.</p>
+      <div style="text-align:center;margin:0 0 24px;">
+        ${mingoButton(this.brandUrl || '#', 'Explore Mingo')}
       </div>
-      <p style="margin: 0; color: #7a6a5a; font-size: 13px; text-align: center;">
-        Log back in anytime for a smoother checkout experience.
+      <p style="margin:0;color:${MINGO.muted};font-size:13px;text-align:center;">
+        Come back anytime for a smoother checkout experience.
       </p>
     `;
 
-    return this.wrapWithLayout(content);
+    return this.wrapWithLayout(content, `Welcome to ${this.brandName}`, 'Your Mingo customer account is ready.');
   }
 
   /**
    * Generate payment failure HTML
    */
   private generatePaymentFailureHTML(orderId: string, reason: string): string {
+    const safeOrderId = escapeHtml(orderId);
+    const safeReason = escapeHtml(reason);
     const content = `
-      <h1 style="color: #ba1a1a; margin: 0 0 16px;">Payment Failed</h1>
-      <p style="margin: 0 0 12px;">We're sorry, but your payment for order #${orderId} could not be processed.</p>
-      <p style="margin: 0 0 24px;"><strong>Reason:</strong> ${reason}</p>
-      <p style="margin: 0 0 12px;">Please try again or contact our support team if the problem persists.</p>
-      <p style="margin: 0;">Thank you for your understanding.</p>
+      <p style="margin:0 0 8px;font-size:13px;letter-spacing:3px;text-transform:uppercase;color:${MINGO.destructive};font-weight:700;">Payment update</p>
+      <h1 style="margin:0 0 14px;font-family:${MINGO_FONT};font-size:28px;line-height:1.25;color:${MINGO.brown};">Payment didn’t go through</h1>
+      <p style="margin:0 0 16px;">We’re sorry, but the payment for order <strong>#${safeOrderId}</strong> could not be processed.</p>
+      <div style="margin:0 0 24px;padding:16px 18px;background:${MINGO.blush};border:1px solid #f1c7c2;border-radius:16px;">
+        <p style="margin:0 0 4px;color:${MINGO.muted};font-size:13px;">Reason</p>
+        <p style="margin:0;color:${MINGO.brown};font-weight:700;">${safeReason}</p>
+      </div>
+      <p style="margin:0 0 12px;">Please try again or contact our support team if the problem persists.</p>
+      <p style="margin:0;color:${MINGO.muted};">Thank you for your understanding.</p>
     `;
 
-    return this.wrapWithLayout(content);
+    return this.wrapWithLayout(content, 'Payment update', `Payment failed for Mingo order #${orderId}.`);
   }
 
   private generatePaidOrderConfirmationHTML(data: {
@@ -581,15 +615,15 @@ export class MailService {
           .map(
             (item) => `
         <tr>
-          <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0;">
-            <div style="font-weight: 600;">${item.title}</div>
-            ${item.variant ? `<div style="color: #666; font-size: 12px;">${item.variant}</div>` : ''}
-            ${item.unitPrice ? `<div style="color: #9a8c82; font-size: 12px;">Unit: ${item.unitPrice}</div>` : ''}
+          <td style="padding:14px 8px 14px 0;border-bottom:1px solid ${MINGO.border};vertical-align:top;">
+            <div style="font-weight:700;color:${MINGO.brown};">${item.title}</div>
+            ${item.variant ? `<div style="color:${MINGO.muted};font-size:12px;">${item.variant}</div>` : ''}
+            ${item.unitPrice ? `<div style="color:${MINGO.muted};font-size:12px;margin-top:3px;">Đơn giá: ${item.unitPrice}</div>` : ''}
           </td>
-          <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: center;">
+          <td style="padding:14px 8px;border-bottom:1px solid ${MINGO.border};text-align:center;vertical-align:top;">
             ${item.quantity}
           </td>
-          <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; text-align: right;">
+          <td style="padding:14px 0 14px 8px;border-bottom:1px solid ${MINGO.border};text-align:right;vertical-align:top;font-weight:700;">
             ${item.totalPrice ?? item.unitPrice ?? '-'}
           </td>
         </tr>
@@ -598,7 +632,7 @@ export class MailService {
           .join('')
       : `
         <tr>
-          <td colspan="3" style="padding: 16px 0; text-align: center; color: #8c8c8c;">
+          <td colspan="3" style="padding:16px 0;text-align:center;color:${MINGO.muted};">
             No items available
           </td>
         </tr>
@@ -632,16 +666,16 @@ export class MailService {
 
     const summaryHTML =
       summaryRows.length > 0
-        ? summaryRows
+        ? `<table role="presentation" style="width:100%;border-collapse:collapse;font-size:14px;">${summaryRows
             .map(
               (row) => `
-        <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; gap: 10px;">
-          <div style="color: #5a5148;">${row.label}:</div>
-          <div style="font-weight: 600;">${row.value}</div>
-        </div>
+        <tr>
+          <td style="padding:4px 0;color:${MINGO.muted};">${row.label}</td>
+          <td style="padding:4px 0;text-align:right;font-weight:600;">${row.value}</td>
+        </tr>
       `,
             )
-            .join('')
+            .join('')}</table>`
         : '';
 
     const shippingLines = this.renderShippingAddress(data.shippingAddress);
@@ -649,35 +683,36 @@ export class MailService {
     const paidDate = data.paidAt ? new Date(data.paidAt).toLocaleString('en-US') : null;
     const detailRows = [
       data.transactionId
-        ? `<p style="margin: 0 0 4px;">Transaction ID: <strong>${data.transactionId}</strong></p>`
+        ? `<p style="margin:0 0 4px;">Transaction ID: <strong>${escapeHtml(data.transactionId)}</strong></p>`
         : '',
       paidDate ? `<p style="margin: 0 0 4px;">Paid on: <strong>${paidDate}</strong></p>` : '',
-      `<p style="margin: 0;">Order #: <strong>${data.orderNumber ?? 'N/A'}</strong></p>`,
+      `<p style="margin:0;">Order #: <strong>${escapeHtml(data.orderNumber ?? 'N/A')}</strong></p>`,
     ].join('');
 
     const viewOrderUrl =
       this.brandUrl && data.orderNumber
         ? `${this.brandUrl.replace(/\/$/, '')}/orders/${data.orderNumber}`
         : this.brandUrl || '#';
+    const customerName = escapeHtml(data.customerName ?? 'there');
 
     const content = `
-      <p style="font-size: 14px; letter-spacing: 4px; color: #fe5000; text-transform: uppercase; margin: 0 0 12px;">
+      <p style="font-size:13px;letter-spacing:3px;color:${MINGO.orange};text-transform:uppercase;margin:0 0 8px;font-weight:700;">
         PAYMENT RECEIVED
       </p>
-      <h1 style="font-size: 26px; margin: 0 0 12px; color: #563e2b;">Thank you, ${data.customerName ?? 'there'}!</h1>
-      <p style="margin: 0 0 24px;">Your payment is confirmed and your order is officially on its way.</p>
+      <h1 style="font-family:${MINGO_FONT};font-size:28px;line-height:1.25;margin:0 0 12px;color:${MINGO.brown};">Thank you, ${customerName}!</h1>
+      <p style="margin:0 0 24px;">Your payment is confirmed and your order is officially on its way.</p>
 
-      <div style="padding: 20px; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 24px; background-color: #fff6ec;">
+      <div style="padding:18px 20px;border:1px solid ${MINGO.border};border-radius:16px;margin-bottom:24px;background:${MINGO.ivory};">
         ${detailRows}
       </div>
 
-      <h2 style="margin: 0 0 12px; font-size: 18px; color: #563e2b;">Order Summary</h2>
-      <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
+      <h2 style="margin:0 0 12px;font-family:${MINGO_FONT};font-size:18px;color:${MINGO.brown};">Order summary</h2>
+      <table role="presentation" style="width:100%;border-collapse:collapse;margin-bottom:16px;font-size:14px;">
         <thead>
-          <tr style="text-align: left; font-size: 13px; text-transform: uppercase; color: #9a8c82;">
-            <th style="padding: 8px 0;">Item</th>
-            <th style="padding: 8px 0; text-align: center;">Qty</th>
-            <th style="padding: 8px 0; text-align: right;">Price</th>
+          <tr style="background:${MINGO.blush};color:${MINGO.muted};font-size:12px;text-transform:uppercase;letter-spacing:.06em;">
+            <th style="padding:10px 8px 10px 12px;text-align:left;">Item</th>
+            <th style="padding:10px 8px;text-align:center;">Qty</th>
+            <th style="padding:10px 12px 10px 8px;text-align:right;">Price</th>
           </tr>
         </thead>
         <tbody>
@@ -685,31 +720,32 @@ export class MailService {
         </tbody>
       </table>
 
-      <div style="margin-bottom: 24px; padding-top: 12px; border-top: 1px solid #f0f0f0;">
+      <div style="margin-bottom:24px;padding:12px 16px 0;border-top:1px solid ${MINGO.border};">
         ${summaryHTML}
-        <div style="display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; margin-top: 8px; gap: 10px;">
-          <div>Total Paid:</div>
-          <div>${paidTotal}</div>
-        </div>
+        <table role="presentation" style="width:100%;border-collapse:collapse;margin-top:8px;font-size:16px;font-weight:700;">
+          <tr><td style="padding:8px 0;">Total paid</td><td style="padding:8px 0;text-align:right;color:${MINGO.orange};">${paidTotal}</td></tr>
+        </table>
       </div>
 
-      <h2 style="margin: 0 0 12px; font-size: 18px; color: #563e2b;">Shipping to</h2>
-      <div style="border: 1px solid #f0f0f0; border-radius: 12px; padding: 16px; margin-bottom: 24px;">
+      <h2 style="margin:0 0 12px;font-family:${MINGO_FONT};font-size:18px;color:${MINGO.brown};">Shipping to</h2>
+      <div style="border:1px solid ${MINGO.border};border-radius:16px;padding:16px;margin-bottom:24px;">
         ${shippingLines}
       </div>
 
-      <div style="text-align: center; margin-bottom: 24px;">
-        <a href="${viewOrderUrl}" style="display: inline-block; padding: 14px 36px; background-color: #fe5000; color: #ffffff; text-decoration: none; border-radius: 999px; font-weight: 600;">
-          View your order
-        </a>
+      <div style="text-align:center;margin-bottom:24px;">
+        ${mingoButton(viewOrderUrl, 'View your order')}
       </div>
 
-      <p style="margin: 0; color: #7a6a5a; font-size: 13px; text-align: center;">
+      <p style="margin:0;color:${MINGO.muted};font-size:13px;text-align:center;">
         You'll receive another update when your order ships.
       </p>
     `;
 
-    return this.wrapWithLayout(content);
+    return this.wrapWithLayout(
+      content,
+      `Payment received - #${data.orderNumber ?? 'N/A'}`,
+      `Payment received for Mingo order #${data.orderNumber ?? 'N/A'}.`,
+    );
   }
 
   private normalizeOrderItems(
@@ -724,8 +760,8 @@ export class MailService {
         (unitPriceValue != null ? unitPriceValue * quantity : undefined);
 
       return {
-        title: item.productName || item.name || 'Item',
-        variant: item.variantName,
+        title: escapeHtml(item.productName || item.name || 'Item'),
+        variant: item.variantName ? escapeHtml(item.variantName) : undefined,
         quantity,
         unitPrice: unitPriceValue != null ? this.formatMoney(unitPriceValue, currency) : undefined,
         totalPrice: totalPriceValue != null ? this.formatMoney(totalPriceValue, currency) : undefined,
@@ -774,7 +810,7 @@ export class MailService {
 
   private renderShippingAddress(address: any): string {
     if (!address) {
-      return '<p style="margin: 0;">Shipping address not available.</p>';
+      return `<p style="margin:0;color:${MINGO.muted};">Shipping address not available.</p>`;
     }
 
     const lines: string[] = [];
@@ -820,8 +856,8 @@ export class MailService {
     }
 
     return lines.length
-      ? lines.map((line) => `<p style="margin: 0;">${line}</p>`).join('')
-      : '<p style="margin: 0;">Shipping address not available.</p>';
+      ? lines.map((line) => `<p style="margin:0;">${escapeHtml(line)}</p>`).join('')
+      : `<p style="margin:0;color:${MINGO.muted};">Shipping address not available.</p>`;
   }
 
   private get mingoBrand(): MingoEmailBrand {
@@ -835,9 +871,10 @@ export class MailService {
   }
 
   /** Bọc nội dung trong layout email Mingo dùng chung (header/footer/brand đồng bộ). */
-  private wrapWithLayout(content: string): string {
+  private wrapWithLayout(content: string, title = this.brandName, preheader?: string): string {
     return renderMingoEmail(this.mingoBrand, {
-      title: this.brandName,
+      title,
+      preheader,
       content,
     });
   }
@@ -850,4 +887,13 @@ export class MailService {
       return 'https://ecom-client-sable.vercel.app/';
     }
   }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

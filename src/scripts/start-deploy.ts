@@ -1,8 +1,10 @@
 import { bootstrap } from "../main";
 import { runDeploymentMigrations } from "./migrate-deploy";
+import { seedAdminFromEnv } from "./seed-admin";
 
 async function startDeploy(): Promise<void> {
   await runDeploymentMigrations();
+  await seedAdminFromEnv();
   await bootstrap();
 }
 

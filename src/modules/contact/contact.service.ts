@@ -58,30 +58,40 @@ export class ContactService {
 
     // 1) Báo nội bộ cho đội ngũ (nếu đã cấu hình hộp thư nhận liên hệ).
     if (inbox) {
-      try {
-        await this.mailService.sendEmail({
-          to: inbox,
-          // Reply-To = email khách, bấm "Trả lời" là trả thẳng cho họ. From luôn là domain của mình
-          // để không hỏng SPF/DMARC.
-          replyTo: saved.email,
-          subject: `[Liên hệ] ${DEPARTMENT_LABEL[dto.department] ?? dto.department} — ${dto.subject}`,
-          html: this.buildEmail(saved),
-        })
-        saved.notified = true
-        await this.contactRepo.save(saved)
-      } catch (error) {
-        this.logger.error(`Không gửi được mail liên hệ nội bộ ${saved.id}`, error as Error)
-      }
+      // Không chờ SMTP: liên hệ đã lưu DB, mail chậm/hỏng không được kéo request thành 502.
+      void this.notify(saved, inbox)
     } else {
       this.logger.warn('CONTACT_INBOX_EMAIL chưa cấu hình — liên hệ chỉ được lưu DB, không báo nội bộ')
     }
 
-    // 2) Gửi mail xác nhận cho chính người liên hệ (độc lập với mail nội bộ:
-    //    một cái hỏng không kéo cái kia hỏng theo).
+    // 2) Xác nhận cho chính người liên hệ, độc lập với mail nội bộ.
+    void this.notifyAcknowledgement(saved, inbox)
+
+    return saved
+  }
+
+  private async notify(saved: ContactMessage, inbox: string): Promise<void> {
+    try {
+      await this.mailService.sendEmail({
+        to: inbox,
+        // Reply-To = email khách, bấm "Trả lời" là trả thẳng cho họ. From luôn là domain của mình
+        // để không hỏng SPF/DMARC.
+        replyTo: saved.email,
+        subject: `[Liên hệ] ${DEPARTMENT_LABEL[saved.department] ?? saved.department} — ${saved.subject}`,
+        html: this.buildEmail(saved),
+      })
+      saved.notified = true
+      await this.contactRepo.save(saved)
+    } catch (error) {
+      this.logger.error(`Không gửi được mail liên hệ nội bộ ${saved.id}`, error as Error)
+    }
+  }
+
+  private async notifyAcknowledgement(saved: ContactMessage, inbox?: string): Promise<void> {
     try {
       await this.mailService.sendEmail({
         to: saved.email,
-        // Khách bấm "Trả lời" thì thư về hộp thư liên hệ của đội ngũ (nếu có), rơi về support mặc định.
+        // Trả lời email xác nhận về đội ngũ nếu có hộp thư nội bộ; nếu không sẽ dùng support mặc định.
         replyTo: inbox,
         subject: 'Mingo đã nhận được liên hệ của bạn',
         html: this.buildAcknowledgementEmail(saved),
@@ -89,8 +99,6 @@ export class ContactService {
     } catch (error) {
       this.logger.error(`Không gửi được mail xác nhận cho khách ${saved.id}`, error as Error)
     }
-
-    return saved
   }
 
   /** Mail xác nhận gửi lại cho người liên hệ — khớp design brand Mingo. */
@@ -149,7 +157,7 @@ export class ContactService {
         ${row('Email', contact.email)}
         ${row('Số điện thoại', contact.phone)}
         ${row('Bộ phận', DEPARTMENT_LABEL[contact.department] ?? contact.department)}
-        ${row('Thời gian', contact.createdAt.toLocaleString('vi-VN'))}
+        ${row('Thời gian', contact.createdAt?.toLocaleString('vi-VN') ?? '')}
       </table>
       <div style="margin-top:20px;padding:16px;background:${MINGO.ivory};border-left:3px solid ${MINGO.orange};color:${MINGO.brown};font-size:14px;line-height:1.7;white-space:pre-wrap;">${escapeHtml(contact.message)}</div>
     `
