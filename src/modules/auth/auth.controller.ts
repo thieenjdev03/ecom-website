@@ -31,11 +31,11 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Login to get access token' })
+  @ApiOperation({ summary: 'Login with email or phone to get access token' })
   @ApiOkResponse({ description: 'Login successful', type: LoginResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid input' })
   async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto.email, dto.password);
+    return this.authService.login(dto);
   }
 
   @Post('check-exists')

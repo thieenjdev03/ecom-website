@@ -86,21 +86,22 @@ export class AuthService {
     return { id: saved.id, email: saved.email, role: saved.role };
   }
 
-  async login(email: string, password: string) {
-    // passwordHash is select:false on the entity — opt in explicitly here.
-    const user = await this.usersRepository
-      .createQueryBuilder('user')
-      .addSelect('user.passwordHash')
-      .where('user.email = :email', { email })
-      .getOne();
+  /**
+   * Accepts either identifier: customers who arrived through guest checkout are
+   * keyed by phone and may have no email at all, so email-only login would lock
+   * them out of the account their orders live in.
+   */
+  async login(input: { email?: string; phone?: string; password: string }) {
+    // findByIdentifiers opts into passwordHash (select:false on the entity).
+    const user = await this.findByIdentifiers(input);
     if (!user || !user.passwordHash) {
       // No passwordHash: either no such account, or a guest account created
       // from checkout that hasn't set a password yet (see /auth/set-password).
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Sai thông tin tài khoản hoặc mật khẩu vui lòng thử lại');
     }
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
+    const isMatch = await bcrypt.compare(input.password, user.passwordHash);
     if (!isMatch) {
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Sai thông tin tài khoản hoặc mật khẩu vui lòng thử lại');
     }
 
     return this.issueLoginResponse(user);
