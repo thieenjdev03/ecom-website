@@ -7,6 +7,7 @@ describe("CheckoutService", () => {
   let cartService: { getCartForCheckout: jest.Mock; clear: jest.Mock };
   let ordersService: { create: jest.Mock };
   let userRepository: { findOne: jest.Mock; create: jest.Mock; save: jest.Mock };
+  let mailService: { sendEmail: jest.Mock };
   let service: CheckoutService;
 
   beforeEach(() => {
@@ -20,7 +21,13 @@ describe("CheckoutService", () => {
       create: jest.fn((data) => data),
       save: jest.fn((data) => Promise.resolve({ id: "guest-user-1", ...data })),
     };
-    service = new CheckoutService(cartService as any, ordersService as any, userRepository as any);
+    mailService = { sendEmail: jest.fn().mockResolvedValue(undefined) };
+    service = new CheckoutService(
+      cartService as any,
+      ordersService as any,
+      userRepository as any,
+      mailService as any,
+    );
   });
 
   it("creates a pending VIETQR order from server-side cart values and clears the cart", async () => {
@@ -44,7 +51,10 @@ describe("CheckoutService", () => {
     });
     ordersService.create.mockResolvedValue({
       id: "order-1",
+      orderNumber: "ORD-1",
       status: "PENDING_PAYMENT",
+      items: [],
+      summary: { subtotal: "120000.00", shipping: "0.00", total: "120000.00", currency: "VND" },
     });
 
     const result = await service.createVietQrOrder(
@@ -131,7 +141,13 @@ describe("CheckoutService", () => {
         },
       ],
     });
-    ordersService.create.mockResolvedValue({ id: "order-2", status: "PENDING_PAYMENT" });
+    ordersService.create.mockResolvedValue({
+      id: "order-2",
+      orderNumber: "ORD-2",
+      status: "PENDING_PAYMENT",
+      items: [],
+      summary: { subtotal: "50000.00", shipping: "0.00", total: "50000.00", currency: "VND" },
+    });
 
     const result = await service.createVietQrOrder(undefined, "cart-token", {
       shipping_address: {
@@ -160,12 +176,20 @@ describe("CheckoutService", () => {
       }),
     );
     expect(result.payment).toEqual({ method: "COD", status: "PENDING" });
+    // Guest gave no email in this test, so there is nothing to send a confirmation to.
+    expect(mailService.sendEmail).not.toHaveBeenCalled();
   });
 
-  it("reuses the existing account when a guest checks out with a phone that already has one", async () => {
+  it("reuses the existing account when a guest checks out with a phone that already has one, and emails them the confirmation", async () => {
     userRepository.findOne.mockResolvedValue({ id: "existing-user", phoneNumber: "84826426888", email: "a@b.com" });
     cartService.getCartForCheckout.mockResolvedValue({ valid: true, subtotal: 0, items: [] });
-    ordersService.create.mockResolvedValue({ id: "order-3", status: "PENDING_PAYMENT" });
+    ordersService.create.mockResolvedValue({
+      id: "order-3",
+      orderNumber: "ORD-3",
+      status: "PENDING_PAYMENT",
+      items: [],
+      summary: { subtotal: "0.00", shipping: "0.00", total: "0.00", currency: "VND" },
+    });
 
     await service.createVietQrOrder(undefined, "cart-token", {
       shipping_address: {
@@ -180,6 +204,43 @@ describe("CheckoutService", () => {
     expect(userRepository.save).not.toHaveBeenCalled();
     expect(ordersService.create).toHaveBeenCalledWith(
       expect.objectContaining({ userId: "existing-user" }),
+    );
+    expect(mailService.sendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: "a@b.com", subject: expect.stringContaining("ORD-3") }),
+    );
+  });
+
+  it("falls back to matching by email when the phone doesn't match any account", async () => {
+    const existingUser = { id: "existing-by-email", phoneNumber: null, email: "known@b.com" };
+    userRepository.findOne.mockImplementation(({ where }: { where: Record<string, unknown> }) =>
+      Promise.resolve(where.phoneNumber ? null : existingUser),
+    );
+    cartService.getCartForCheckout.mockResolvedValue({ valid: true, subtotal: 0, items: [] });
+    ordersService.create.mockResolvedValue({
+      id: "order-4",
+      orderNumber: "ORD-4",
+      status: "PENDING_PAYMENT",
+      items: [],
+      summary: { subtotal: "0.00", shipping: "0.00", total: "0.00", currency: "VND" },
+    });
+
+    await service.createVietQrOrder(undefined, "cart-token", {
+      shipping_address: {
+        recipient_name: "Thi Nguyen",
+        recipient_phone: "0999999999",
+        province: "Quang Ninh",
+        district: "Phuong Hong Tuyen",
+        street_line_1: "738/20/5 Quoc lo 1a",
+      },
+      email: "known@b.com",
+    });
+
+    expect(ordersService.create).toHaveBeenCalledWith(
+      expect.objectContaining({ userId: "existing-by-email" }),
+    );
+    // Backfills the missing phone onto the matched account, but never overwrites an existing value.
+    expect(userRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "existing-by-email", phoneNumber: "84999999999" }),
     );
   });
 
