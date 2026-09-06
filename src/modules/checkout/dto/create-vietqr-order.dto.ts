@@ -85,7 +85,7 @@ export class CreateVietQrOrderDto {
   shipping_address?: CheckoutShippingAddressDto;
 
   @ApiPropertyOptional({
-    description: "Contact email. Optional for guest checkout (phone is the primary identifier).",
+    description: "Contact email. Required for guest checkout; no user account is created.",
     example: "guest@example.com",
   })
   @IsOptional()

@@ -1,3 +1,4 @@
+import { createHash } from 'crypto';
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, In } from 'typeorm';
@@ -45,7 +46,7 @@ export class OrdersService {
     fromStatus: OrderStatus,
     toStatus: OrderStatus,
   ): Promise<void> {
-    if (fromStatus === toStatus) {
+    if (!order.userId || fromStatus === toStatus) {
       return;
     }
     try {
@@ -62,14 +63,17 @@ export class OrdersService {
     }
   }
 
-  async create(createOrderDto: CreateOrderDto): Promise<Order> {
+  async create(createOrderDto: CreateOrderDto, guest?: { email: string; phone: string; tokenHash: string }): Promise<Order> {
     try {
       // Validate required fields
       this.validateCreateOrderDto(createOrderDto);
 
+      if (!createOrderDto.userId && (!guest || !createOrderDto.shipping_address || createOrderDto.shippingAddressId || createOrderDto.billingAddressId)) {
+        throw new BadRequestException('Guest contact and shipping address are required.');
+      }
       // Validate user exists
-      const user = await this.userRepository.findOne({ where: { id: createOrderDto.userId } });
-      if (!user) {
+      const user = createOrderDto.userId ? await this.userRepository.findOne({ where: { id: createOrderDto.userId } }) : null;
+      if (createOrderDto.userId && !user) {
         throw new BadRequestException(`User with ID ${createOrderDto.userId} not found. Please provide a valid user ID.`);
       }
 
@@ -120,10 +124,10 @@ export class OrdersService {
         const addressText = `Shipping Address: ${addr.full_name}, ${addr.phone}, ${addr.address_line}${addr.city ? `, ${addr.city}` : ''}${addr.district ? `, ${addr.district}` : ''}${addr.ward ? `, ${addr.ward}` : ''}`;
         notes = notes ? `${notes}\n${addressText}` : addressText;
 
-        const savedAddress = await this.userAddressesService.upsertFromCheckout(
+        const savedAddress = createOrderDto.userId ? await this.userAddressesService.upsertFromCheckout(
           createOrderDto.userId,
           this.mapShippingPayloadToBookDto(createOrderDto.shipping_address),
-        );
+        ) : null;
         if (savedAddress) {
           shippingAddressId = savedAddress.id;
         }
@@ -131,7 +135,18 @@ export class OrdersService {
 
       // Map DTO to Entity format
       const order = this.orderRepository.create({
-        userId: createOrderDto.userId,
+        userId: createOrderDto.userId ?? null,
+        guestEmail: guest?.email ?? null,
+        guestPhone: guest?.phone ?? null,
+        guestTrackingTokenHash: guest?.tokenHash ?? null,
+        shippingSnapshot: createOrderDto.shipping_address ? {
+          receiver_name: createOrderDto.shipping_address.full_name,
+          phone: createOrderDto.shipping_address.phone,
+          address_line: createOrderDto.shipping_address.address_line,
+          province_name: createOrderDto.shipping_address.province,
+          district_name: createOrderDto.shipping_address.district,
+          ward_name: createOrderDto.shipping_address.ward,
+        } : null,
         orderNumber,
         status: OrderStatus.PENDING_PAYMENT,
         paymentMethod: createOrderDto.paymentMethod || 'PAYPAL',
@@ -166,6 +181,24 @@ export class OrdersService {
 
       throw new BadRequestException(`Failed to create order: ${error.message || 'Unknown error occurred'}`);
     }
+  }
+
+  async trackGuestOrder(orderNumber: string, token: string) {
+    if (!/^[a-f0-9]{64}$/.test(token ?? '')) throw new NotFoundException('Order not found');
+    const order = await this.orderRepository.findOne({ where: {
+      orderNumber,
+      guestTrackingTokenHash: createHash('sha256').update(token).digest('hex'),
+    } });
+    if (!order || order.userId) throw new NotFoundException('Order not found');
+    // Explicit public projection: never disclose user relations, internal notes or token hashes.
+    return {
+      orderNumber: order.orderNumber, status: order.status,
+      paymentStatus: order.status === OrderStatus.REFUNDED ? 'REFUNDED' : (order.paidAt || order.status === OrderStatus.PAID || order.tracking_history?.some(item => item.to_status === OrderStatus.PAID)) ? 'PAID' : 'PENDING',
+      paymentMethod: order.paymentMethod, items: order.items, summary: order.summary,
+      shippingSnapshot: order.shippingSnapshot, createdAt: order.createdAt,
+      trackingNumber: order.trackingNumber, carrier: order.carrier,
+      trackingHistory: (order.tracking_history ?? []).map(item => ({ status: item.to_status, changedAt: item.changed_at })),
+    };
   }
 
   async findAll(userId?: string, status?: string): Promise<Order[]> {

@@ -1,3 +1,5 @@
+import { createHash, randomBytes } from 'crypto';
+import { isEmail } from 'class-validator';
 import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
@@ -6,10 +8,9 @@ import { OrdersService } from "../orders/orders.service";
 import { Order } from "../orders/entities/order.entity";
 import { ShippingAddressDto } from "../orders/dto/order.dto";
 import { User } from "../users/user.entity";
-import { Role } from "../../auth/enums/role.enum";
 import { normalizeVnPhone } from "../../common/phone.util";
 import { MailService } from "../mail/mail.service";
-import { renderMingoEmail, mingoBrandFromEnv, MINGO } from "../../common/email/mingo-email";
+import { renderMingoEmail, mingoBrandFromEnv, mingoButton, MINGO } from "../../common/email/mingo-email";
 import { CheckoutShippingAddressDto, CreateVietQrOrderDto } from "./dto/create-vietqr-order.dto";
 
 type CheckoutPaymentMethod = "VIETQR" | "COD";
@@ -37,7 +38,9 @@ export class CheckoutService {
   }> {
     const paymentMethod = this.resolvePaymentMethod(dto);
 
-    let userId: string;
+    let userId: string | undefined;
+    let guest: { email: string; phone: string; tokenHash: string } | undefined;
+    let trackingToken: string | undefined;
     let shippingAddressId: string | undefined;
     let shippingAddress: ShippingAddressDto | undefined;
     let recipientUser: User | null = null;
@@ -55,12 +58,13 @@ export class CheckoutService {
           "Guest checkout requires shipping_address (with recipient_phone) since there is no saved address to use.",
         );
       }
-      const guest = await this.findOrCreateGuestIdentity(dto.shipping_address.recipient_phone, {
-        recipientName: dto.shipping_address.recipient_name,
-        email: dto.email,
-      });
-      userId = guest.id;
-      recipientUser = guest;
+      const phone = normalizeVnPhone(dto.shipping_address.recipient_phone);
+      const email = dto.email?.trim().toLowerCase();
+      if (!/^84\d{9,10}$/.test(phone) || !email || !isEmail(email)) {
+        throw new BadRequestException('Guest checkout requires a valid email and phone number.');
+      }
+      trackingToken = randomBytes(32).toString('hex');
+      guest = { email, phone, tokenHash: createHash('sha256').update(trackingToken).digest('hex') };
       shippingAddress = this.toOrdersShippingAddress(dto.shipping_address);
     }
 
@@ -101,14 +105,18 @@ export class CheckoutService {
       shipping_address: shippingAddress,
       notes: dto.notes?.trim() || undefined,
       paymentMethod,
-    });
+    }, guest);
 
     await this.cartService.clear(cartToken);
 
-    if (!recipientUser) {
+    if (userId) {
       recipientUser = await this.userRepository.findOne({ where: { id: userId } });
     }
-    await this.sendOrderConfirmationEmail(order, paymentMethod, recipientUser, dto.shipping_address);
+    const baseUrl = mingoBrandFromEnv().brandUrl;
+    const trackingUrl = trackingToken
+      ? `${baseUrl}${locale === 'en' ? '/en' : ''}/orders/track/${encodeURIComponent(order.orderNumber)}#token=${trackingToken}`
+      : `${baseUrl}${locale === 'en' ? '/en' : ''}/orders/${encodeURIComponent(order.orderNumber)}`;
+    await this.sendOrderConfirmationEmail(order, paymentMethod, recipientUser, dto.shipping_address, guest?.email, trackingUrl);
 
     return {
       order,
@@ -121,16 +129,17 @@ export class CheckoutService {
 
   /**
    * Best-effort: a failed send must never fail the checkout response — the
-   * order is already committed by this point. Guests who only gave a phone
-   * number (no email) simply don't get one; that's expected, not an error.
+   * order is already committed by this point. Guest email is validated before creation.
    */
   private async sendOrderConfirmationEmail(
     order: Order,
     paymentMethod: CheckoutPaymentMethod,
     recipientUser: User | null,
     shippingAddress: CheckoutShippingAddressDto | undefined,
+    guestEmail?: string,
+    trackingUrl?: string,
   ): Promise<void> {
-    const email = recipientUser?.email;
+    const email = guestEmail ?? recipientUser?.email;
     if (!email) {
       this.logger.warn(`Order ${order.orderNumber} has no recipient email — skipping confirmation mail.`);
       return;
@@ -145,7 +154,7 @@ export class CheckoutService {
       await this.mailService.sendEmail({
         to: email,
         subject: `Mingo đã nhận đơn hàng ${order.orderNumber}`,
-        html: this.buildOrderConfirmationEmail(order, paymentMethod, recipientName),
+        html: this.buildOrderConfirmationEmail(order, paymentMethod, recipientName, trackingUrl),
       });
     } catch (error) {
       this.logger.error(`Không gửi được mail xác nhận đơn hàng ${order.orderNumber}`, error as Error);
@@ -156,6 +165,7 @@ export class CheckoutService {
     order: Order,
     paymentMethod: CheckoutPaymentMethod,
     recipientName: string,
+    trackingUrl?: string,
   ): string {
     const items: Array<{ productName: string; variantName?: string; quantity: number; totalPrice: string }> =
       order.items ?? [];
@@ -204,6 +214,7 @@ export class CheckoutService {
           ${row("Phương thức thanh toán", isCod ? "Thanh toán khi nhận hàng (COD)" : "Chuyển khoản VietQR")}
         </table>
       </div>
+      ${trackingUrl ? mingoButton(trackingUrl, "Theo dõi đơn hàng") : ""}
     `;
 
     return renderMingoEmail(mingoBrandFromEnv(), {
@@ -253,72 +264,6 @@ export class CheckoutService {
     mapped.ward = address.ward;
     mapped.address_line = address.street_line_1;
     return mapped;
-  }
-
-  /**
-   * Find the account owning this phone (primary) or, failing that, this
-   * email — or create a passwordless "guest" account for the phone. Checking
-   * both means a guest who reuses an email tied to an existing account (even
-   * one they registered under a different phone) still gets their order
-   * linked to that account instead of a fresh disconnected guest.
-   */
-  private async findOrCreateGuestIdentity(
-    rawPhone: string,
-    opts: { recipientName?: string; email?: string },
-  ): Promise<User> {
-    const phone = normalizeVnPhone(rawPhone);
-    if (!phone) {
-      throw new BadRequestException("A valid recipient_phone is required for guest checkout.");
-    }
-    const email = opts.email?.trim().toLowerCase() || undefined;
-
-    let existing = await this.userRepository.findOne({ where: { phoneNumber: phone } });
-    if (!existing && email) {
-      existing = await this.userRepository.findOne({ where: { email } });
-    }
-
-    if (existing) {
-      let dirty = false;
-      // Backfill only — never overwrite a value the account already has, so a
-      // guest checkout can't silently change contact info on someone else's
-      // real account.
-      if (email && !existing.email) {
-        existing.email = email;
-        dirty = true;
-      }
-      if (!existing.phoneNumber) {
-        existing.phoneNumber = phone;
-        dirty = true;
-      }
-      if (dirty) {
-        await this.userRepository.save(existing);
-      }
-      return existing;
-    }
-
-    const [firstName, ...rest] = (opts.recipientName ?? "").trim().split(/\s+/).filter(Boolean);
-    try {
-      return await this.userRepository.save(
-        this.userRepository.create({
-          phoneNumber: phone,
-          email: email || null,
-          passwordHash: null,
-          isGuest: true,
-          role: Role.USER,
-          firstName: firstName || undefined,
-          lastName: rest.join(" ") || undefined,
-        }),
-      );
-    } catch (error: any) {
-      // Unique violation: a concurrent guest checkout for the same phone/email won the race.
-      if (error?.code === "23505") {
-        const winner =
-          (await this.userRepository.findOne({ where: { phoneNumber: phone } })) ??
-          (email ? await this.userRepository.findOne({ where: { email } }) : null);
-        if (winner) return winner;
-      }
-      throw error;
-    }
   }
 
   private formatMoney(value: number): string {

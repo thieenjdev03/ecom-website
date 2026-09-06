@@ -89,7 +89,7 @@ describe("CheckoutService", () => {
         total: "120000.00",
         currency: "VND",
       },
-    });
+    }, undefined);
     expect(cartService.clear).toHaveBeenCalledWith("cart-token");
     expect(result.payment).toEqual({
       method: "VIETQR",
@@ -125,130 +125,51 @@ describe("CheckoutService", () => {
     expect(cartService.getCartForCheckout).not.toHaveBeenCalled();
   });
 
-  it("creates a guest COD order keyed by phone when there is no authenticated user", async () => {
-    userRepository.findOne.mockResolvedValue(null);
-    cartService.getCartForCheckout.mockResolvedValue({
-      valid: true,
-      subtotal: 50000,
-      items: [
-        {
-          quantity: 1,
-          variantSku: undefined,
-          variantName: undefined,
-          unitPrice: 50000,
-          lineTotal: 50000,
-          product: { id: "11a2f4d1-4f4d-4010-8d88-7e197e569e4e", name: "Tea", slug: "tea" },
-        },
-      ],
-    });
-    ordersService.create.mockResolvedValue({
-      id: "order-2",
-      orderNumber: "ORD-2",
-      status: "PENDING_PAYMENT",
-      items: [],
-      summary: { subtotal: "50000.00", shipping: "0.00", total: "50000.00", currency: "VND" },
-    });
+  const shipping = {
+    recipient_name: 'Guest', recipient_phone: '0909090909',
+    province: 'HCM', district: 'Ward', street_line_1: '123 Street',
+  };
 
-    const result = await service.createVietQrOrder(undefined, "cart-token", {
-      shipping_address: {
-        recipient_name: "Thi Nguyen",
-        recipient_phone: "+84826426888",
-        province: "Quang Ninh",
-        district: "Phuong Hong Tuyen",
-        street_line_1: "738/20/5 Quoc lo 1a",
-      },
-      payment_method: "COD",
-    });
-
-    expect(userRepository.findOne).toHaveBeenCalledWith({ where: { phoneNumber: "84826426888" } });
-    expect(userRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({ phoneNumber: "84826426888", isGuest: true, passwordHash: null }),
-    );
-    expect(ordersService.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        userId: "guest-user-1",
-        paymentMethod: "COD",
-        shipping_address: expect.objectContaining({
-          full_name: "Thi Nguyen",
-          phone: "+84826426888",
-          countryCode: "VN",
-        }),
-      }),
-    );
-    expect(result.payment).toEqual({ method: "COD", status: "PENDING" });
-    // Guest gave no email in this test, so there is nothing to send a confirmation to.
-    expect(mailService.sendEmail).not.toHaveBeenCalled();
-  });
-
-  it("reuses the existing account when a guest checks out with a phone that already has one, and emails them the confirmation", async () => {
-    userRepository.findOne.mockResolvedValue({ id: "existing-user", phoneNumber: "84826426888", email: "a@b.com" });
-    cartService.getCartForCheckout.mockResolvedValue({ valid: true, subtotal: 0, items: [] });
-    ordersService.create.mockResolvedValue({
-      id: "order-3",
-      orderNumber: "ORD-3",
-      status: "PENDING_PAYMENT",
-      items: [],
-      summary: { subtotal: "0.00", shipping: "0.00", total: "0.00", currency: "VND" },
-    });
-
-    await service.createVietQrOrder(undefined, "cart-token", {
-      shipping_address: {
-        recipient_name: "Thi Nguyen",
-        recipient_phone: "0826426888",
-        province: "Quang Ninh",
-        district: "Phuong Hong Tuyen",
-        street_line_1: "738/20/5 Quoc lo 1a",
-      },
-    });
-
+  it.each(['COD', 'VIETQR'] as const)('keeps guest %s orders independent and emails a secret tracking link', async (paymentMethod) => {
+    userRepository.findOne.mockResolvedValue({ id: 'existing-user', email: 'guest@example.com' });
+    cartService.getCartForCheckout.mockResolvedValue({ valid: true, subtotal: 50000, items: [] });
+    ordersService.create.mockResolvedValue({ orderNumber: 'ORD-GUEST', items: [], summary: { total: '50000.00' } });
+    await service.createVietQrOrder(undefined, 'cart', {
+      email: 'guest@example.com', shipping_address: shipping, paymentMethod,
+    }, 'vi');
+    expect(userRepository.findOne).not.toHaveBeenCalled();
+    expect(userRepository.create).not.toHaveBeenCalled();
     expect(userRepository.save).not.toHaveBeenCalled();
-    expect(ordersService.create).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: "existing-user" }),
-    );
-    expect(mailService.sendEmail).toHaveBeenCalledWith(
-      expect.objectContaining({ to: "a@b.com", subject: expect.stringContaining("ORD-3") }),
-    );
+    const [payload, guest] = ordersService.create.mock.calls[0];
+    expect(payload.userId).toBeUndefined();
+    expect(guest).toEqual({ email: 'guest@example.com', phone: '84909090909', tokenHash: expect.stringMatching(/^[a-f0-9]{64}$/) });
+    const mail = mailService.sendEmail.mock.calls[0][0];
+    expect(mail.to).toBe('guest@example.com');
+    expect(mail.html).toContain('/orders/track/ORD-GUEST#token=');
+    const token = mail.html.match(/#token=([a-f0-9]{64})/)[1];
+    expect(require('crypto').createHash('sha256').update(token).digest('hex')).toBe(guest.tokenHash);
+    expect(cartService.clear).toHaveBeenCalledWith('cart');
   });
 
-  it("falls back to matching by email when the phone doesn't match any account", async () => {
-    const existingUser = { id: "existing-by-email", phoneNumber: null, email: "known@b.com" };
-    userRepository.findOne.mockImplementation(({ where }: { where: Record<string, unknown> }) =>
-      Promise.resolve(where.phoneNumber ? null : existingUser),
-    );
-    cartService.getCartForCheckout.mockResolvedValue({ valid: true, subtotal: 0, items: [] });
-    ordersService.create.mockResolvedValue({
-      id: "order-4",
-      orderNumber: "ORD-4",
-      status: "PENDING_PAYMENT",
-      items: [],
-      summary: { subtotal: "0.00", shipping: "0.00", total: "0.00", currency: "VND" },
-    });
-
-    await service.createVietQrOrder(undefined, "cart-token", {
-      shipping_address: {
-        recipient_name: "Thi Nguyen",
-        recipient_phone: "0999999999",
-        province: "Quang Ninh",
-        district: "Phuong Hong Tuyen",
-        street_line_1: "738/20/5 Quoc lo 1a",
-      },
-      email: "known@b.com",
-    });
-
-    expect(ordersService.create).toHaveBeenCalledWith(
-      expect.objectContaining({ userId: "existing-by-email" }),
-    );
-    // Backfills the missing phone onto the matched account, but never overwrites an existing value.
-    expect(userRepository.save).toHaveBeenCalledWith(
-      expect.objectContaining({ id: "existing-by-email", phoneNumber: "84999999999" }),
-    );
+  it.each([undefined, '', 'invalid'])('rejects missing or invalid guest email: %s', async (email) => {
+    await expect(service.createVietQrOrder(undefined, 'cart', { email, shipping_address: shipping })).rejects.toBeInstanceOf(BadRequestException);
+    expect(ordersService.create).not.toHaveBeenCalled();
+    expect(cartService.clear).not.toHaveBeenCalled();
   });
 
-  it("rejects guest checkout without a shipping address", async () => {
-    await expect(
-      service.createVietQrOrder(undefined, "cart-token", {}),
-    ).rejects.toBeInstanceOf(BadRequestException);
+  it.each(['', '123', 'abc'])('rejects invalid guest phone: %s', async (phone) => {
+    await expect(service.createVietQrOrder(undefined, 'cart', { email: 'guest@example.com', shipping_address: { ...shipping, recipient_phone: phone } })).rejects.toBeInstanceOf(BadRequestException);
+  });
 
+  it('preserves the created order when mail delivery fails', async () => {
+    cartService.getCartForCheckout.mockResolvedValue({ valid: true, subtotal: 50000, items: [] });
+    ordersService.create.mockResolvedValue({ orderNumber: 'ORD-GUEST', items: [], summary: {} });
+    mailService.sendEmail.mockRejectedValue(new Error('Mail offline'));
+    await expect(service.createVietQrOrder(undefined, 'cart', { email: 'guest@example.com', shipping_address: shipping })).resolves.toHaveProperty('order.orderNumber', 'ORD-GUEST');
+  });
+
+  it('rejects guest checkout without a shipping address', async () => {
+    await expect(service.createVietQrOrder(undefined, 'cart', {})).rejects.toBeInstanceOf(BadRequestException);
     expect(cartService.getCartForCheckout).not.toHaveBeenCalled();
   });
 });

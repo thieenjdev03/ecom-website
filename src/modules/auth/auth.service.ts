@@ -2,7 +2,6 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -34,6 +33,7 @@ export class AuthService {
     country: string,
     marketingOptIn = true,
   ) {
+    email = email.trim().toLowerCase();
     const exists = await this.usersRepository.findOne({ where: { email } });
     if (exists) {
       throw new ConflictException('User with this email already exists');
@@ -46,9 +46,7 @@ export class AuthService {
       role: Role.USER,
       firstName,
       lastName,
-      // Normalized so a later guest checkout under the same number (see
-      // CheckoutService.findOrCreateGuestByPhone) resolves to this account
-      // instead of spawning a duplicate guest.
+      // Registration and phone login share the same canonical form.
       phoneNumber: phoneNumber ? normalizeVnPhone(phoneNumber) : phoneNumber,
       country,
     });
@@ -144,12 +142,7 @@ export class AuthService {
     return { exists: !!user, hasPassword: !!user?.passwordHash };
   }
 
-  /**
-   * Claims a passwordless guest account (created from a guest checkout) by
-   * setting its first password — no OTP, by explicit product decision:
-   * whoever knows the phone/email an order was placed under can claim it.
-   * Logs the caller in immediately on success.
-   */
+  /** Legacy claiming is disabled; guest purchases do not create accounts. */
   async setPassword(input: {
     phone?: string;
     email?: string;
@@ -157,30 +150,6 @@ export class AuthService {
     firstName?: string;
     lastName?: string;
   }) {
-    const user = await this.findByIdentifiers(input);
-    if (!user) {
-      throw new NotFoundException('No account found for this phone/email.');
-    }
-    if (user.passwordHash) {
-      throw new ConflictException('This account already has a password. Please log in instead.');
-    }
-
-    user.passwordHash = await bcrypt.hash(input.password, 12);
-    user.isGuest = false;
-    if (input.email && !user.email) user.email = input.email.trim().toLowerCase();
-    if (input.firstName && !user.firstName) user.firstName = input.firstName;
-    if (input.lastName && !user.lastName) user.lastName = input.lastName;
-
-    let saved: User;
-    try {
-      saved = await this.usersRepository.save(user);
-    } catch (error: any) {
-      if (error?.code === '23505') {
-        throw new ConflictException('This email is already used by another account.');
-      }
-      throw error;
-    }
-
-    return this.issueLoginResponse(saved);
+    throw new BadRequestException('Please register a new account or use password reset.');
   }
 }

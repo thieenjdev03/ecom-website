@@ -37,7 +37,7 @@ export class CheckoutController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary:
-      "Create an order (VIETQR or COD) from the current cart. Works without login — a guest is identified by shipping_address.recipient_phone and gets a lightweight account so the order can later be claimed.",
+      "Create an order (VIETQR or COD) from the current cart. Works without login — guest email and recipient_phone are required; guest orders are not linked to an account.",
   })
   @ApiCreatedResponse({
     description:
@@ -52,11 +52,13 @@ export class CheckoutController {
     const user: any = (req as any).user;
     const authenticatedUserId = user?.sub ?? user?.userId ?? user?.id ?? undefined;
 
-    return this.checkoutService.createVietQrOrder(
+    const result = await this.checkoutService.createVietQrOrder(
       authenticatedUserId,
       cartToken,
       dto,
       locale === "vi" ? "vi" : "en",
     );
+    const { id, orderNumber, status, paymentMethod, summary } = result.order;
+    return { order: { id, orderNumber, status, paymentMethod, summary }, payment: result.payment };
   }
 }

@@ -24,3 +24,15 @@ describe('calculateMingoPoints', () => {
     },
   );
 });
+
+import { PointsService } from './points.service';
+import { Order } from '../orders/entities/order.entity';
+
+it('never writes loyalty transactions for a guest order', async () => {
+  const database = { transaction: jest.fn() };
+  const service = new PointsService(database as any);
+  const order = { id: 'guest-order', userId: null, summary: { total: '100000' } } as Order;
+  await service.earnForOrder(order);
+  await service.reverseForOrder(order);
+  expect(database.transaction).not.toHaveBeenCalled();
+});

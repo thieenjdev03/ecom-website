@@ -53,12 +53,24 @@ export class Order {
   id: string;
 
   // User relationship
-  @Column('uuid')
-  userId: string;
+  @Column('uuid', { nullable: true })
+  userId: string | null;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: true })
   @JoinColumn({ name: 'userId' })
   user: User;
+
+  @Column({ type: 'varchar', length: 320, nullable: true })
+  guestEmail: string | null;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  guestPhone: string | null;
+
+  @Column({ type: 'varchar', length: 64, nullable: true, select: false })
+  guestTrackingTokenHash: string | null;
+
+  @Column({ type: 'jsonb', nullable: true })
+  shippingSnapshot: { receiver_name: string; phone: string; address_line: string; province_name?: string; district_name?: string; ward_name?: string } | null;
 
   // Order details
   @Column({ length: 50, unique: true })

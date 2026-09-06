@@ -53,7 +53,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary:
-      'Claim a passwordless guest account (created from a guest checkout) by setting its first password. Logs the caller in on success.',
+      'Legacy account claiming is disabled. Use registration or password reset.',
   })
   @ApiOkResponse({ description: 'Password set; login successful', type: LoginResponseDto })
   @ApiBadRequestResponse({ description: 'Invalid input, account not found, or already has a password' })

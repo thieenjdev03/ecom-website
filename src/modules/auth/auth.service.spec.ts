@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -87,31 +87,8 @@ describe('AuthService', () => {
     });
   });
 
-  describe('setPassword', () => {
-    it('throws NotFoundException when no account matches', async () => {
-      getOne.mockResolvedValue(null);
-      await expect(
-        service.setPassword({ phone: '0909090909', password: 'newpassword123' }),
-      ).rejects.toBeInstanceOf(NotFoundException);
-    });
-
-    it('throws ConflictException when the account already has a password', async () => {
-      getOne.mockResolvedValue({ id: 'u1', passwordHash: 'existing-hash' });
-      await expect(
-        service.setPassword({ phone: '0909090909', password: 'newpassword123' }),
-      ).rejects.toBeInstanceOf(ConflictException);
-    });
-
-    it('claims a passwordless guest account and logs it in', async () => {
-      getOne.mockResolvedValue({ id: 'u1', passwordHash: null, isGuest: true, email: null, role: 'user' });
-
-      const result = await service.setPassword({ phone: '0909090909', password: 'newpassword123' });
-
-      expect(save).toHaveBeenCalledWith(
-        expect.objectContaining({ id: 'u1', isGuest: false, passwordHash: expect.any(String) }),
-      );
-      expect(result).toHaveProperty('accessToken');
-      expect(result.user).toEqual({ id: 'u1', email: null, role: 'user' });
-    });
+  it('does not claim guest accounts by knowing a phone number', async () => {
+    await expect(service.setPassword({ phone: '0909090909', password: 'newpassword123' })).rejects.toBeInstanceOf(BadRequestException);
+    expect(save).not.toHaveBeenCalled();
   });
 });

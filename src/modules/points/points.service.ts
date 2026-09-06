@@ -34,6 +34,7 @@ export class PointsService {
    * transaction, có pessimistic write-lock trên dòng user để tránh race.
    */
   async earnForOrder(order: Order): Promise<void> {
+    if (!order.userId) return;
     const points = this.computeEarnPoints(order);
     if (points <= 0) {
       return;
@@ -46,6 +47,7 @@ export class PointsService {
    * điểm đã EARN cho order đó; nếu chưa từng EARN thì không làm gì. Idempotent.
    */
   async reverseForOrder(order: Order): Promise<void> {
+    if (!order.userId) return;
     await this.dataSource.transaction(async (manager) => {
       const earned = await manager.findOne(PointTransaction, {
         where: { orderId: order.id, type: PointTransactionType.EARN },
