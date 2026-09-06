@@ -140,7 +140,7 @@ export class MarketingService {
     try {
       await this.mailService.sendEmail({
         to: email,
-        subject: 'Chào mừng bạn đến với Mingo! 🍦',
+        subject: 'Chào mừng bạn đến với Mingo!',
         html: this.generateNewsletterWelcomeHTML(email),
       });
       this.logger.log(`Newsletter welcome email sent to ${email}`);
@@ -164,7 +164,7 @@ export class MarketingService {
         Đăng ký nhận tin thành công
       </p>
       <h1 style="margin:0 0 18px;font-family:${MINGO_FONT};font-size:26px;font-weight:800;color:${MINGO.brown};text-align:center;">
-        Chào mừng bạn đến với Mingo! 🍦
+        Chào mừng bạn đến với Mingo!
       </h1>
 
       <p style="margin:0 0 16px;">Xin chào,</p>
@@ -174,7 +174,7 @@ export class MarketingService {
       </p>
       <p style="margin:0 0 12px;">Từ giờ, bạn sẽ là người đầu tiên biết về:</p>
       <ul style="margin:0 0 24px;padding-left:20px;color:${MINGO.brown};">
-        ${li('🍨 Vị kem mới &amp; bộ sưu tập giới hạn')}
+        ${li('✨ Vị kem mới &amp; bộ sưu tập giới hạn')}
         ${li('🎁 Ưu đãi và khuyến mãi độc quyền')}
         ${li('📣 Sự kiện, quà tặng dành riêng cho thành viên')}
         ${li('🎯 Gợi ý sản phẩm phù hợp với bạn')}

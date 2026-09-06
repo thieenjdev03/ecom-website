@@ -86,7 +86,7 @@ interface RenderOptions {
 
 /**
  * Bọc nội dung trong layout email Mingo hoàn chỉnh: nền cream, card trắng bo góc,
- * thanh cam trên đỉnh, wordmark "Mingo 🍦", footer với hỗ trợ + chính sách.
+ * thanh cam trên đỉnh, wordmark "Mingo", footer với hỗ trợ + chính sách.
  */
 export function renderMingoEmail(brand: MingoEmailBrand, opts: RenderOptions): string {
   const year = new Date().getFullYear();
@@ -141,7 +141,6 @@ export function renderMingoEmail(brand: MingoEmailBrand, opts: RenderOptions): s
               <a href="${brandUrl}" style="text-decoration:none;">
                 <span style="font-family:${MINGO_FONT};font-size:32px;font-weight:800;
                              color:${MINGO.orange};letter-spacing:-0.5px;">${brandName}</span>
-                <span style="font-size:26px;vertical-align:middle;">🍦</span>
               </a>
             </td>
           </tr>
