@@ -59,7 +59,7 @@ export class OtpService {
     //    other transports instead of aborting — e.g. an unverified sender domain.
     if (this.resend) {
       try {
-        const from = process.env.MAIL_FROM || 'noreply@talktodoc.online'
+        const from = process.env.MAIL_FROM || 'noreply@kemmingo.com'
         const result = await this.resend.emails.send({ from, to, subject, html })
         if ((result as any).error) {
           throw new Error((result as any).error.message || 'Resend send failed')

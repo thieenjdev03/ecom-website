@@ -1,4 +1,5 @@
 import { GuestOrdersController } from './guest-orders.controller';
+import { MeOrdersController } from './me-orders.controller';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersService } from './orders.service';
@@ -18,7 +19,7 @@ import { PointsModule } from '../points/points.module';
     AddressesModule,
     PointsModule,
   ],
-  controllers: [OrdersController, GuestOrdersController],
+  controllers: [OrdersController, GuestOrdersController, MeOrdersController],
   providers: [OrdersService],
   exports: [OrdersService],
 })

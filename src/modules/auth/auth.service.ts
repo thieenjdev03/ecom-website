@@ -34,9 +34,13 @@ export class AuthService {
     marketingOptIn = true,
   ) {
     email = email.trim().toLowerCase();
-    const exists = await this.usersRepository.findOne({ where: { email } });
-    if (exists) {
-      throw new ConflictException('User with this email already exists');
+    phoneNumber = normalizeVnPhone(phoneNumber);
+    if (!phoneNumber) throw new BadRequestException('Số điện thoại không hợp lệ.');
+    const [emailUser, phoneUser] = await this.registrationMatches({ email, phone: phoneNumber });
+    if (emailUser || phoneUser) {
+      throw new ConflictException(emailUser && phoneUser
+        ? 'Email và số điện thoại đã được đăng ký.'
+        : emailUser ? 'Email đã được đăng ký.' : 'Số điện thoại đã được đăng ký.');
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
@@ -55,7 +59,7 @@ export class AuthService {
       saved = await this.usersRepository.save(user);
     } catch (error: any) {
       if (error?.code === '23505') {
-        throw new ConflictException('This phone number is already registered to another account.');
+        throw new ConflictException('Email hoặc số điện thoại đã được đăng ký.');
       }
       throw error;
     }
@@ -136,10 +140,24 @@ export class AuthService {
     };
   }
 
-  /** Used by the storefront's "Đăng ký" step to decide: register vs. set a password on an existing guest. */
+  private async registrationMatches(input: { phone?: string; email?: string }) {
+    const email = input.email?.trim().toLowerCase();
+    const phone = input.phone ? normalizeVnPhone(input.phone) : undefined;
+    if (!email && !phone) throw new BadRequestException('Provide a phone or email to look up the account.');
+    const digits = `regexp_replace("user"."phoneNumber", '[^0-9]', '', 'g')`;
+    const normalizedPhone = `CASE WHEN ${digits} LIKE '0%' THEN '84' || substring(${digits} from 2) ELSE ${digits} END`;
+    return Promise.all([
+      email ? this.usersRepository.createQueryBuilder('user').addSelect('user.passwordHash')
+        .where('lower(trim("user"."email")) = :email', { email }).getOne() : null,
+      phone ? this.usersRepository.createQueryBuilder('user').addSelect('user.passwordHash')
+        .where(`${normalizedPhone} = :phone`, { phone }).getOne() : null,
+    ]);
+  }
+
+  /** Registration checks both identifiers independently; either collision blocks registration. */
   async checkExists(input: { phone?: string; email?: string }): Promise<{ exists: boolean; hasPassword: boolean }> {
-    const user = await this.findByIdentifiers(input);
-    return { exists: !!user, hasPassword: !!user?.passwordHash };
+    const users = await this.registrationMatches(input);
+    return { exists: users.some(Boolean), hasPassword: users.some(user => !!user?.passwordHash) };
   }
 
   /** Legacy claiming is disabled; guest purchases do not create accounts. */

@@ -183,6 +183,26 @@ export class OrdersService {
     }
   }
 
+  async trackUserOrder(orderNumber: string, userId: string) {
+    if (!userId) throw new NotFoundException('Order not found');
+    const order = await this.orderRepository.findOne({
+      where: { orderNumber, userId },
+      relations: ['shippingAddress'],
+    });
+    if (!order) throw new NotFoundException('Order not found');
+    await this.populateProductThumbnails(order);
+    const address = order.shippingAddress;
+    return {
+      ...this.toTrackingView(order),
+      id: order.id,
+      shippingAddress: address ? {
+        recipientName: address.recipientName, recipientPhone: address.recipientPhone,
+        province: address.province, district: address.district,
+        ward: address.ward, streetLine1: address.streetLine1,
+      } : null,
+    };
+  }
+
   async trackGuestOrder(orderNumber: string, token: string) {
     if (!/^[a-f0-9]{64}$/.test(token ?? '')) throw new NotFoundException('Order not found');
     const order = await this.orderRepository.findOne({ where: {
@@ -190,6 +210,10 @@ export class OrdersService {
       guestTrackingTokenHash: createHash('sha256').update(token).digest('hex'),
     } });
     if (!order || order.userId) throw new NotFoundException('Order not found');
+    return this.toTrackingView(order);
+  }
+
+  private toTrackingView(order: Order) {
     // Explicit public projection: never disclose user relations, internal notes or token hashes.
     return {
       orderNumber: order.orderNumber, status: order.status,

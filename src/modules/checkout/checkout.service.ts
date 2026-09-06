@@ -10,7 +10,7 @@ import { ShippingAddressDto } from "../orders/dto/order.dto";
 import { User } from "../users/user.entity";
 import { normalizeVnPhone } from "../../common/phone.util";
 import { MailService } from "../mail/mail.service";
-import { renderMingoEmail, mingoBrandFromEnv, mingoButton, MINGO } from "../../common/email/mingo-email";
+import { renderMingoEmail, mingoBrandFromEnv, mingoOrderTrackingButton, MINGO } from "../../common/email/mingo-email";
 import { CheckoutShippingAddressDto, CreateVietQrOrderDto } from "./dto/create-vietqr-order.dto";
 
 type CheckoutPaymentMethod = "VIETQR" | "COD";
@@ -214,7 +214,7 @@ export class CheckoutService {
           ${row("Phương thức thanh toán", isCod ? "Thanh toán khi nhận hàng (COD)" : "Chuyển khoản VietQR")}
         </table>
       </div>
-      ${trackingUrl ? mingoButton(trackingUrl, "Theo dõi đơn hàng") : ""}
+      ${trackingUrl ? mingoOrderTrackingButton(trackingUrl, "Theo dõi đơn hàng") : ""}
     `;
 
     return renderMingoEmail(mingoBrandFromEnv(), {

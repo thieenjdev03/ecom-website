@@ -25,9 +25,14 @@ export const MINGO = {
 export const MINGO_FONT =
   "'Be Vietnam Pro','Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
+/** Wordmark dùng thay logo ảnh trong header email — tên đầy đủ, màu cam chủ đạo. */
+export const MINGO_WORDMARK = 'Mingo Ice Cream Viet Nam';
+
 export interface MingoEmailBrand {
   brandName: string;
   brandUrl: string;
+  /** Logo vuông, nền trong suốt — cùng file dùng ở site header (mingo-store LOGO_SRC). */
+  logoUrl: string;
   supportEmail: string;
   privacyUrl?: string;
   termsUrl?: string;
@@ -49,6 +54,7 @@ export function mingoBrandFromEnv(): MingoEmailBrand {
   return {
     brandName: process.env.MAIL_BRAND_NAME || 'Mingo',
     brandUrl,
+    logoUrl: process.env.MAIL_BRAND_LOGO_URL || `${brandUrl}/assets/mingo/home/mingo-logo.png`,
     supportEmail: process.env.MAIL_SUPPORT_EMAIL || `support@${host}`,
     privacyUrl: process.env.MAIL_PRIVACY_URL || `${brandUrl}/policies`,
     termsUrl: process.env.MAIL_TERMS_URL || `${brandUrl}/policies`,
@@ -64,6 +70,11 @@ export function mingoButton(href: string, label: string): string {
               padding:15px 36px;border-radius:999px;font-family:${MINGO_FONT};">
       ${escapeHtml(label)}
     </a>`;
+}
+
+/** Centered order tracking CTA shared by order emails. */
+export function mingoOrderTrackingButton(href: string, label: string): string {
+  return `<div style="text-align:center;margin-top:24px;">${mingoButton(href, label)}</div>`;
 }
 
 /** Khối mã OTP nổi bật (nền blush, viền đứt, chữ cam giãn cách). */
@@ -91,7 +102,7 @@ interface RenderOptions {
 export function renderMingoEmail(brand: MingoEmailBrand, opts: RenderOptions): string {
   const year = new Date().getFullYear();
   const preheader = opts.preheader
-    ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;">${escapeHtml(opts.preheader)}</div>`
+    ? `<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;height:0;width:0;">Mingo Ice Cream VietNam</div>`
     : '';
 
   const privacyLink = brand.privacyUrl
@@ -139,8 +150,10 @@ export function renderMingoEmail(brand: MingoEmailBrand, opts: RenderOptions): s
           <tr>
             <td align="center" class="mingo-header" style="padding:32px 28px 8px;">
               <a href="${brandUrl}" style="text-decoration:none;">
-                <span style="font-family:${MINGO_FONT};font-size:32px;font-weight:800;
-                             color:${MINGO.orange};letter-spacing:-0.5px;">${brandName}</span>
+                <span style="display:inline-block;font-family:${MINGO_FONT};font-weight:800;
+                             font-size:20px;line-height:1.2;color:${MINGO.orange};letter-spacing:0.2px;">
+                  ${escapeHtml(MINGO_WORDMARK)}
+                </span>
               </a>
             </td>
           </tr>

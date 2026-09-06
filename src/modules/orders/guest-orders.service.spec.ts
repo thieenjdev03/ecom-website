@@ -25,6 +25,25 @@ describe('Independent guest orders', () => {
     service = new OrdersService(repository as any, users as any, {} as any, {} as any, addresses as any, points as any);
   });
 
+  it('restricts account tracking to the authenticated owner', async () => {
+    repository.findOne.mockResolvedValue(null);
+    await expect(service.trackUserOrder('ORD-1', 'owner')).rejects.toBeInstanceOf(NotFoundException);
+    expect(repository.findOne).toHaveBeenCalledWith({ where: { orderNumber: 'ORD-1', userId: 'owner' }, relations: ['shippingAddress'] });
+  });
+
+  it('never queries account orders without an owner', async () => {
+    await expect(service.trackUserOrder('ORD-1', undefined as any)).rejects.toBeInstanceOf(NotFoundException);
+    expect(repository.findOne).not.toHaveBeenCalled();
+  });
+
+  it('returns account tracking without internal data', async () => {
+    repository.findOne.mockResolvedValue({ id: 'id', userId: 'owner', orderNumber: 'ORD-1', status: OrderStatus.PENDING_PAYMENT, items: [], internalNotes: 'private', shippingAddress: { recipientName: 'Buyer', userId: 'owner' }, tracking_history: [] });
+    const result = await service.trackUserOrder('ORD-1', 'owner');
+    expect(result).toMatchObject({ id: 'id', orderNumber: 'ORD-1', paymentStatus: 'PENDING', shippingAddress: { recipientName: 'Buyer' } });
+    expect(result).not.toHaveProperty('internalNotes');
+    expect(result.shippingAddress).not.toHaveProperty('userId');
+  });
+
   it('persists contact and address on the order without touching users or address books', async () => {
     const order = await service.create(payload as any, { email: 'guest@example.com', phone: '84909090909', tokenHash });
     expect(order.userId).toBeNull();

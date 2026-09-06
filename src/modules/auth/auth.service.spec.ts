@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -42,13 +42,13 @@ describe('AuthService', () => {
         {
           provide: MailService,
           useValue: {
-            sendWelcomeEmail: jest.fn(),
+            sendWelcomeEmail: jest.fn().mockResolvedValue(undefined),
           },
         },
         {
           provide: MarketingService,
           useValue: {
-            handleUserRegistration: jest.fn(),
+            handleUserRegistration: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -62,6 +62,10 @@ describe('AuthService', () => {
   });
 
   describe('checkExists', () => {
+    it('checks email even when a different, unused phone is supplied', async () => {
+      getOne.mockResolvedValueOnce({ id: 'email-owner', passwordHash: 'hash' }).mockResolvedValueOnce(null);
+      await expect(service.checkExists({ email: 'existing@example.com', phone: '0909090909' })).resolves.toEqual({ exists: true, hasPassword: true });
+    });
     it('reports no account when nothing matches', async () => {
       getOne.mockResolvedValue(null);
       await expect(service.checkExists({ phone: '0909090909' })).resolves.toEqual({
@@ -85,6 +89,28 @@ describe('AuthService', () => {
         hasPassword: true,
       });
     });
+  });
+
+  it.each([
+    [{ id: 'email-owner' }, null],
+    [null, { id: 'phone-owner' }],
+    [{ id: 'email-owner' }, { id: 'different-phone-owner' }],
+  ])('rejects registration when either identifier belongs to an account', async (emailUser, phoneUser) => {
+    getOne.mockResolvedValueOnce(emailUser).mockResolvedValueOnce(phoneUser);
+    await expect(service.register('Existing@Example.com', 'password123', 'A', 'B', '+84 909 090 909', 'VN')).rejects.toBeInstanceOf(ConflictException);
+    expect(save).not.toHaveBeenCalled();
+  });
+
+  it('saves normalized identifiers for a new registration', async () => {
+    getOne.mockResolvedValue(null);
+    await service.register(' New@Example.com ', 'password123', 'A', 'B', '0909 090 909', 'VN');
+    expect(save).toHaveBeenCalledWith(expect.objectContaining({ email: 'new@example.com', phoneNumber: '84909090909' }));
+  });
+
+  it('returns conflict if another request registers the identifier first', async () => {
+    getOne.mockResolvedValue(null);
+    save.mockRejectedValue({ code: '23505' });
+    await expect(service.register('new@example.com', 'password123', 'A', 'B', '0909090909', 'VN')).rejects.toBeInstanceOf(ConflictException);
   });
 
   it('does not claim guest accounts by knowing a phone number', async () => {

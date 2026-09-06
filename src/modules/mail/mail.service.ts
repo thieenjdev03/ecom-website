@@ -6,6 +6,7 @@ import {
   MINGO,
   MINGO_FONT,
   mingoButton,
+  mingoOrderTrackingButton,
   renderMingoEmail,
   type MingoEmailBrand,
 } from '../../common/email/mingo-email';
@@ -42,6 +43,7 @@ export class MailService {
   private readonly defaultFromAddress: string;
   private readonly brandName: string;
   private readonly brandUrl: string;
+  private readonly logoUrl: string;
   private readonly privacyUrl: string;
   private readonly termsUrl: string;
   private readonly supportEmail: string;
@@ -92,6 +94,9 @@ export class MailService {
     const normalizedBrandUrl = configuredBrandUrl.replace(/\/+$/, '');
 
     this.brandUrl = normalizedBrandUrl;
+    this.logoUrl =
+      this.configService.get<string>('MAIL_BRAND_LOGO_URL') ||
+      `${normalizedBrandUrl}/assets/mingo/home/mingo-logo.png`;
     this.privacyUrl =
       this.configService.get<string>('MAIL_PRIVACY_URL') || `${normalizedBrandUrl}/policies`;
     this.termsUrl =
@@ -733,7 +738,7 @@ export class MailService {
       </div>
 
       <div style="text-align:center;margin-bottom:24px;">
-        ${mingoButton(viewOrderUrl, 'View your order')}
+        ${mingoOrderTrackingButton(viewOrderUrl, 'View your order')}
       </div>
 
       <p style="margin:0;color:${MINGO.muted};font-size:13px;text-align:center;">
@@ -864,6 +869,7 @@ export class MailService {
     return {
       brandName: this.brandName,
       brandUrl: this.brandUrl,
+      logoUrl: this.logoUrl,
       supportEmail: this.supportEmail,
       privacyUrl: this.privacyUrl,
       termsUrl: this.termsUrl,
